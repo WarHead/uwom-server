@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -1048,9 +1049,50 @@ enum TrinityStrings
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
 
-    // NOT RESERVED IDS                   12000-1999999999
+    // NOT RESERVED IDS                   12200-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)
-};
-#endif
 
+    // Jail 12100-12199 reserviert
+    LANG_JAIL_YOURE_JAILED      = 12100,
+    LANG_JAIL_REASON            = 12101,
+    LANG_JAIL_WAS_JAILED        = 12102,
+    LANG_JAIL_YOURE_UNJAILED    = 12103,
+    LANG_JAIL_WAS_UNJAILED      = 12104,
+    LANG_JAIL_NOREASON          = 12105,
+    LANG_JAIL_NONAME            = 12106,
+    LANG_JAIL_NOTIME            = 12107,
+    LANG_JAIL_VALUE             = 12108,
+    LANG_JAIL_CHAR_NOTJAILED    = 12109,
+    LANG_JAIL_DENIED            = 12110,
+    LANG_JAIL_JAILED_H_INFO     = 12111,
+    LANG_JAIL_JAILED_M_INFO     = 12112,
+    LANG_JAIL_NOTJAILED_INFO    = 12113,
+    LANG_JAIL_GM_INFO           = 12114,
+    LANG_JAIL_GM_NOINFO         = 12115,
+    LANG_JAIL_NO_JAIL           = 12116,
+    LANG_JAIL_NO_UNJAIL         = 12117,
+    LANG_JAIL_WARNING           = 12118,
+    LANG_JAIL_ANNOUNCE          = 12119,
+    LANG_JAIL_RELOAD            = 12120,
+    LANG_JAIL_CONF_LOADED       = 12121,
+    LANG_JAIL_CONF_ERR1         = 12122,
+    LANG_JAIL_CONF_ERR2         = 12123,
+    LANG_JAIL_CHAR_TELE         = 12124,
+    LANG_JAIL_CHAR_FREE         = 12125,
+    LANG_JAIL_WRONG_NAME        = 12126,
+    LANG_JAIL_WARNING_BAN       = 12127,
+    LANG_JAIL_BAN_REASON        = 12128,
+    LANG_JAIL_PRESERVATION      = 12129,
+    LANG_JAIL_GM_INFO_H         = 12130,
+    LANG_JAIL_GM_INFO_BANS      = 12131,
+    LANG_JAIL_GM_INFO_ONLY_BANS = 12132,
+    LANG_JAIL_GM_ALREADY_JAILED = 12133,
+    LANG_JAIL_GM_NO_DELETE      = 12134,
+    LANG_JAIL_RELOAD_JAIL       = 12135,
+    LANG_JAIL_ENABLED           = 12197,
+    LANG_JAIL_DISABLED          = 12198,
+    LANG_JAIL_NOT_ACTIVE        = 12199
+};
+
+#endif

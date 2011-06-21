@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/// \addtogroup world The World
-/// @{
-/// \file
 
 #ifndef __WORLD_H
 #define __WORLD_H
@@ -68,6 +65,7 @@ enum ShutdownExitCode
 enum WorldTimers
 {
     WUPDATE_AUCTIONS,
+    WUPDATE_JAILS,
     WUPDATE_WEATHERS,
     WUPDATE_UPTIME,
     WUPDATE_CORPSES,

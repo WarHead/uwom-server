@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -44,6 +45,7 @@
 #include "SpellMgr.h"
 #include "GroupMgr.h"
 #include "Chat.h"
+#include "Jail.h"
 #include "DBCStores.h"
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
@@ -1643,6 +1645,9 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
+
+    m_timers[WUPDATE_JAILS].SetInterval(MINUTE*IN_MILLISECONDS); // Jail - Jede Minute schauen, ob jemand entlassen werden muss.
+
     m_timers[WUPDATE_UPTIME].SetInterval(m_int_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
                                                             //Update "uptime" table based on configuration entry in minutes.
     m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
@@ -1715,6 +1720,20 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Calculate random battleground reset time..." );
     InitRandomBGResetTime();
+
+    // Jail von WarHead
+    sLog->outString();
+    sLog->outString("Jail: (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de"); // Durch das Ändern / Löschen dieser Ausgabe erlischt das Recht zur Nutzung!
+    sLog->outString("Jail: Lade die Konfiguration..." );
+    if (!sJail->LadeKonfiguration())
+    {
+        sLog->outError(sObjectMgr->GetTrinityStringForDBCLocale(LANG_JAIL_CONF_ERR1));
+        sLog->outError(sObjectMgr->GetTrinityStringForDBCLocale(LANG_JAIL_CONF_ERR2));
+    }
+    if (sJail->Init())
+        sJail->KnastAufraeumen();
+
+    sLog->outString();
 
     // possibly enable db logging; avoid massive startup spam by doing it here.
     if (sLog->GetLogDBLater())
@@ -1894,6 +1913,13 @@ void World::Update(uint32 diff)
 
         ///- Handle expired auctions
         sAuctionMgr->Update();
+    }
+
+    // Jail auf abgelaufene Einträge überprüfen
+    if (m_timers[WUPDATE_JAILS].Passed())
+    {
+        sJail->Update();
+        m_timers[WUPDATE_JAILS].Reset();
     }
 
     /// <li> Handle session updates when the timer has passed
