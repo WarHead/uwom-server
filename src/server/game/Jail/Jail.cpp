@@ -489,7 +489,7 @@ bool Jail::EnableKommando(ChatHandler * handler)
 {
     m_JailKonf.Enabled = true;
     handler->SendSysMessage(LANG_JAIL_ENABLED);
-    return true;
+    return Init(true);
 }
 
 bool Jail::DisableKommando(ChatHandler * handler)
@@ -627,6 +627,12 @@ bool Jail::Init(bool reload)
     m_JailMap.clear(); // Für den Reload
 
     sLog->outString("Jail: Initialisiere das Gefängnis...");
+
+    if (!m_JailKonf.Enabled)
+    {
+         sLog->outString("Jail: Das Jail ist nicht aktiv! Beende die Initialisierung.");
+         return false;
+    }
 
     QueryResult result = CharacterDatabase.Query("SELECT * FROM `jail`");
     if (!result)
