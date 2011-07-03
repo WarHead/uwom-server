@@ -3,6 +3,7 @@
 DELETE FROM `command` WHERE `name` LIKE '%jail%';
 INSERT INTO `command` (name, security, help) VALUES
 ('jail info',       0, 'Syntax: .jail info\nZeigt dir deinen Knaststatus an.'),
+('jail goto',       0, 'Syntax: .jail goto Fraktion (horde/ally)\nTeleportiert dich in den Knast der angegebenen Fraktion.'),
 ('jail pinfo',      1, 'Syntax: .jail pinfo [Charakter]\nZeigt Jail-Infos vom selektiertem, oder angegeben Charakter an.'),
 ('jail arrest',     2, 'Syntax: .jail arrest Charakter Stunden Grund\nBuchtet den Charakter für Stunden aus dem Grund ein.'),
 ('jail release',    2, 'Syntax: .jail release Charakter\nEntlässt den Charakter aus dem Knast.'),
