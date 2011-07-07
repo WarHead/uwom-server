@@ -17,6 +17,7 @@ struct JailKonfStruktur
     uint32 BanDauer;    // Nach dieser Zeit (Std.) wird ein durch das Jail gebannter Account wieder freigeschaltet.
     uint32 Radius;      // Radius in dem der Knastbruder sich bewegen darf.
     uint32 GMAcc;       // Account der zum Bannen genutzt wird
+    uint32 Amnestie;    // Monate (nach dem letzten Vorfall), nach denen die Jaileinträge gelöscht werden.
 
     Position AllyPos;   // Koordinaten für den Allyknast
     Position HordePos;  // Koordinaten für den Hordeknast
@@ -68,8 +69,10 @@ public:
     bool LadeKonfiguration(bool reload = false);
     // Inhaftierungen laden
     bool Init(bool reload = false);
-    // Knast auf nicht mehr existierende Charaktere prüfen
+    // Knast auf nicht mehr existierende Charaktere prüfen.
     void KnastAufraeumen();
+    // Prüfen ob jemand Amnestie bekommen muss.
+    void Amnestie();
     // Jede Minute schauen, ob jemand entlassen werden muss.
     void Update();
 

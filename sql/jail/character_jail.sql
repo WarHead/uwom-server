@@ -38,9 +38,6 @@ CREATE TABLE `jail_conf` (
   `enabled` tinyint(4) NOT NULL default '0' COMMENT 'Ein/ausschalten des Jails. Standardeinstellung ist aus.',
   `gm_acc` int(11) unsigned NOT NULL default '2019794' COMMENT 'Account der genutzt wird, um zu bannen.',
   `gm_char` varchar(13) NOT NULL default 'Robotron' COMMENT 'Charaktername der genutzt wird, um zu bannen.',
+  `amnesty` int(11) unsigned NOT NULL default '3' COMMENT 'Zeit in Monaten, nach denen die Jaileinträge verfallen.',
   PRIMARY KEY  (`max_jails`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Jail Konfigurations-Tabelle für UWoM-Server von WarHead.';
-
-INSERT INTO `jail_conf` (`max_jails`,`max_duration`,`min_reason`,`warn_player`,`ally_x`,`ally_y`,`ally_z`,`ally_o`,`ally_m`,
-`horde_x`,`horde_y`,`horde_z`,`horde_o`,`horde_m`,`del_char`,`ban_acc`,`ban_duration`,`radius`,`enabled`) VALUES
-(3,672,30,1,31.7282,135.794,-40.0508,4.73516,35,2179.85,-4763.96,54.911,4.44216,1,0,1,168,15,1);
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Jail Konfigurations-Tabelle für UWoM-Server von WarHead.';
