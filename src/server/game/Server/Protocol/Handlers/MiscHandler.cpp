@@ -1516,9 +1516,6 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
-        return;
-
     Group *pGroup = _player->GetGroup();
     if (pGroup)
     {
@@ -1575,9 +1572,6 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket & recv_data)
     }
 
     if (Difficulty(mode) == _player->GetRaidDifficulty())
-        return;
-
-    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
         return;
 
     Group *pGroup = _player->GetGroup();
