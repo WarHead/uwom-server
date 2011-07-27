@@ -412,7 +412,7 @@ class BattlefieldWG : public Battlefield
         void PromotePlayer(Player *killer);
 
         void UpdateTenacity();
-        void ProcessEvent(GameObject *obj, uint32 eventId);
+        void ProcessEvent(WorldObject *obj, uint32 eventId);
 
     protected:
         bool m_CanClickOnOrb;
@@ -1366,7 +1366,7 @@ struct BfWGGameObjectBuilding
         }
 
         // Rebuild gameobject
-        m_Build->Rebuild();
+        m_Build->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
 
         // Update worldstate
         m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT - (m_Team * 3);
@@ -1387,13 +1387,13 @@ struct BfWGGameObjectBuilding
             m_WG->SendWarningToAllInZone(m_NameId);
 
         for (GuidSet::const_iterator itr = m_CreatureTopList[m_WG->GetAttackerTeam()].begin(); itr != m_CreatureTopList[m_WG->GetAttackerTeam()].end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->HideNpc(creature);
 
         for (GuidSet::const_iterator itr = m_TurretTopList.begin(); itr != m_TurretTopList.end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->HideNpc(creature);
 
         if (m_Type == BATTLEFIELD_WG_OBJECTTYPE_KEEP_TOWER)
@@ -1469,18 +1469,15 @@ struct BfWGGameObjectBuilding
             {
                 case BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT:
                 case BATTLEFIELD_WG_OBJECTSTATE_HORDE_INTACT:
-                     m_Build->Rebuild();
+                    m_Build->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
                     break;
                 case BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_DESTROY:
                 case BATTLEFIELD_WG_OBJECTSTATE_HORDE_DESTROY:
-                    m_Build->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                    m_Build->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-                    m_Build->SetUInt32Value(GAMEOBJECT_DISPLAYID, m_Build->GetGOInfo()->building.destroyedDisplayId);
+                    m_Build->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                     break;
                 case BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_DAMAGE:
                 case BATTLEFIELD_WG_OBJECTSTATE_HORDE_DAMAGE:
-                    m_Build->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                    m_Build->SetUInt32Value(GAMEOBJECT_DISPLAYID, m_Build->GetGOInfo()->building.damagedDisplayId);
+                    m_Build->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
                     break;
             }
         }
@@ -1610,23 +1607,23 @@ struct BfWGGameObjectBuilding
     void UpdateCreatureAndGo()
     {
         for (GuidSet::const_iterator itr = m_CreatureTopList[m_WG->GetDefenderTeam()].begin(); itr != m_CreatureTopList[m_WG->GetDefenderTeam()].end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->HideNpc(creature);
 
         for (GuidSet::const_iterator itr = m_CreatureTopList[m_WG->GetAttackerTeam()].begin(); itr != m_CreatureTopList[m_WG->GetAttackerTeam()].end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->ShowNpc(creature, true);
 
         for (GuidSet::const_iterator itr = m_CreatureBottomList[m_WG->GetDefenderTeam()].begin(); itr != m_CreatureBottomList[m_WG->GetDefenderTeam()].end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->HideNpc(creature);
 
         for (GuidSet::const_iterator itr = m_CreatureBottomList[m_WG->GetAttackerTeam()].begin(); itr != m_CreatureBottomList[m_WG->GetAttackerTeam()].end(); ++itr)
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                if (Creature *creature = unit->ToCreature())
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                if (Creature* creature = unit->ToCreature())
                     m_WG->ShowNpc(creature, true);
 
         for (GameObjectSet::const_iterator itr = m_GameObjectList[m_WG->GetDefenderTeam()].begin(); itr != m_GameObjectList[m_WG->GetDefenderTeam()].end(); ++itr)
@@ -1640,9 +1637,9 @@ struct BfWGGameObjectBuilding
     {
         for (GuidSet::const_iterator itr = m_TurretBottomList.begin(); itr != m_TurretBottomList.end(); ++itr)
         {
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
             {
-                if (Creature *creature = unit->ToCreature())
+                if (Creature* creature = unit->ToCreature())
                 {
                     if (m_Build)
                     {
@@ -1697,9 +1694,9 @@ struct BfWGGameObjectBuilding
 
         for (GuidSet::const_iterator itr = m_TurretTopList.begin(); itr != m_TurretTopList.end(); ++itr)
         {
-            if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
+            if (Unit* unit = sObjectAccessor->FindUnit(*itr))
             {
-                if (Creature *creature = unit->ToCreature())
+                if (Creature* creature = unit->ToCreature())
                 {
                     if (m_Build)
                     {
@@ -1827,14 +1824,14 @@ struct BfWGWorkShopData
                 {
                     // Show Alliance creature
                     for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                            if (Creature *creature = unit->ToCreature())
+                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                            if (Creature* creature = unit->ToCreature())
                                 m_WG->ShowNpc(creature, creature->GetEntry() != 30499);
 
                     // Hide Horde creature
                     for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
-                        if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                            if (Creature *creature = unit->ToCreature())
+                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                            if (Creature* creature = unit->ToCreature())
                                 m_WG->HideNpc(creature);
 
                     // Show Alliance gameobject
@@ -1866,14 +1863,14 @@ struct BfWGWorkShopData
                 {
                     // Show Horde creature
                     for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_HORDE].begin(); itr != m_CreatureOnPoint[TEAM_HORDE].end(); ++itr)
-                        if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                            if (Creature *creature = unit->ToCreature())
+                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                            if (Creature* creature = unit->ToCreature())
                                 m_WG->ShowNpc(creature, creature->GetEntry() != 30400);
 
                     // Hide Alliance creature
                     for (GuidSet::const_iterator itr = m_CreatureOnPoint[TEAM_ALLIANCE].begin(); itr != m_CreatureOnPoint[TEAM_ALLIANCE].end(); ++itr)
-                        if (Unit *unit = sObjectAccessor->FindUnit((*itr)))
-                            if (Creature *creature = unit->ToCreature())
+                        if (Unit* unit = sObjectAccessor->FindUnit(*itr))
+                            if (Creature* creature = unit->ToCreature())
                                 m_WG->HideNpc(creature);
 
                     // Hide Alliance gameobject
