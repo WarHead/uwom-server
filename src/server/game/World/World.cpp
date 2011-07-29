@@ -110,12 +110,6 @@ World::World()
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
 
-/*
-    // Tausendwinter
-    m_TWTimer = uint32((getWorldState(WS_TW_ZEIT) + time(NULL)));
-    m_TWStatus = 0;
-*/
-
     m_isClosed = false;
 
     m_CleaningFlags = 0;
@@ -1153,21 +1147,6 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_PVP_TOKEN_COUNT] = sConfig->GetIntDefault("PvPToken.ItemCount", 1);
     if (m_int_configs[CONFIG_PVP_TOKEN_COUNT] < 1)
         m_int_configs[CONFIG_PVP_TOKEN_COUNT] = 1;
-
-    // Tausendwinter
-    m_bool_configs[CONFIG_TW_AKTIVIERT]         = sConfig->GetBoolDefault("Tausendwinter.Aktiviert", true);
-    m_bool_configs[CONFIG_TW_AUTOMATISCH]       = sConfig->GetBoolDefault("Tausendwinter.Automatisch", true);
-    m_bool_configs[CONFIG_TW_TELEPORT_DALARAN]  = sConfig->GetBoolDefault("Tausendwinter.TeleportDalaran", false);
-    m_bool_configs[CONFIG_TW_WELTSTARTNACHRICHT]= sConfig->GetBoolDefault("Tausendwinter.WeltStartNachricht", false);
-    m_bool_configs[CONFIG_TW_WELTCOUNTDOWN]     = sConfig->GetBoolDefault("Tausendwinter.WeltStartCountdown", false);
-    m_bool_configs[CONFIG_TW_WELTSIEGNACHRICHT] = sConfig->GetBoolDefault("Tausendwinter.WeltSiegNachricht", false);
-    m_bool_configs[CONFIG_TW_VERSCHIEBE_NPCS]   = sConfig->GetBoolDefault("Tausendwinter.VerschiebeNPCs", false);
-
-    m_int_configs[CONFIG_TW_STARTZEIT]          = sConfig->GetIntDefault("Tausendwinter.Startzeit", 30) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_KAMPFDAUER]         = sConfig->GetIntDefault("Tausendwinter.Kampfdauer", 30) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_INTERVALL]          = sConfig->GetIntDefault("Tausendwinter.KampfIntervall", 130) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_SPEICHER_INTERVALL] = sConfig->GetIntDefault("Tausendwinter.SpeicherIntervall", 5) * IN_MILLISECONDS * MINUTE;
-
     // Gildenportal
     m_int_configs[CONFIG_GILDEN_ID] = sConfig->GetIntDefault("GuildPortal.GuildID", 0);
 
@@ -2911,31 +2890,3 @@ void World::ProcessQueryCallbacks()
         }
     }
 }
-
-/* Werde ich für meinen Tausendwinter Source umschreiben.
-void World::SendWintergraspState()
-{
-    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
-    if (!pvpWG)
-        return;
-
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
-            continue;
-
-            if (pvpWG->isWarTime())
-            {
-                // "Battle in progress"
-                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], uint32(time(NULL)));
-            } else
-                // Time to next battle
-            {
-                pvpWG->SendInitWorldStatesTo(itr->second->GetPlayer());
-                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], uint32(time(NULL) + pvpWG->GetTimer()));
-                // Hide unneeded info which in center of screen
-                itr->second->GetPlayer()->SendInitWorldStates(itr->second->GetPlayer()->GetZoneId(), itr->second->GetPlayer()->GetAreaId());
-            }
-    }
-}
-*/

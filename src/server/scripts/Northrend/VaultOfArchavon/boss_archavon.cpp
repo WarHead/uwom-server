@@ -19,9 +19,6 @@
 #include "ScriptPCH.h"
 #include "vault_of_archavon.h"
 
-#include "OutdoorPvPMgr.h"
-#include "OutdoorPvPTW.h"
-
 #define EMOTE_BERSERK           -1590002
 
 //Spells Archavon
@@ -77,13 +74,10 @@ public:
 
         InstanceScript* pInstance;
         EventMap events;
-        EventMap eventsTW;
 
         void Reset()
         {
             events.Reset();
-            eventsTW.Reset();
-            eventsTW.ScheduleEvent(EVENT_TW_CHECK, 100);
 
             if (pInstance)
                 pInstance->SetData(DATA_ARCHAVON_EVENT, NOT_STARTED);
@@ -109,22 +103,8 @@ public:
                 pInstance->SetData(DATA_ARCHAVON_EVENT, IN_PROGRESS);
         }
 
-        void CheckTW()
-        {
-            if (Tausendwinter * pTW = const_cast<Tausendwinter*> ((Tausendwinter*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(NORDEND_TAUSENDWINTER)))
-                pTW->DarfAngegriffenWerden(me);
-
-            eventsTW.RescheduleEvent(EVENT_TW_CHECK, 29000);
-        }
-
-        // Below UpdateAI may need review/debug.
         void UpdateAI(const uint32 diff)
         {
-            eventsTW.Update(diff);
-
-            if (eventsTW.ExecuteEvent() == EVENT_TW_CHECK)
-                CheckTW();
-
             if (!UpdateVictim())
                 return;
 
@@ -169,7 +149,6 @@ public:
     };
 
 };
-
 /*######
 ##  Mob Archavon Warder
 ######*/
@@ -188,13 +167,10 @@ public:
         mob_archavon_warderAI(Creature *c) : ScriptedAI(c) {}
 
         EventMap events;
-        EventMap eventsTW;
 
         void Reset()
         {
             events.Reset();
-            eventsTW.Reset();
-            eventsTW.ScheduleEvent(EVENT_TW_CHECK, 100);
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -205,21 +181,8 @@ public:
             events.ScheduleEvent(EVENT_WHIRL, 7500);
         }
 
-        void CheckTW()
-        {
-            if (Tausendwinter * pTW = const_cast<Tausendwinter*> ((Tausendwinter*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(NORDEND_TAUSENDWINTER)))
-                pTW->DarfAngegriffenWerden(me);
-
-            eventsTW.RescheduleEvent(EVENT_TW_CHECK, 29000);
-        }
-
         void UpdateAI(const uint32 diff)
         {
-            eventsTW.Update(diff);
-
-            if (eventsTW.ExecuteEvent() == EVENT_TW_CHECK)
-                CheckTW();
-
             if (!UpdateVictim())
                 return;
 
@@ -249,8 +212,6 @@ public:
     };
 
 };
-
-
 
 void AddSC_boss_archavon()
 {

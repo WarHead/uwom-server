@@ -32,10 +32,6 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 
-#include "OutdoorPvPMgr.h"
-#include "OutdoorPvPTW.h"
-
-
 union u_map_magic
 {
     char asChar[4];
@@ -2220,11 +2216,9 @@ bool InstanceMap::CanEnter(Player* player)
         ASSERT(false);
         return false;
     }
-
     // allow GM's to enter
     if (player->isGameMaster())
         return Map::CanEnter(player);
-
     // cannot enter if the instance is full (player cap), GMs don't count
     uint32 maxPlayers = GetMaxPlayers();
     if (GetPlayersCountExceptGMs() >= maxPlayers)
@@ -2233,7 +2227,6 @@ bool InstanceMap::CanEnter(Player* player)
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
         return false;
     }
-
     // cannot enter while an encounter is in progress on raids
     /*Group *pGroup = player->GetGroup();
     if (!player->isGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
@@ -2242,21 +2235,9 @@ bool InstanceMap::CanEnter(Player* player)
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }
-
-    // Archavons Kammer auf Tausendwinterbesitzer prüfen
-    if (GetId() == 624)
-        if (Tausendwinter * pTW = const_cast<Tausendwinter*> ((Tausendwinter*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(NORDEND_TAUSENDWINTER)))
-            if (!pTW->DarfArchavonsKammerBetreten(player))
-            {
-                player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAP_NOT_ALLOWED);
-                return false;
-            }
-
     // cannot enter if instance is in use by another party/soloer that have a
     // permanent save in the same instance id
-
     PlayerList const &playerList = GetPlayers();
-
     if (!playerList.isEmpty())
         for (PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
             if (Player *iPlayer = i->getSource())

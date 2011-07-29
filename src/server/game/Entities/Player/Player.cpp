@@ -59,7 +59,6 @@
 #include "BattlegroundMgr.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
-#include "OutdoorPvPTW.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Spell.h"
@@ -22457,10 +22456,6 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
         if (itr->second->autocast && itr->second->IsFitToRequirements(this, newZone, 0))
             if (!HasAura(itr->second->spellId))
                 CastSpell(this, itr->second->spellId, true);
-
-    // Essenz von Tausendwinter aktualisieren
-    if (Tausendwinter * pTW = const_cast<Tausendwinter*> ((Tausendwinter*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(NORDEND_TAUSENDWINTER)))
-        pTW->AktualisiereEssenzVonTausendwinter(this, newZone);
 }
 
 void Player::UpdateAreaDependentAuras(uint32 newArea)
@@ -22536,9 +22531,6 @@ void Player::UpdateCorpseReclaimDelay()
 
 void Player::SendCorpseReclaimDelay(bool load)
 {
-    if (GetZoneId() == NORDEND_TAUSENDWINTER)
-        return;
-
     Corpse* corpse = GetCorpse();
     if (load && !corpse)
         return;

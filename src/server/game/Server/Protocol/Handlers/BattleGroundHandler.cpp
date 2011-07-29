@@ -22,7 +22,6 @@
 #include "ArenaTeamMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-
 #include "ArenaTeam.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundWS.h"
@@ -35,9 +34,6 @@
 #include "Opcodes.h"
 #include "DisableMgr.h"
 #include "Group.h"
-
-#include "OutdoorPvPMgr.h"
-#include "OutdoorPvPTW.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket & recv_data)
 {

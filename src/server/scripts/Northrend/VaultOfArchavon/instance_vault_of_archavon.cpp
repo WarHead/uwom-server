@@ -157,7 +157,6 @@ public:
 
 };
 
-
 void AddSC_instance_archavon()
 {
     new instance_archavon();
