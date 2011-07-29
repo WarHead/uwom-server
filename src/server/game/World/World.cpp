@@ -17,10 +17,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \file
-    \ingroup world
-*/
-
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
