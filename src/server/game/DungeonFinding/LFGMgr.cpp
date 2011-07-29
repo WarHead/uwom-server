@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -931,7 +932,7 @@ bool LFGMgr::CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal)
     // Select a random dungeon from the compatible list
     // TODO - Select the dungeon based on group item Level, not just random
     LfgDungeonSet::const_iterator itDungeon = compatibleDungeons.begin();
-    for (uint8 i = 0; i < urand(0, compatibleDungeons.size() - 1); ++i)
+    for (uint8 i = urand(0, compatibleDungeons.size() - 1); i > 0 ; --i)
         ++itDungeon;
 
     // Create a new proposal

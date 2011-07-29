@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2010-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -92,6 +93,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                 DeathbringerSaurfangDoorGUID = 0;
                 DeathbringerSaurfangEventGUID = 0;
                 DeathbringersCacheGUID = 0;
+                KanonenschiffTruheAllyGUID = 0;
+                KanonenschiffTruheHordeGUID = 0;
+                TraumwandlerTruheGUID = 0;
                 SaurfangTeleportGUID = 0;
                 PlagueSigilGUID = 0;
                 BloodwingSigilGUID = 0;
@@ -362,7 +366,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     // these 2 gates are functional only on 25man modes
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_01:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_04:
-                        if (instance->GetSpawnMode() & 1)
+                        if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
                             AddDoor(go, true);
                         break;
                     case GO_LADY_DEATHWHISPER_ELEVATOR:
@@ -373,6 +377,20 @@ class instance_icecrown_citadel : public InstanceMapScript
                             go->SetGoState(GO_STATE_READY);
                         }
                         break;
+                    // Truhe des Kanonenschiffs (Ally)
+                    case GO_Truhe_des_Kanonenschiffs_Ally_10:
+                    case GO_Truhe_des_Kanonenschiffs_Ally_10H:
+                    case GO_Truhe_des_Kanonenschiffs_Ally_25:
+                    case GO_Truhe_des_Kanonenschiffs_Ally_25H:
+                        KanonenschiffTruheAllyGUID = go->GetGUID();
+                        break;
+                    // Truhe des Kanonenschiffs (Horde)
+                    case GO_Truhe_des_Kanonenschiffs_Horde_10:
+                    case GO_Truhe_des_Kanonenschiffs_Horde_10H:
+                    case GO_Truhe_des_Kanonenschiffs_Horde_25:
+                    case GO_Truhe_des_Kanonenschiffs_Horde_25H:
+                        KanonenschiffTruheHordeGUID = go->GetGUID();
+                        break;
                     case GO_SAURFANG_S_DOOR:
                         DeathbringerSaurfangDoorGUID = go->GetGUID();
                         AddDoor(go, true);
@@ -382,6 +400,12 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DEATHBRINGER_S_CACHE_10H:
                     case GO_DEATHBRINGER_S_CACHE_25H:
                         DeathbringersCacheGUID = go->GetGUID();
+                        break;
+                    case GO_Truhe_des_Traumwandlers_10:
+                    case GO_Truhe_des_Traumwandlers_10H:
+                    case GO_Truhe_des_Traumwandlers_25:
+                    case GO_Truhe_des_Traumwandlers_25H:
+                        TraumwandlerTruheGUID = go->GetGUID();
                         break;
                     case GO_SCOURGE_TRANSPORTER_SAURFANG:
                         SaurfangTeleportGUID = go->GetGUID();
@@ -625,6 +649,15 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_PROFESSOR_PUTRICIDE:
                         HandleGameObject(PlagueSigilGUID, state != DONE);
+
+                        if (state == DONE)
+                        {
+                            // So lange das Kanonenschiff nicht funktioniert, die Truhe beim Tot vom Prof. bei ihm spawnen lassen!
+                            if (TeamInInstance && TeamInInstance == ALLIANCE)
+                                DoRespawnGameObject(KanonenschiffTruheAllyGUID, 7*DAY);
+                            else
+                                DoRespawnGameObject(KanonenschiffTruheHordeGUID, 7*DAY);
+                        }
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -639,6 +672,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         HandleGameObject(BloodwingSigilGUID, state != DONE);
+
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -654,6 +688,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_VALITHRIA_DREAMWALKER:
                         if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
                             instance->SummonCreature(NPC_VALITHRIA_DREAMWALKER_QUEST, ValithriaSpawnPos);
+                        if (state == DONE)
+                            DoRespawnGameObject(TraumwandlerTruheGUID, 7*DAY);
                         break;
                     case DATA_SINDRAGOSA:
                         HandleGameObject(FrostwingSigilGUID, state != DONE);
@@ -693,6 +729,9 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case DATA_KILL_CREDIT:
+                        GiveKillCredit(data);
+                        break;
                     case DATA_BONED_ACHIEVEMENT:
                         IsBonedEligible = data ? true : false;
                         break;
@@ -1008,6 +1047,27 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return true;
             }
 
+            void GiveKillCredit(uint32 uiQuest)
+            {
+                switch(uiQuest)
+                {
+                    case Quest_A_Feast_of_Souls: // Quest 24547 Kill Credit
+                        if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        {
+                            Map::PlayerList const &pl = instance->GetPlayers();
+                            if (!pl.isEmpty())
+                                for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                                    if (Player* pPl = itr->getSource())
+                                        if (pPl->hasQuest(uiQuest) && !pPl->GetQuestRewardStatus(uiQuest))
+                                        {
+                                            pPl->CastSpell(pPl, SPELL_SOUL_FEAST_1, true);
+                                            pPl->CastSpell(pPl, SPELL_SOUL_FEAST_2, true);
+                                        }
+                        }
+                        break;
+                }
+            }
+
             std::string GetSaveData()
             {
                 OUT_SAVE_INST_DATA;
@@ -1096,6 +1156,9 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 DeathbringerSaurfangDoorGUID;
             uint64 DeathbringerSaurfangEventGUID;   // Muradin Bronzebeard or High Overlord Saurfang
             uint64 DeathbringersCacheGUID;
+            uint64 KanonenschiffTruheAllyGUID;
+            uint64 KanonenschiffTruheHordeGUID;
+            uint64 TraumwandlerTruheGUID;
             uint64 SaurfangTeleportGUID;
             uint64 PlagueSigilGUID;
             uint64 BloodwingSigilGUID;

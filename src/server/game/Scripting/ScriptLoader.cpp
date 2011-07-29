@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -52,6 +53,7 @@ void AddSC_gm_commandscript();
 void AddSC_go_commandscript();
 void AddSC_gobject_commandscript();
 void AddSC_honor_commandscript();
+void AddSC_jail_commandscript();
 void AddSC_learn_commandscript();
 void AddSC_modify_commandscript();
 void AddSC_npc_commandscript();
@@ -59,6 +61,7 @@ void AddSC_quest_commandscript();
 void AddSC_reload_commandscript();
 void AddSC_tele_commandscript();
 void AddSC_titles_commandscript();
+void AddSC_tw_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_gps_commandscript();
 
@@ -488,17 +491,18 @@ void AddSC_boss_baltharus_the_warborn();
 void AddSC_boss_saviana_ragefire();
 void AddSC_boss_general_zarithrian();
 
-void AddSC_dalaran();
+void AddSC_crystalsong_forest();
 void AddSC_borean_tundra();
+void AddSC_dalaran();
 void AddSC_dragonblight();
 void AddSC_grizzly_hills();
 void AddSC_howling_fjord();
 void AddSC_icecrown();
+void AddSC_isle_of_conquest();
 void AddSC_sholazar_basin();
 void AddSC_storm_peaks();
+void AddSC_tausendwinter();
 void AddSC_zuldrak();
-void AddSC_crystalsong_forest();
-void AddSC_isle_of_conquest();
 
 //outland
 void AddSC_boss_exarch_maladaar();           //Auchindoun Auchenai Crypts
@@ -590,6 +594,7 @@ void AddSC_outdoorpvp_hp();
 void AddSC_outdoorpvp_na();
 void AddSC_outdoorpvp_si();
 void AddSC_outdoorpvp_tf();
+void AddSC_outdoorpvp_tw();
 void AddSC_outdoorpvp_zm();
 
 // player
@@ -653,6 +658,7 @@ void AddCommandScripts()
     AddSC_go_commandscript();
     AddSC_gobject_commandscript();
     AddSC_honor_commandscript();
+    AddSC_jail_commandscript();
     AddSC_learn_commandscript();
     AddSC_modify_commandscript();
     AddSC_npc_commandscript();
@@ -660,6 +666,7 @@ void AddCommandScripts()
     AddSC_reload_commandscript();
     AddSC_tele_commandscript();
     AddSC_titles_commandscript();
+    AddSC_tw_commandscript();
     AddSC_wp_commandscript();
     AddSC_gps_commandscript();
 }
@@ -1190,17 +1197,18 @@ void AddNorthrendScripts()
     AddSC_boss_saviana_ragefire();
     AddSC_boss_general_zarithrian();
 
-    AddSC_dalaran();
+    AddSC_crystalsong_forest();
     AddSC_borean_tundra();
+    AddSC_dalaran();
     AddSC_dragonblight();
     AddSC_grizzly_hills();
     AddSC_howling_fjord();
     AddSC_icecrown();
+    AddSC_isle_of_conquest();
     AddSC_sholazar_basin();
     AddSC_storm_peaks();
+    AddSC_tausendwinter();
     AddSC_zuldrak();
-    AddSC_crystalsong_forest();
-    AddSC_isle_of_conquest();
 #endif
 }
 
@@ -1212,6 +1220,7 @@ void AddOutdoorPvPScripts()
     AddSC_outdoorpvp_na();
     AddSC_outdoorpvp_si();
     AddSC_outdoorpvp_tf();
+    AddSC_outdoorpvp_tw();
     AddSC_outdoorpvp_zm();
 #endif
 }

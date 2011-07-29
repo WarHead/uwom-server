@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2010-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,6 +24,7 @@
 #include "Creature.h"
 
 #define ICCScriptName "instance_icecrown_citadel"
+#define Quest_A_Feast_of_Souls  24547
 
 uint32 const EncounterCount = 13;
 uint32 const WeeklyNPCs = 9;
@@ -44,6 +46,11 @@ enum SharedSpells
     // Residue Rendezvous
     SPELL_ORANGE_BLIGHT_RESIDUE = 72144,
     SPELL_GREEN_BLIGHT_RESIDUE  = 72145,
+
+    // Kill Credit 38121 - Soul Feast Kill Credit Bunny - Quest 24547 - A Feast of Souls
+    // Must be used by every killable NPC within the ICC
+    SPELL_SOUL_FEAST_1          = 71203,
+    SPELL_SOUL_FEAST_2          = 53677
 };
 
 enum TeleporterSpells
@@ -99,6 +106,9 @@ enum DataTypes
     DATA_CAPTAIN_RUPERT             = 34,
     DATA_VALITHRIA_TRIGGER          = 35,
     DATA_VALITHRIA_LICH_KING        = 36,
+
+    DATA_FALLEN_ADDS_SPAWNEN,
+    DATA_KILL_CREDIT
 };
 
 enum CreaturesIds
@@ -251,10 +261,13 @@ enum CreaturesIds
 enum GameObjectsIds
 {
     // Lower Spire Trash
-    GO_SPIRIT_ALARM_1                       = 201814,
-    GO_SPIRIT_ALARM_2                       = 201815,
-    GO_SPIRIT_ALARM_3                       = 201816,
-    GO_SPIRIT_ALARM_4                       = 201817,
+    GO_SPIRIT_ALARM_1                       = 201814, // unten
+    GO_SPIRIT_ALARM_2                       = 201815, // unten
+    GO_SPIRIT_ALARM_3                       = 201816, // unten
+    GO_SPIRIT_ALARM_4                       = 201817, // unten
+
+    GO_SPIRIT_ALARM_5                       = 201888, // oben
+    GO_SPIRIT_ALARM_6                       = 201889, // oben
 
     // Lord Marrogar
     GO_DOODAD_ICECROWN_ICEWALL02            = 201910,
@@ -264,6 +277,16 @@ enum GameObjectsIds
     // Lady Deathwhisper
     GO_ORATORY_OF_THE_DAMNED_ENTRANCE       = 201563,
     GO_LADY_DEATHWHISPER_ELEVATOR           = 202220,
+
+    // Kanonenschiff
+    GO_Truhe_des_Kanonenschiffs_Ally_10     = 201872,
+    GO_Truhe_des_Kanonenschiffs_Ally_10H    = 201873,
+    GO_Truhe_des_Kanonenschiffs_Ally_25     = 201874,
+    GO_Truhe_des_Kanonenschiffs_Ally_25H    = 201875,
+    GO_Truhe_des_Kanonenschiffs_Horde_10    = 202177,
+    GO_Truhe_des_Kanonenschiffs_Horde_10H   = 202178,
+    GO_Truhe_des_Kanonenschiffs_Horde_25    = 202179,
+    GO_Truhe_des_Kanonenschiffs_Horde_25H   = 202180,
 
     // Deathbringer Saurfang
     GO_SAURFANG_S_DOOR                      = 201825,
@@ -284,6 +307,11 @@ enum GameObjectsIds
     GO_SCIENTIST_ENTRANCE                   = 201372,
     GO_DRINK_ME                             = 201584,
     GO_PLAGUE_SIGIL                         = 202182,
+
+    GO_Truhe_des_Traumwandlers_10           = 201959,
+    GO_Truhe_des_Traumwandlers_10H          = 202338,
+    GO_Truhe_des_Traumwandlers_25           = 202339,
+    GO_Truhe_des_Traumwandlers_25H          = 202340,
 
     // Blood Prince Council
     GO_CRIMSON_HALL_DOOR                    = 201376,

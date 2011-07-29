@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2009-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,20 +26,18 @@ Script Data End */
 
 #include "ScriptPCH.h"
 
+// NPC IDs: 29254,29255
+
 /*******************************************************
  * npc_mageguard_dalaran
  *******************************************************/
 
-enum Spells
+enum SpellsAndTexts
 {
-    SPELL_TRESPASSER_A = 54028,
-    SPELL_TRESPASSER_H = 54029
-};
-
-enum NPCs // All outdoor guards are within 35.0f of these NPCs
-{
-    NPC_APPLEBOUGH_A = 29547,
-    NPC_SWEETBERRY_H = 29715,
+    SPELL_EINDRINGLING_A    = 54028,
+    SPELL_EINDRINGLING_H    = 54029,
+    TEXT_A                  = -1010001,
+    TEXT_H                  = -1010000,
 };
 
 class npc_mageguard_dalaran : public CreatureScript
@@ -50,65 +49,66 @@ public:
     {
         npc_mageguard_dalaranAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_NORMAL, true);
-            creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_NORMAL, true);
+            me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
 
-        void Reset(){}
-
-        void EnterCombat(Unit* /*who*/){}
-
-        void AttackStart(Unit* /*who*/){}
-
-        void MoveInLineOfSight(Unit* who)
+        void Reset()
         {
-            if (!who || !who->IsInWorld() || who->GetZoneId() != 4395)
-                return;
-
-            if (!me->IsWithinDist(who, 65.0f, false))
-                return;
-
-            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
-
-            if (!player || player->isGameMaster() || player->IsBeingTeleported())
-                return;
-
-            switch (me->GetEntry())
-            {
-                case 29254:
-                    if (player->GetTeam() == HORDE)              // Horde unit found in Alliance area
-                    {
-                        if (GetClosestCreatureWithEntry(me, NPC_APPLEBOUGH_A, 32.0f))
-                        {
-                            if (me->isInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
-                                DoCast(who, SPELL_TRESPASSER_A); // Teleport the Horde unit out
-                        }
-                        else                                      // In my line of sight, and "indoors"
-                            DoCast(who, SPELL_TRESPASSER_A);     // Teleport the Horde unit out
-                    }
-                    break;
-                case 29255:
-                    if (player->GetTeam() == ALLIANCE)           // Alliance unit found in Horde area
-                    {
-                        if (GetClosestCreatureWithEntry(me, NPC_SWEETBERRY_H, 32.0f))
-                        {
-                            if (me->isInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
-                                DoCast(who, SPELL_TRESPASSER_H); // Teleport the Alliance unit out
-                        }
-                        else                                      // In my line of sight, and "indoors"
-                            DoCast(who, SPELL_TRESPASSER_H);     // Teleport the Alliance unit out
-                    }
-                    break;
-            }
             me->SetOrientation(me->GetHomePosition().GetOrientation());
+        }
+
+        void EnterCombat(Unit* who)
+        {
             return;
         }
 
-        void UpdateAI(const uint32 /*diff*/){}
+        void AttackStart(Unit* who)
+        {
+            return;
+        }
+
+        void MoveInLineOfSight(Unit *who)
+        {
+            if (!who)
+                return;
+
+            Player* pwho = NULL;
+
+            if (who->GetTypeId() == TYPEID_PLAYER)
+                pwho = (Player*)who;
+
+            if (!pwho || pwho->isGameMaster())
+                return;
+
+            if (me->GetDistance(pwho) >= 12.0f)
+                return;
+
+            switch(me->GetEntry())
+            {
+                case 29254: // Ally
+                    if (!me->isInCombat() && pwho->GetTeam() == HORDE && !pwho->HasAura(SPELL_EINDRINGLING_A))
+                    {
+                        me->Yell(TEXT_A, LANG_UNIVERSAL, pwho->GetGUID());
+                        DoCast(pwho, SPELL_EINDRINGLING_A);
+                    }
+                    break;
+                case 29255: // Horde
+                    if (!me->isInCombat() && pwho->GetTeam() == ALLIANCE && !pwho->HasAura(SPELL_EINDRINGLING_H))
+                    {
+                        me->Yell(TEXT_H, LANG_UNIVERSAL, pwho->GetGUID());
+                        DoCast(pwho, SPELL_EINDRINGLING_H);
+                    }
+                    break;
+            }
+            EnterEvadeMode();
+            return;
+        }
+        void UpdateAI(const uint32 diff) {}
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI *GetAI(Creature *creature) const
     {
         return new npc_mageguard_dalaranAI(creature);
     }

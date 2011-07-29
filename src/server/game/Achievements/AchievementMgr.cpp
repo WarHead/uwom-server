@@ -745,6 +745,14 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         AchievementEntry const *achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         if (!achievement)
             continue;
+ 
+        // GMs mit GM an, oder die unsichtbar sind, keine Achievements geben (z.B. beim zuschauen in einer User-Instanz)
+        if (GetPlayer()->isGameMaster() || !GetPlayer()->isGMVisible())
+            continue;
+
+        // GMs nicht erlauben Achievements der Art "Erster des Realms..." zu bekommen
+        if (achievement->categoryId == 81 && achievement->flags & 256 && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
+            continue;
 
         if (!CanUpdateCriteria(achievementCriteria, achievement))
             continue;

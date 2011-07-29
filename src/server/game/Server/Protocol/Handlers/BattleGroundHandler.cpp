@@ -36,6 +36,9 @@
 #include "DisableMgr.h"
 #include "Group.h"
 
+#include "OutdoorPvPMgr.h"
+#include "OutdoorPvPTW.h"
+
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket & recv_data)
 {
     uint64 guid;

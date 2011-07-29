@@ -31,6 +31,9 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 
+#include "OutdoorPvPMgr.h"
+#include "OutdoorPvPTW.h"
+
 
 union u_map_magic
 {
@@ -2239,6 +2242,15 @@ bool InstanceMap::CanEnter(Player* player)
         return false;
     }
 
+    // Archavons Kammer auf Tausendwinterbesitzer pr�fen
+    if (GetId() == 624)
+        if (Tausendwinter * pTW = const_cast<Tausendwinter*> ((Tausendwinter*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(NORDEND_TAUSENDWINTER)))
+            if (!pTW->DarfArchavonsKammerBetreten(player))
+            {
+                player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAP_NOT_ALLOWED);
+                return false;
+            }
+
     // cannot enter if instance is in use by another party/soloer that have a
     // permanent save in the same instance id
 
@@ -2490,6 +2502,11 @@ void InstanceMap::PermBindAllPlayers(Player* player)
     if (!save)
     {
         sLog->outError("Cannot bind players, no instance save available for map!");
+        return;
+    }
+    else if (!IsRaid()) // Nur Raidinstanzen permanent binden
+    {
+        save->SetCanReset(true);
         return;
     }
 

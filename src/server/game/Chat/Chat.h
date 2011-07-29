@@ -131,6 +131,7 @@ class ChatHandler
         bool ShowHelpForCommand(ChatCommand *table, const char* cmd);
         bool ShowHelpForSubCommands(ChatCommand *table, char const* cmd, char const* subcmd);
 
+        bool HandleAHBotOptionsCommand(const char * args);
         bool HandleNameAnnounceCommand(const char* args);
         bool HandleGMNameAnnounceCommand(const char* args);
         bool HandleGMAnnounceCommand(const char* args);
@@ -401,5 +402,9 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
+
+#define MAX_FMT_STRING  32000
+
+char const *fmtstring(char const *format, ...);
 
 #endif

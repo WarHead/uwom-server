@@ -66,13 +66,14 @@ enum Spells
 
 enum Events
 {
-    EVENT_PHANTOM_BLAST         = 1,
-    EVENT_MIRRORED_SOUL         = 2,
-    EVENT_WELL_OF_SOULS         = 3,
-    EVENT_UNLEASHED_SOULS       = 4,
-    EVENT_WAILING_SOULS         = 5,
-    EVENT_WAILING_SOULS_TICK    = 6,
-    EVENT_FACE_ANGER            = 7,
+    EVENT_NONE,
+    EVENT_PHANTOM_BLAST,
+    EVENT_MIRRORED_SOUL,
+    EVENT_WELL_OF_SOULS,
+    EVENT_UNLEASHED_SOULS,
+    EVENT_WAILING_SOULS,
+    EVENT_WAILING_SOULS_TICK,
+    EVENT_FACE_ANGER,
 };
 
 enum eEnum
@@ -261,9 +262,14 @@ class boss_devourer_of_souls : public CreatureScript
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
+                    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+
                     switch(eventId)
                     {
                         case EVENT_PHANTOM_BLAST:
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                             DoCastVictim(SPELL_PHANTOM_BLAST);
                             events.ScheduleEvent(EVENT_PHANTOM_BLAST, 5000);
                             break;

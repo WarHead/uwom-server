@@ -230,14 +230,15 @@ class boss_lady_deathwhisper : public CreatureScript
                 _nextVengefulShadeTargetGUID = 0;
                 _darnavanGUID = 0;
                 DoCast(me, SPELL_SHADOW_CHANNELING);
+                DoCast(me, SPELL_MANA_BARRIER, true);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
-                me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
-                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
             }
 
             void MoveInLineOfSight(Unit* who)
             {
+                if (!me->isInCombat() && !me->HasAura(SPELL_MANA_BARRIER))
+                    DoCast(me, SPELL_MANA_BARRIER, true);
+
                 if (!_introDone && me->IsWithinDistInMap(who, 110.0f))
                 {
                     _introDone = true;
@@ -288,13 +289,15 @@ class boss_lady_deathwhisper : public CreatureScript
                 Talk(SAY_AGGRO);
                 DoStartNoMovement(who);
                 me->RemoveAurasDueToSpell(SPELL_SHADOW_CHANNELING);
-                DoCast(me, SPELL_MANA_BARRIER, true);
 
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, IN_PROGRESS);
             }
 
             void JustDied(Unit* killer)
             {
+                if (InstanceScript* pInstance = me->GetInstanceScript())
+                    pInstance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
+
                 Talk(SAY_DEATH);
 
                 std::set<uint32> livingAddEntries;

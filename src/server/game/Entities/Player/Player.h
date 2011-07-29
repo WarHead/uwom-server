@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -1111,7 +1112,7 @@ class Player : public Unit, public GridObject<Player>
         void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
         bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
-        bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
+        bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_ANWAERTER && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
         bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
@@ -1125,6 +1126,23 @@ class Player : public Unit, public GridObject<Player>
         void GiveLevel(uint8 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
+
+        // Jail von WarHead
+        uint32 m_JailRelease;       // Entlassungszeit
+        uint32 m_JailAnzahl;        // Anzahl der Knastbesuche
+        uint32 m_JailGMAcc;         // GM-Account der ihn eingebuchtet hat
+        uint32 m_JailDauer;         // Dauer des Knastaufenthaltes
+        uint32 m_JailWarnTimer;     // Timer damit die Warnungen vom Jail nicht wärend eines Ladebildschirms gesendet werden!
+        uint32 m_JailBans;          // Anzahl der Bannungen durch das Jail
+        uint32 m_JailZeit;          // Inhaftierungszeit
+
+        std::string m_JailGrund;    // Der Grund
+        std::string m_JailGMChar;   // GM-Charakter der ihn eingebuchtet hat
+
+        bool m_Jailed;              // Zur Zeit gerade im Knast?
+
+        void JailDatenLaden();
+        void JailDatenSpeichern();
 
         // Played Time Stuff
         time_t m_logintime;

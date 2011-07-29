@@ -1213,6 +1213,7 @@ void SpellMgr::LoadSpellRequired()
 {
     uint32 oldMSTime = getMSTime();
 
+
     mSpellsReqSpell.clear();                                   // need for reload case
     mSpellReq.clear();                                         // need for reload case
 
@@ -2561,16 +2562,6 @@ void SpellMgr::LoadSpellAreas()
 
 void SpellMgr::LoadSpellInfoStore()
 {
-                return false;
-            break;
-        }
-        case 58730: // No fly Zone - Wintergrasp
-        {
-            if (!player)
-                return false;
-
-            Battlefield* Bf = sBattlefieldMgr.GetBattlefieldToZoneId(player->GetZoneId());
-            if (!Bf || Bf->CanFlyIn() || (!player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY)))
     uint32 oldMSTime = getMSTime();
 
     UnloadSpellInfoStore();

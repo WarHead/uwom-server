@@ -82,8 +82,6 @@ public:
         boss_taldaramAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         uint32 uiBloodthirstTimer;
@@ -110,14 +108,22 @@ public:
             Phase = NORMAL;
             uiPhaseTimer = 0;
             uiEmbraceTarget = 0;
+
             if (pInstance)
                 pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, NOT_STARTED);
+
+            if (!CheckSpheres())
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, IN_PROGRESS);
+
             DoScriptText(SAY_AGGRO, me);
         }
 
@@ -125,6 +131,7 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
             if (uiPhaseTimer <= diff)
             {
                 switch (Phase)
@@ -295,6 +302,7 @@ public:
                 GameObject* pSpheres = pInstance->instance->GetGameObject(uiSphereGuids[i]);
                 if (!pSpheres)
                     return false;
+
                 if (pSpheres->GetGoState() != GO_STATE_ACTIVE)
                     return false;
             }
@@ -314,6 +322,7 @@ public:
         {
             if (!pInstance)
                 return;
+
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -399,8 +408,14 @@ public:
 
             switch(pGO->GetEntry())
             {
-                case GO_SPHERE1: pInstance->SetData(DATA_SPHERE1_EVENT, IN_PROGRESS); break;
-                case GO_SPHERE2: pInstance->SetData(DATA_SPHERE2_EVENT, IN_PROGRESS); break;
+                case GO_SPHERE1:
+                    pInstance->SetData(DATA_SPHERE1_EVENT, IN_PROGRESS);
+                    pInstance->SetData64(DATA_SPHERE1, pGO->GetGUID());
+                    break;
+                case GO_SPHERE2:
+                    pInstance->SetData(DATA_SPHERE2_EVENT, IN_PROGRESS);
+                    pInstance->SetData64(DATA_SPHERE2, pGO->GetGUID());
+                    break;
             }
 
             CAST_AI(boss_taldaram::boss_taldaramAI, pPrinceTaldaram->AI())->CheckSpheres();

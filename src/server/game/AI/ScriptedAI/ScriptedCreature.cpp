@@ -1,4 +1,5 @@
-/* Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+/* Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
  *
  * Thanks to the original authors: ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -110,12 +111,136 @@ bool SummonList::HasEntry(uint32 entry)
 
 ScriptedAI::ScriptedAI(Creature* pCreature) : CreatureAI(pCreature),
     me(pCreature),
+    FirstTime(true),
+    MaxDistance(100.0f),
+    CheckDistanceTimer(5000),
+    CheckThreatListTimer(2000),
     IsFleeing(false),
     _evadeCheckCooldown(2500),
     _isCombatMovementAllowed(true)
 {
     _isHeroic = me->GetMap()->IsHeroic();
     _difficulty = Difficulty(me->GetMap()->GetSpawnMode());
+}
+
+// Add items to a player
+void ScriptedAI::addItem(Player* player, uint32 itemid, uint8 amount, bool received, bool created, bool broadcast)
+{
+    ItemPosCountVec dest;
+    uint32 no_space = 0;
+    InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, amount, &no_space);
+
+    if (msg != EQUIP_ERR_OK)
+    {
+        player->SendEquipError(msg, NULL, NULL);
+        return;
+    }
+    // create the new item(s) and store it
+    Item* pItem = player->StoreNewItem(dest, itemid, true, Item::GenerateItemRandomPropertyId(itemid));
+    if (!pItem)
+    {
+        player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        return;
+    }
+    player->SendNewItem(pItem, amount, received, created, broadcast);
+}
+
+// Entfernung (in yards / 3D) überprüfen und nach hause gehen wenn zu weit vom Spawnpunkt.
+void ScriptedAI::CheckDistance(float dist, const uint32 uiDiff)
+{
+    if (!me->isInCombat())
+        return;
+
+    float x=0.0f, y=0.0f, z=0.0f;
+    me->GetRespawnCoord(x,y,z);
+
+    if (CheckDistanceTimer < uiDiff)
+        CheckDistanceTimer = 5000;
+    else
+    {
+        CheckDistanceTimer -= uiDiff;
+        return;
+    }
+    if (me->IsInEvadeMode() || !me->getVictim())
+        return;
+
+    if (me->GetDistance(x,y,z) > dist)
+        EnterEvadeMode();
+}
+
+// Überprüft auf freundliche NPCs in der ThreatList, und geht bei leerer Liste nach Hause
+void ScriptedAI::CheckThreatList(const uint32 uiDiff)
+{
+    if (!me->isInCombat())
+        return;
+
+    if (CheckThreatListTimer < uiDiff)
+        CheckThreatListTimer = 2000;
+    else
+    {
+        CheckThreatListTimer -= uiDiff;
+        return;
+    }
+
+    if (me->IsInEvadeMode() || !me->getVictim())
+        return;
+
+    std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
+    for (std::list<HostileReference *>::iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+    {
+        Unit* tmp = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+        if (tmp && tmp->GetTypeId() == TYPEID_UNIT && tmp->IsFriendlyTo(me))
+            me->getThreatManager().getThreatList().remove((*itr));
+    }
+
+    if (me->getThreatManager().isThreatListEmpty())
+        EnterEvadeMode();
+}
+
+// Despawned ein Add
+bool ScriptedAI::DespawnAdd(uint64 guid)
+{
+    if (!guid)
+        return false;
+
+    Creature* pC = me->GetMap()->GetCreature(guid);
+
+    if (!pC)
+        return false;
+
+    if (pC->isAlive())
+    {
+        pC->SetVisible(false);
+        pC->setDeathState(JUST_DIED);
+        pC->SetHealth(0);
+    }
+
+    if (pC->getDeathState() == CORPSE)
+        pC->RemoveCorpse();
+
+    return true;
+}
+
+// Gibt einen random Player in range in einer Instanz zurück
+Player* ScriptedAI::SelectRandomPlayer(float range)
+{
+    Map* map = me->GetMap();
+    if (map && map->IsDungeon())
+    {
+        Map::PlayerList const &PlayerList = map->GetPlayers();
+
+        if (PlayerList.isEmpty())
+            return NULL;
+
+        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+        {
+            if ((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range)) && i->getSource()->isTargetableForAttack())
+                return i->getSource();
+        }
+        return NULL;
+    }
+    else
+        return NULL;
 }
 
 void ScriptedAI::AttackStartNoMove(Unit* pWho)

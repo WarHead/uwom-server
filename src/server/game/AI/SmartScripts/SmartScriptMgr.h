@@ -450,7 +450,6 @@ enum SMART_ACTION
     SMART_ACTION_CALL_RANDOM_TIMED_ACTIONLIST       = 87,     // script9 ids 1-9
     SMART_ACTION_CALL_RANDOM_RANGE_TIMED_ACTIONLIST = 88,     // script9 id min, max
     SMART_ACTION_RANDOM_MOVE                        = 89,     // maxDist
-
     SMART_ACTION_SET_UNIT_FIELD_BYTES_1             = 90,     // bytes, target
     SMART_ACTION_REMOVE_UNIT_FIELD_BYTES_1          = 91,     // bytes, target
 
@@ -463,7 +462,11 @@ enum SMART_ACTION
     SMART_ACTION_REMOVE_DYNAMIC_FLAG                = 96,     // Flags
     SMART_ACTION_JUMP_TO_POS                        = 97,     // speedXY, speedZ, targetX, targetY, targetZ
 
-    SMART_ACTION_END                                = 98,
+    SMART_ACTION_CASTER_MOVEMENT                    = 98,     // Param1 = Castermovement deaktivieren/aktivieren - 0/1 - default = 0
+                                                              // Param2 = Minimum Distanz setzen - default = 0
+                                                              // Param3 = Maximum Distanz setzen - default = 29
+                                                              // Am besten mit EVENT_T_AGGRO zu nutzen. ;)
+    SMART_ACTION_END                                = 99
 };
 
 struct SmartAction

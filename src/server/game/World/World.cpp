@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -75,6 +76,8 @@
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "Channel.h"
+#include "Jail.h"
+#include "AuctionHouseBot.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -110,6 +113,12 @@ World::World()
 
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
+
+/*
+    // Tausendwinter
+    m_TWTimer = uint32((getWorldState(WS_TW_ZEIT) + time(NULL)));
+    m_TWStatus = 0;
+*/
 
     m_isClosed = false;
 
@@ -1044,7 +1053,7 @@ void World::LoadConfigSettings(bool reload)
             sLog->outError("ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
 
-    m_int_configs[CONFIG_INSTANT_LOGOUT] = sConfig->GetIntDefault("InstantLogout", SEC_MODERATOR);
+    m_int_configs[CONFIG_INSTANT_LOGOUT] = sConfig->GetIntDefault("InstantLogout", SEC_ANWAERTER);
 
     m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] = sConfig->GetIntDefault("Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS);
     if (m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] > GUILD_EVENTLOG_MAX_RECORDS)
@@ -1148,6 +1157,23 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_PVP_TOKEN_COUNT] = sConfig->GetIntDefault("PvPToken.ItemCount", 1);
     if (m_int_configs[CONFIG_PVP_TOKEN_COUNT] < 1)
         m_int_configs[CONFIG_PVP_TOKEN_COUNT] = 1;
+
+    // Tausendwinter
+    m_bool_configs[CONFIG_TW_AKTIVIERT]         = sConfig->GetBoolDefault("Tausendwinter.Aktiviert", true);
+    m_bool_configs[CONFIG_TW_AUTOMATISCH]       = sConfig->GetBoolDefault("Tausendwinter.Automatisch", true);
+    m_bool_configs[CONFIG_TW_TELEPORT_DALARAN]  = sConfig->GetBoolDefault("Tausendwinter.TeleportDalaran", false);
+    m_bool_configs[CONFIG_TW_WELTSTARTNACHRICHT]= sConfig->GetBoolDefault("Tausendwinter.WeltStartNachricht", false);
+    m_bool_configs[CONFIG_TW_WELTCOUNTDOWN]     = sConfig->GetBoolDefault("Tausendwinter.WeltStartCountdown", false);
+    m_bool_configs[CONFIG_TW_WELTSIEGNACHRICHT] = sConfig->GetBoolDefault("Tausendwinter.WeltSiegNachricht", false);
+    m_bool_configs[CONFIG_TW_VERSCHIEBE_NPCS]   = sConfig->GetBoolDefault("Tausendwinter.VerschiebeNPCs", false);
+
+    m_int_configs[CONFIG_TW_STARTZEIT]          = sConfig->GetIntDefault("Tausendwinter.Startzeit", 30) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_KAMPFDAUER]         = sConfig->GetIntDefault("Tausendwinter.Kampfdauer", 30) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_INTERVALL]          = sConfig->GetIntDefault("Tausendwinter.KampfIntervall", 130) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_SPEICHER_INTERVALL] = sConfig->GetIntDefault("Tausendwinter.SpeicherIntervall", 5) * IN_MILLISECONDS * MINUTE;
+
+    // Gildenportal
+    m_int_configs[CONFIG_GILDEN_ID] = sConfig->GetIntDefault("GuildPortal.GuildID", 0);
 
     m_bool_configs[CONFIG_NO_RESET_TALENT_COST] = sConfig->GetBoolDefault("NoResetTalentsCost", false);
     m_bool_configs[CONFIG_SHOW_KICK_IN_WORLD] = sConfig->GetBoolDefault("ShowKickInWorld", false);
@@ -1658,6 +1684,9 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
+
+    m_timers[WUPDATE_JAILS].SetInterval(MINUTE*IN_MILLISECONDS); // Jail - Jede Minute schauen, ob jemand entlassen werden muss.
+
     m_timers[WUPDATE_UPTIME].SetInterval(m_int_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
                                                             //Update "uptime" table based on configuration entry in minutes.
     m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
@@ -1734,6 +1763,23 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Calculate random battleground reset time..." );
     InitRandomBGResetTime();
+
+    // Jail von WarHead
+    sLog->outString();
+    sLog->outString("Jail: (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de"); // Durch das Ändern / Löschen dieser Ausgabe erlischt das Recht zur Nutzung!
+    sLog->outString("Jail: Lade die Konfiguration..." );
+    if (!sJail->LadeKonfiguration())
+    {
+        sLog->outError(sObjectMgr->GetTrinityStringForDBCLocale(LANG_JAIL_CONF_ERR1));
+        sLog->outError(sObjectMgr->GetTrinityStringForDBCLocale(LANG_JAIL_CONF_ERR2));
+    }
+    if (sJail->Init())
+        sJail->KnastAufraeumen();
+
+    sLog->outString();
+
+    sLog->outString("Initialisiere den AuktionshausBot...");
+    auctionbot.Initialize();
 
     // possibly enable db logging; avoid massive startup spam by doing it here.
     if (sLog->GetLogDBLater())
@@ -1901,6 +1947,8 @@ void World::Update(uint32 diff)
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
+        auctionbot.Update();
+
         m_timers[WUPDATE_AUCTIONS].Reset();
 
         ///- Update mails (return old mails with item, or delete them)
@@ -1913,6 +1961,13 @@ void World::Update(uint32 diff)
 
         ///- Handle expired auctions
         sAuctionMgr->Update();
+    }
+
+    // Jail auf abgelaufene Einträge überprüfen
+    if (m_timers[WUPDATE_JAILS].Passed())
+    {
+        sJail->Update();
+        m_timers[WUPDATE_JAILS].Reset();
     }
 
     /// <li> Handle session updates when the timer has passed
@@ -2151,7 +2206,7 @@ void World::SendGMText(int32 string_id, ...)
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
             continue;
 
-        if (itr->second->GetSecurity() < SEC_MODERATOR)
+        if (itr->second->GetSecurity() < SEC_ANWAERTER)
             continue;
 
         wt_do(itr->second->GetPlayer());
@@ -2860,3 +2915,31 @@ void World::ProcessQueryCallbacks()
         }
     }
 }
+
+/* Werde ich für meinen Tausendwinter Source umschreiben.
+void World::SendWintergraspState()
+{
+    OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
+    if (!pvpWG)
+        return;
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+            continue;
+
+            if (pvpWG->isWarTime())
+            {
+                // "Battle in progress"
+                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], uint32(time(NULL)));
+            } else
+                // Time to next battle
+            {
+                pvpWG->SendInitWorldStatesTo(itr->second->GetPlayer());
+                itr->second->GetPlayer()->SendUpdateWorldState(ClockWorldState[1], uint32(time(NULL) + pvpWG->GetTimer()));
+                // Hide unneeded info which in center of screen
+                itr->second->GetPlayer()->SendInitWorldStates(itr->second->GetPlayer()->GetZoneId(), itr->second->GetPlayer()->GetAreaId());
+            }
+    }
+}
+*/

@@ -269,6 +269,8 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, uint8 typ
 
     if (TempSummon* accessory = _me->SummonCreature(entry, *_me, TempSummonType(type), summonTime))
     {
+        accessory->setFaction(_me->getFaction());
+
         if (minion)
             accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
 

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -50,6 +51,63 @@ go_bashir_crystalforge
 EndContentData */
 
 #include "ScriptPCH.h"
+#include "GuildMgr.h"
+
+// Copyright 2008-2011 by maguus (United Worlds of MaNGOS) - Extended by WarHead
+// Gildenhausportal 400000
+class go_gilden_portal : public GameObjectScript
+{
+public:
+    go_gilden_portal() : GameObjectScript("go_gilden_portal") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject * /*pGO*/)
+    {
+        if (!pPlayer)
+            return false;
+
+        if (!sWorld->getIntConfig(CONFIG_GILDEN_ID))
+        {
+            pPlayer->GetSession()->SendNotification("Das Gildenhaus ist zur Zeit nicht vergeben.");
+            return true;
+        }
+
+        if (pPlayer->GetGuildId() > 0 && pPlayer->GetGuildId() == sWorld->getIntConfig(CONFIG_GILDEN_ID))
+        {
+            pPlayer->TeleportTo(1, 16200.116211f, 16206.101562f, 0.139813f, 3.148836f);
+            return true;
+        }
+        else
+        {
+            std::string str = sGuildMgr->GetGuildNameById(sWorld->getIntConfig(CONFIG_GILDEN_ID));
+            pPlayer->GetSession()->SendNotification("Zutritt nur für Mitglieder der Gilde: '%s'!", str.c_str());
+            // GM erlauben trotzdem geportet zu werden
+            if (pPlayer->isGameMaster())
+                pPlayer->TeleportTo(1, 16200.116211f, 16206.101562f, 0.139813f, 3.148836f);
+        }
+        return true;
+    }
+};
+
+// Copyright 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+// Ei der Geißelneruber 193051 - Quest 13182
+class go_ei_der_geisselneruber : public GameObjectScript
+{
+public:
+    go_ei_der_geisselneruber() : GameObjectScript("go_ei_der_geisselneruber") { }
+
+    bool OnGossipHello(Player *pPlayer, GameObject *pGO)
+    {
+        if (pPlayer && pPlayer->GetQuestStatus(13182) == QUEST_STATUS_INCOMPLETE)
+        {
+            pGO->SetLootState(GO_READY);
+            pGO->SetGoState(GO_STATE_ACTIVE);
+        }
+        else
+            return true;
+
+        return false;
+    }
+};
 
 /*######
 ## go_cat_figurine
@@ -728,7 +786,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* pGO)
     {
-        if (Creature* pGoblinPrisoner = pGO->FindNearestCreature(NPC_GOBLIN_PRISIONER, 5.0f, true))
+        if (Creature *pGoblinPrisoner = pGO->FindNearestCreature(NPC_GOBLIN_PRISIONER, 5.0f, true))
         {
             pGO->SetGoState(GO_STATE_ACTIVE);
             player->KilledMonsterCredit(NPC_GOBLIN_PRISIONER, pGoblinPrisoner->GetGUID());
@@ -755,7 +813,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* pGO)
     {
-        if (Creature* pNearestPrisoner = pGO->FindNearestCreature(NPC_SCOURGE_PRISONER, 5.0f, true))
+        if (Creature *pNearestPrisoner = pGO->FindNearestCreature(NPC_SCOURGE_PRISONER, 5.0f, true))
         {
             pGO->SetGoState(GO_STATE_ACTIVE);
             player->KilledMonsterCredit(NPC_SCOURGE_PRISONER, pNearestPrisoner->GetGUID());
@@ -932,7 +990,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* pGO)
     {
-        Unit* caster = pGO->GetOwner();
+        Unit *caster = pGO->GetOwner();
         if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
             return true;
 
@@ -1036,7 +1094,7 @@ public:
     {
         if (player->GetQuestStatus(QUEST_OH_NOES_THE_TADPOLES) == QUEST_STATUS_INCOMPLETE)
         {
-            Creature* pTadpole = pGO->FindNearestCreature(NPC_WINTERFIN_TADPOLE, 1.0f);
+            Creature *pTadpole = pGO->FindNearestCreature(NPC_WINTERFIN_TADPOLE, 1.0f);
             if (pTadpole)
             {
                 pGO->UseDoorOrButton();
@@ -1056,10 +1114,11 @@ public:
 
 enum eReallyDoneItThisTime
 {
-    QUEST_ALLIANCE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL      = 14096,
-    QUEST_HORDE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL         = 14142,
-    NPC_CAPTIVE_ASPIRANT                                    = 34716,
-    NPC_KUL                                                 = 34956
+    QUEST_ALLIANCE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL  = 14096,
+    QUEST_HORDE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL     = 14142,
+    NPC_CAPTIVE_ASPIRANT                                = 34716,
+    NPC_KUL                                             = 34956,
+    TEXT_ID                                             = -1560045
 };
 
 class go_black_cage : public GameObjectScript
@@ -1067,19 +1126,25 @@ class go_black_cage : public GameObjectScript
 public:
     go_black_cage() : GameObjectScript("go_black_cage") { }
 
-    bool OnGossipHello(Player* player, GameObject* pGO)
+    bool OnGossipHello(Player * pPlayer, GameObject * pGO)
     {
-        if ((player->GetTeamId() == TEAM_ALLIANCE && player->GetQuestStatus(QUEST_ALLIANCE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL) == QUEST_STATUS_INCOMPLETE) ||
-            (player->GetTeamId() == TEAM_HORDE && player->GetQuestStatus(QUEST_HORDE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL) == QUEST_STATUS_INCOMPLETE))
+        if ((pPlayer->GetTeamId() == TEAM_ALLIANCE && pPlayer->GetQuestStatus(QUEST_ALLIANCE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL) == QUEST_STATUS_INCOMPLETE) ||
+            (pPlayer->GetTeamId() == TEAM_HORDE && pPlayer->GetQuestStatus(QUEST_HORDE_YOU_VE_REALLY_DONE_IT_THIS_TIME_KUL) == QUEST_STATUS_INCOMPLETE))
         {
-            Creature* pPrisoner = pGO->FindNearestCreature(NPC_CAPTIVE_ASPIRANT, 1.0f);
+            Creature * pPrisoner = pGO->FindNearestCreature(NPC_CAPTIVE_ASPIRANT, 5.0f);
+
             if (!pPrisoner)
-                pPrisoner = pGO->FindNearestCreature(NPC_KUL, 1.0f);
+                pPrisoner = pGO->FindNearestCreature(NPC_KUL, 5.0f);
+
             if (pPrisoner)
             {
                 pGO->UseDoorOrButton();
-                pPrisoner->DisappearAndDie();
-                player->KilledMonsterCredit(pPrisoner->GetEntry(), 0);
+                pGO->SetResetTime(65*IN_MILLISECONDS);
+
+                pPrisoner->HandleEmoteCommand(EMOTE_ONESHOT_YES);
+                pPrisoner->Whisper(TEXT_ID, pPlayer->GetGUID());
+                pPrisoner->SetTimeUntilDisappear(5*IN_MILLISECONDS);
+                pPrisoner->GetMotionMaster()->MoveFleeing(pPlayer, 5*IN_MILLISECONDS);
             }
         }
         return true;
@@ -1188,6 +1253,11 @@ public:
 
 void AddSC_go_scripts()
 {
+    // Eigene
+    new go_gilden_portal;
+    new go_ei_der_geisselneruber;
+
+    // Trinity
     new go_cat_figurine;
     new go_northern_crystal_pylon;
     new go_eastern_crystal_pylon;

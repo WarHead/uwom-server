@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -145,22 +146,46 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
 enum TimeConstants
 {
-    MINUTE = 60,
-    HOUR   = MINUTE*60,
-    DAY    = HOUR*24,
-    WEEK   = DAY*7,
-    MONTH  = DAY*30,
-    YEAR   = MONTH*12,
+    MINUTE          = 60,
+    HOUR            = MINUTE*60,
+    DAY             = HOUR*24,
+    WEEK            = DAY*7,
+    MONTH           = DAY*30,
+    YEAR            = MONTH*12,
     IN_MILLISECONDS = 1000
+};
+
+enum StandardZeiten
+{
+    MINUTEN_05  = 300 * IN_MILLISECONDS,
+    MINUTEN_10  = 600 * IN_MILLISECONDS,
+    MINUTEN_15  = 900 * IN_MILLISECONDS,
+    MINUTEN_20  = 1200 * IN_MILLISECONDS,
+    MINUTEN_30  = 1800 * IN_MILLISECONDS,
+    MINUTEN_40  = 2400 * IN_MILLISECONDS,
+    MINUTEN_50  = 3000 * IN_MILLISECONDS,
+    MINUTEN_60  = 6000 * IN_MILLISECONDS,
+    STUNDE      = MINUTEN_60,
+    SEKUNDEN_10 = 10 * IN_MILLISECONDS,
+    SEKUNDEN_20 = 20 * IN_MILLISECONDS,
+    SEKUNDEN_30 = 30 * IN_MILLISECONDS,
+    SEKUNDEN_40 = 40 * IN_MILLISECONDS,
+    SEKUNDEN_50 = 50 * IN_MILLISECONDS,
+    SEKUNDEN_60 = 60 * IN_MILLISECONDS
 };
 
 enum AccountTypes
 {
-    SEC_PLAYER         = 0,
-    SEC_MODERATOR      = 1,
-    SEC_GAMEMASTER     = 2,
-    SEC_ADMINISTRATOR  = 3,
-    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
+    SEC_PLAYER          = 0,
+    SEC_SPONSOR         = 8,
+    SEC_VETERAN         = 9,
+    SEC_ANWAERTER       = 10,
+    SEC_GAMEMASTER      = 20,
+    SEC_HGM             = 30,
+    SEC_OGM             = 35,
+    SEC_GGM             = 40,
+    SEC_ADMINISTRATOR   = 50,
+    SEC_CONSOLE         = 60 // must be always last in list, accounts must have less security level always also
 };
 
 enum LocaleConstant

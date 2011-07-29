@@ -203,6 +203,9 @@ class boss_sindragosa : public CreatureScript
 
             void JustDied(Unit* killer)
             {
+                if (InstanceScript* pInstance = me->GetInstanceScript())
+                    pInstance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
+
                 BossAI::JustDied(killer);
                 Talk(SAY_DEATH);
             }
@@ -1343,8 +1346,11 @@ class spell_frostwarden_handler_order_whelp : public SpellScriptLoader
                     unitList.remove_if(OrderWhelpTargetSelector(creature));
 
                 std::list<Creature*>::iterator itr = unitList.begin();
-                std::advance(itr, urand(0, unitList.size()-1));
-                (*itr)->CastSpell(GetHitUnit(), uint32(GetEffectValue()), true);
+                if ((*itr) && itr != unitList.end() && unitList.size() > 1)
+                {
+                    std::advance(itr, urand(0, unitList.size()-1));
+                    (*itr)->CastSpell(GetHitUnit(), uint32(GetEffectValue()), true);
+                }
             }
 
             void Register()
