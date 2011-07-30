@@ -58,6 +58,7 @@ private:
     JailKonfStruktur    m_JailKonf; // Konfiguration des Jails
     JailMap             m_JailMap;  // UNORDERED_MAP aller Jaileinträge
 
+    void Amnestie(); // Prüfen ob jemand Amnestie bekommen muss.
     bool SendeInaktiv(ChatHandler * handler);
     bool Inhaftierung(ChatHandler * handler, Player * chr, std::string cname, uint32 jailtime, std::string jailreason, uint32 acc_id, std::string announce);
     bool Inhaftierung(ChatHandler * handler, uint32 guid, std::string cname, uint32 jailtime, std::string jailreason, uint32 acc_id, std::string announce);
@@ -71,8 +72,6 @@ public:
     bool Init(bool reload = false);
     // Knast auf nicht mehr existierende Charaktere prüfen.
     void KnastAufraeumen();
-    // Prüfen ob jemand Amnestie bekommen muss.
-    void Amnestie();
     // Jede Minute schauen, ob jemand entlassen werden muss.
     void Update();
 
@@ -87,11 +86,11 @@ public:
     bool EnableKommando(ChatHandler * handler);
     bool DisableKommando(ChatHandler * handler);
 
-    Position HoleAllyKnastPos();
-    Position HoleHordeKnastPos();
+    Position HoleAllyKnastPos() const { return m_JailKonf.AllyPos; }
+    Position HoleHordeKnastPos() const { return m_JailKonf.HordePos; }
 
-    const uint32 HoleAllyKnastKarte() { return m_JailKonf.MapAlly; };
-    const uint32 HoleHordeKnastKarte() { return m_JailKonf.MapHorde; };
+    uint32 HoleAllyKnastKarte() const { return m_JailKonf.MapAlly; }
+    uint32 HoleHordeKnastKarte() const { return m_JailKonf.MapHorde; }
 
     void Kontrolle(Player * pPlayer, bool update = false);
     void SendeWarnung(Player * pPlayer);
