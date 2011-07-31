@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -19,6 +20,7 @@
 #ifndef TRINITYCORE_GROUP_H
 #define TRINITYCORE_GROUP_H
 
+#include "BattlefieldMgr.h"
 #include "Battleground.h"
 #include "DBCEnums.h"
 #include "GroupRefManager.h"
@@ -26,7 +28,6 @@
 #include "QueryResult.h"
 #include "SharedDefines.h"
 #include "Player.h"
-#include "../../Battlefield/BattlefieldMgr.h"  //FIXME
 
 class Creature;
 class GroupReference;

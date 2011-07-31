@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -34,7 +35,7 @@ enum BattlefieldTypes
 
 enum BattlefieldIDs
 {
-    BATTLEFIELD_BATTLEID_WG                      = 1,       // Wintergrasp battle 
+    BATTLEFIELD_BATTLEID_WG                      = 1,       // Wintergrasp battle
 };
 
 enum BattlefieldObjectiveStates
@@ -296,6 +297,8 @@ class Battlefield:public ZoneScript
 
     void PlayerAcceptInviteToQueue(Player * plr);
     void PlayerAcceptInviteToWar(Player * plr);
+    void PlayerAskToLeave(Player * plr); // Dummy - Muss erstellt werden! FIXME
+
     uint32 GetBattleId() { return m_BattleId; }
     void AskToLeaveQueue(Player * plr);
 
@@ -344,7 +347,7 @@ protected:
     PlayerTimerMap m_InvitedPlayers[BG_TEAMS_COUNT];
     PlayerTimerMap m_PlayersWillBeKick[BG_TEAMS_COUNT];
 
-    //Variables that must exist for each battlefield 
+    //Variables that must exist for each battlefield
     uint32 m_TypeId;                                        // See enum BattlefieldTypes
     uint32 m_BattleId;                                      // BattleID (for packet)
     uint32 m_ZoneId;                                        // ZoneID of Wintergrasp = 4197

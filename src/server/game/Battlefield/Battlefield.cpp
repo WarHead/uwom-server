@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -405,6 +406,10 @@ void Battlefield::PlayerAcceptInviteToWar(Player *plr)
 
         OnPlayerJoinWar(plr);                               //for scripting
     }
+}
+
+void Battlefield::PlayerAskToLeave(Player * /*plr*/) // Dummy - Muss erstellt werden! FIXME
+{
 }
 
 void Battlefield::TeamCastSpell(TeamId team, int32 spellId)
