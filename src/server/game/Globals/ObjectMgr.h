@@ -634,6 +634,7 @@ class ObjectMgr
         EquipmentInfo const *GetEquipmentInfo(uint32 entry);
         CreatureAddon const *GetCreatureAddon(uint32 lowguid);
         CreatureAddon const *GetCreatureTemplateAddon(uint32 entry);
+        CreatureCaster const * GetCreatureTemplateCaster(uint32 entry);
         ItemTemplate const* GetItemTemplate(uint32 entry);
         ItemTemplateContainer const* GetItemTemplateStore() { return &ItemTemplateStore; }
 
@@ -866,6 +867,7 @@ class ObjectMgr
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatureTemplateAddons();
+        void LoadCreatureTemplateCaster(); // Definitionen aller NPC die vorrangig als Caster fungieren.
         void CheckCreatureTemplate(CreatureTemplate const* cInfo);
         void LoadCreatures();
         void LoadLinkedRespawn();
@@ -1324,6 +1326,7 @@ class ObjectMgr
         CreatureModelContainer CreatureModelStore;
         CreatureAddonContainer CreatureAddonStore;
         CreatureAddonContainer CreatureTemplateAddonStore;
+        CreatureCasterContainer CreatureTemplateCasterStore;
         EquipmentInfoContainer EquipmentInfoStore;
         LinkedRespawnMap mLinkedRespawnMap;
         CreatureLocaleMap mCreatureLocaleMap;
