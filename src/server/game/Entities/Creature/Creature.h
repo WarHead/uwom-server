@@ -280,10 +280,9 @@ typedef UNORDERED_MAP<uint32, CreatureAddon> CreatureAddonContainer;
 // `creature_template_caster` table
 struct CreatureCaster
 {
-    uint32 entry;
     float minRange;
     float maxRange;
-    //bool melee;
+    bool melee;
 };
 
 typedef UNORDERED_MAP<uint32, CreatureCaster> CreatureCasterContainer;
@@ -695,6 +694,9 @@ class Creature : public Unit, public GridObject<Creature>
 
         float GetMinCastRange() const { if (m_isCaster) return m_CasterDefaultMinCombatRange; else return 0.0f;  }
         float GetMaxCastRange() const { if (m_isCaster) return m_CasterDefaultMaxCombatRange; else return 0.0f;  }
+        bool isCasterWithMelee() const { return m_CasterDefaultMelee; }
+        bool isCaster() const { return m_isCaster; }
+
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData *data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
@@ -751,6 +753,10 @@ class Creature : public Unit, public GridObject<Creature>
         float m_CasterDefaultMinCombatRange;
         // Default maximum Castrange für Caster. Default = 29.
         float m_CasterDefaultMaxCombatRange;
+        // Soll er Meleeattacken machen? Default = true.
+        bool m_CasterDefaultMelee;
+        // Korrektes Castermovement erzeugen, für NPC aus `creature_template_caster`
+        void HandleCaster();
 
         //WaypointMovementGenerator vars
         uint32 m_waypointID;
