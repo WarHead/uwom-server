@@ -807,6 +807,8 @@ void Tausendwinter::AktualisiereNPC(Creature * pCr)
             pCr->SetVisible(m_Kampf ? false : true);
             pCr->SetReactState(m_Kampf ? REACT_PASSIVE : REACT_AGGRESSIVE);
             break;
+        default:
+            break;
     }
 }
 
@@ -988,6 +990,8 @@ void Tausendwinter::HandleKill(Player * killer, Unit * killed)
                     break;
                 case TW_NPC_TYP_TURMKANONE:
                     ok = true;
+                    break;
+                default:
                     break;
             }
         }
@@ -1655,6 +1659,8 @@ void Tausendwinter::MeldeFehlendeNPCs()
                 break;
             case TW_NPC_TYP_ENTDECKUNGSEINHEIT:
                 ++TriggerCnt;
+                break;
+            default:
                 break;
         }
     }
@@ -2798,6 +2804,8 @@ void Tausendwinter::OnCreatureCreate(Creature * pCr)
                         break;
                     }
             break;
+        default:
+            break;
     }
 }
 
@@ -2855,6 +2863,8 @@ void Tausendwinter::OnCreatureRemove(Creature * pCr)
                         Werkstatt->m_Kontrolle = NULL;
                         break;
                     }
+            break;
+        default:
             break;
     }
 }
