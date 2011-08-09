@@ -12,3 +12,4 @@ src/server/scripts/OutdoorPvP/OutdoorPvPTW.cpp
 src/server/scripts/OutdoorPvP/OutdoorPvPTW.h
 src/server/scripts/Northrend/tausendwinter.cpp
 src/uwom-server/src/server/scripts/Commands/cs_tw.cpp
+diff/tausendwinter.patch
