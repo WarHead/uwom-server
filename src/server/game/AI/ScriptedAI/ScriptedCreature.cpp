@@ -608,12 +608,12 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
     return true;
 }
 
-void Scripted_NoMovementAI::AttackStart(Unit* target)
+void Scripted_NoMovementAI::AttackStart(Unit * target, float /*dist*/)
 {
     if (!target)
         return;
 
-    if (me->Attack(target, true))
+    if (me->Attack(target, false))
         DoStartNoMovement(target);
 }
 
