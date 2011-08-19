@@ -137,9 +137,9 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered, bool aliv
         std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
         for (std::list<HostileReference*>::iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
-            if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
+            if (Unit *pTemp = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 if (pTemp->GetTypeId() == TYPEID_PLAYER && pTemp->isAlive() == alive)
-                    me->CastSpell(unit, spellid, triggered);
+                    me->CastSpell(pTemp, spellid, triggered);
         }
     }else
         return;
