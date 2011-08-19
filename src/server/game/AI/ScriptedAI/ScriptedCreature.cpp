@@ -244,6 +244,7 @@ Player* ScriptedAI::SelectRandomPlayer(float range)
         return NULL;
 }
 
+void ScriptedAI::AttackStartNoMove(Unit * who)
 {
     if (!who)
         return;
