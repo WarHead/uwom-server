@@ -30,6 +30,7 @@ Script Data End */
 #include "ScriptPCH.h"
 #include "eye_of_eternity.h"
 #include "ScriptedEscortAI.h"
+#include "Vehicle.h"
 
 // not implemented
 enum Achievements
@@ -89,6 +90,8 @@ enum Spells
     SPELL_SURGE_POWER = 56505, // used in phase 2
     SPELL_SUMMON_ARCANE_BOMB = 56429,
     SPELL_ARCANE_OVERLOAD = 56432,
+    SPELL_ARCANE_OVERLOAD_SIZE = 56435,
+    SPELL_ARCANE_BARRAGE_TRIG = 56397,
     SPELL_SUMMOM_RED_DRAGON = 56070,
     SPELL_SURGE_POWER_PHASE_3 = 57407,
     SPELL_STATIC_FIELD = 57430
@@ -527,6 +530,9 @@ public:
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
 
+            // must be declared outside of loop
+            UnitList fieldTargets;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -573,11 +579,13 @@ public:
                         events.ScheduleEvent(EVENT_SUMMON_ARCANE, urand(12, 15)*IN_MILLISECONDS, 0, PHASE_TWO);
                         break;
                     case EVENT_SURGE_POWER_PHASE_3:
-                        DoCast(GetTargetPhaseThree(), SPELL_SURGE_POWER_PHASE_3);
+                        DoCast(SPELL_SURGE_POWER_PHASE_3);  // target selection and Boss-Warning in SpellScript
                         events.ScheduleEvent(EVENT_SURGE_POWER_PHASE_3, urand(7, 16)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     case EVENT_STATIC_FIELD:
-                        DoCast(GetTargetPhaseThree(), SPELL_STATIC_FIELD);
+                        fieldTargets = SelectRandomTargets(RAID_MODE(1, 3), true);
+                        for (UnitList::iterator itr = fieldTargets.begin(); itr != fieldTargets.end(); ++itr)
+                            DoCast((*itr), SPELL_STATIC_FIELD, true);
                         events.ScheduleEvent(EVENT_STATIC_FIELD, urand(20, 30)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     default:
@@ -588,23 +596,53 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        Unit* GetTargetPhaseThree()
+        UnitList SelectRandomTargets(uint8 maxCount, bool targetVehicle = false)
         {
-            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+            UnitList temp;
+            UnitList result;
 
-            // we are a drake
-            if (target->GetVehicleKit())
-                return target;
+            std::list<HostileReference*> &UnitList = me->getThreatManager().getThreatList();
+            if (UnitList.empty())
+                return result;
 
-            // we are a player using a drake (or at least you should)
-            if (target->GetTypeId() == TYPEID_PLAYER)
+            for (std::list<HostileReference*>::iterator itr = UnitList.begin(); itr != UnitList.end(); ++itr)
             {
-                if (Unit* base = target->GetVehicleBase())
-                    return base;
+                if (Unit* target = (*itr)->getTarget())
+                {
+                    if (target->GetTypeId() == TYPEID_UNIT && !target->GetVehicleKit())
+                        continue;
+
+                    if (targetVehicle)
+                    {
+                        if (Unit* base = target->GetVehicleBase())
+                            temp.push_back(base);
+                        else if (target->IsVehicle())
+                            temp.push_back(target);
+                    }
+                    else
+                    {
+                        if (!target->IsVehicle())
+                            temp.push_back(target);
+                        else if (Vehicle* kit = target->GetVehicleKit())
+                            if (Unit* rider = kit->GetPassenger(SEAT_0))
+                                temp.push_back(rider);
+
+                    }
+                }
             }
 
-            // is a player falling from a vehicle?
-            return NULL;
+            UnitList::iterator j;
+            for (uint8 i = 0; i < maxCount; i++)
+            {
+                if (temp.empty())
+                    break;
+
+                j = temp.begin();
+                advance(j, rand()%temp.size());
+                result.push_back(*j);
+                temp.erase(j);
+            }
+            return result;
         }
 
         void JustDied(Unit* /*killer*/)
@@ -719,6 +757,195 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
         {
             return new spell_malygos_vortex_visual_AuraScript();
         }
+};
+
+class spell_malygos_surge_of_power_p3 : public SpellScriptLoader
+{
+public:
+    spell_malygos_surge_of_power_p3() : SpellScriptLoader("spell_malygos_surge_of_power_p3") {}
+
+    class spell_malygos_surge_of_power_p3_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_malygos_surge_of_power_p3_SpellScript)
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || !caster->IsAIEnabled || caster->ToCreature()->GetEntry() != NPC_MALYGOS)
+                return;
+
+            uint8 numTargets = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? 3 : 1;
+            unitList = CAST_AI(boss_malygos::boss_malygosAI, (caster->ToCreature()->AI()))->SelectRandomTargets(numTargets, true);
+            /* uncomment after reordering the text
+            for (UnitList::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                caster->ToCreature()->AI()->Talk(EMOTE_SURGE_OF_POWER, (*itr)->GetVehicleKit()->GetPassenger(SEAT_0)->GetGUID());
+            */
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_surge_of_power_p3_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_malygos_surge_of_power_p3_SpellScript();
+    }
+};
+
+class spell_malygos_arcane_storm : public SpellScriptLoader
+{
+public:
+    spell_malygos_arcane_storm() : SpellScriptLoader("spell_malygos_arcane_storm") {}
+
+    class spell_malygos_arcane_storm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_malygos_arcane_storm_SpellScript)
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || !caster->IsAIEnabled || caster->ToCreature()->GetEntry() != NPC_MALYGOS)
+                return;
+
+            uint8 numTargets = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? urand(7, 9) : urand(1, 3);
+            unitList = CAST_AI(boss_malygos::boss_malygosAI, (caster->ToCreature()->AI()))->SelectRandomTargets(numTargets);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_malygos_arcane_storm_SpellScript();
+    }
+};
+
+class spell_malygos_arcane_barrage : public SpellScriptLoader
+{
+public:
+    spell_malygos_arcane_barrage() : SpellScriptLoader("spell_malygos_arcane_barrage") {}
+
+    class spell_malygos_arcane_barrage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_malygos_arcane_barrage_SpellScript)
+
+        bool heroic;
+
+        bool Load()
+        {
+            heroic = false;
+            if (Unit* caster = GetCaster())
+                heroic = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL;
+
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            if (GetSpellInfo()->Id != SPELL_ARCANE_BARRAGE_TRIG)
+                return;
+
+            if (Unit* caster = GetCaster())
+                if (InstanceScript* iScript = caster->GetInstanceScript())
+                    if (Creature* malygos = Unit::GetCreature(*caster, iScript->GetData64(DATA_MALYGOS)))
+                        unitList = CAST_AI(boss_malygos::boss_malygosAI, (malygos->AI()))->SelectRandomTargets(heroic ? 3 : 1);
+        }
+
+        void DoHeroicDamage()
+        {
+            if (heroic && GetSpellInfo()->Id != SPELL_ARCANE_BARRAGE_TRIG)
+                SetHitDamage(int32(GetHitDamage() * 1.2f));
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_malygos_arcane_barrage_SpellScript::DoHeroicDamage);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_barrage_SpellScript::FilterTargets, EFFECT_0, TARGET_SRC_CASTER);
+        }
+     };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_malygos_arcane_barrage_SpellScript();
+    }
+};
+
+class spell_malygos_arcane_overload : public SpellScriptLoader
+{
+public:
+    spell_malygos_arcane_overload() : SpellScriptLoader("spell_malygos_arcane_overload") {}
+
+    class spell_malygos_arcane_overload_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_malygos_arcane_overload_SpellScript)
+
+        void FilterTargets(std::list<Unit*>& targetList)
+        {
+            uint8 stack = 50;
+            Unit* caster = GetCaster();
+
+            if (!caster)
+                return;
+
+            if (Aura* aur = caster->GetAura(SPELL_ARCANE_OVERLOAD_SIZE))
+                stack -= aur->GetStackAmount();
+
+            for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end();)
+            {
+                if (caster->GetExactDist((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ()) > ((stack / 50.0f) * 18.0f))
+                    itr = targetList.erase(itr);
+                else
+                    itr++;
+            }
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_overload_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_malygos_arcane_overload_SpellScript();
+    }
+};
+
+class spell_malygos_surge_of_power : public SpellScriptLoader
+{
+public:
+    spell_malygos_surge_of_power() : SpellScriptLoader("spell_malygos_surge_of_power") {}
+
+    class spell_malygos_surge_of_power_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_malygos_surge_of_power_SpellScript)
+
+        void FilterTargets(std::list<Unit*>& targetList)
+        {
+            for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end();)
+            {
+                if ((*itr)->ToCreature() || (*itr)->ToPlayer()->GetVehicle())
+                    itr = targetList.erase(itr);
+                else
+                    itr++;
+            }
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_surge_of_power_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_malygos_surge_of_power_SpellScript();
+    }
 };
 
 class npc_portal_eoe: public CreatureScript
@@ -1146,8 +1373,13 @@ void AddSC_boss_malygos()
     new npc_hover_disk();
     new npc_arcane_overload();
     new npc_wyrmrest_skytalon();
+    new npc_alexstrasza_eoe();
     new spell_malygos_vortex_dummy();
     new spell_malygos_vortex_visual();
-    new npc_alexstrasza_eoe();
+    new spell_malygos_arcane_barrage();
+    new spell_malygos_arcane_storm();
+    new spell_malygos_surge_of_power_p3();
+    new spell_malygos_arcane_overload();
+    new spell_malygos_surge_of_power();
     new achievement_denyin_the_scion();
 }
