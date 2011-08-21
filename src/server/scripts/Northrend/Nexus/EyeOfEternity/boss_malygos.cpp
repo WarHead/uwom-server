@@ -407,8 +407,9 @@ public:
             if (who->GetEntry() == NPC_POWER_SPARK)
             {
                 // not sure about the distance | I think it is better check this here than in the UpdateAI function...
-                if (who->GetDistance(me) <= 2.5f)
-                    who->CastSpell(me, SPELL_POWER_SPARK_MALYGOS, true);
+                if (who->GetDistance(me) <= 0.5f)
+                    if (!who->ToCreature()->AI()->GetData(0))
+                        who->CastSpell(me, SPELL_POWER_SPARK_MALYGOS, true);
             }
         }
 
@@ -1058,7 +1059,6 @@ public:
     };
 };
 
-
 class npc_power_spark: public CreatureScript
 {
 public:
@@ -1073,25 +1073,26 @@ public:
     {
         npc_power_sparkAI(Creature* creature) : ScriptedAI(creature)
         {
-            _instance = creature->GetInstanceScript();
+            me->SetReactState(REACT_PASSIVE);
 
-            MoveToMalygos();
+            if (_instance = creature->GetInstanceScript())
+            {
+                me->GetMotionMaster()->MoveIdle();
+                if (Creature* malygos = Unit::GetCreature(*me, instance->GetData64(DATA_MALYGOS)))
+                     me->GetMotionMaster()->MoveFollow(malygos, -malygos->GetObjectSize(), 0.0f);
+            }
+
+            _isDead = false;
+        }
+
+        uint32 GetData(uint32 /*data*/)
+        {
+            return _isDead ? 1 : 0;
         }
 
         void EnterEvadeMode()
         {
             me->DespawnOrUnsummon();
-        }
-
-        void MoveToMalygos()
-        {
-            me->GetMotionMaster()->MoveIdle();
-
-            if (_instance)
-            {
-                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
-                    me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
-            }
         }
 
         void UpdateAI(uint32 const /*diff*/)
@@ -1113,23 +1114,29 @@ public:
                     return;
                 }
 
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
-                    me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
+                if (!_isDead && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                    me->GetMotionMaster()->MoveFollow(malygos, -malygos->GetObjectSize(), 0.0f);
             }
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32& damage)
         {
-            if (damage > me->GetMaxHealth())
+            if (damage > me->GetHealth())
             {
                 damage = 0;
+                isDead = true;
+                me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall(GROUND_Z);
+                me->GetMotionMaster()->MoveIdle();
                 DoCast(me, SPELL_POWER_SPARK_DEATH, true);
-                me->DespawnOrUnsummon(1000);
+                me->DespawnOrUnsummon(60000);               // ToDo: how long should they really stay?
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
         }
 
     private:
         InstanceScript* _instance;
+        bool _isDead;
     };
 };
 
