@@ -1230,14 +1230,36 @@ public:
 
         void Reset()
         {
-            DoCast(me, SPELL_ARCANE_OVERLOAD, false);
+            _delay = 1000;                                  // cast animation is not played if the model still 'animates in'
+            me->DespawnOrUnsummon(50*IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 const /*diff*/)
+        void UpdateAI(uint32 const diff)
         {
+            if (_delay <= diff && _delay > 0)
+            {
+                _delay = 0;
+                if (InstanceScript* instance = me->GetInstanceScript())
+                    if (Creature* malygos = Unit::GetCreature(*me, instance->GetData64(DATA_MALYGOS)))
+                        malygos->CastSpell(me, SPELL_ARCANE_BOMB_MISSILE, true);
+            }
+            else
+                _delay -=diff;
+
             // we dont do melee damage!
         }
 
+        void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+        {
+            if (spell->Id == SPELL_ARCANE_BOMB_MISSILE)
+            {
+                me->CastSpell(me, SPELL_ARCANE_BOMB_EFFECT, true);
+                me->CastSpell(me, SPELL_ARCANE_OVERLOAD, true);
+            }
+        }
+
+    private:
+        uint16 _delay;
     };
 };
 
