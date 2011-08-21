@@ -89,7 +89,7 @@ enum Spells
     //SPELL_VORTEX_5           = 56263,                     // damage | used to enter to the vehicle - defined in eye_of_eternity.h
     SPELL_VORTEX_6             = 73040,                     // teleport - (casted to all raid) | caster 30090 | target player
 
-    SPELL_SUMMON_POWER_PARK    = 56142,
+    SPELL_SUMMON_POWER_SPARK   = 56142,
     SPELL_POWER_SPARK_DEATH    = 55852,
     SPELL_POWER_SPARK_MALYGOS  = 56152,
 
@@ -1017,32 +1017,39 @@ public:
         void Reset()
         {
             _summonTimer = urand(5, 7)*IN_MILLISECONDS;
+            _active = true;
         }
 
         void UpdateAI(uint32 const diff)
         {
-            if (!me->HasAura(SPELL_PORTAL_VISUAL_CLOSED) &&
-                !me->HasAura(SPELL_PORTAL_OPENED))
-                DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
+            if (!_instance)
+                return;
 
-            if (_instance)
+            Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS));
+            if (!malygos)
+                return;
+
+            if (malygos->AI()->GetData(DATA_PHASE) > PHASE_ONE)
             {
-                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
-                {
-                    if (malygos->AI()->GetData(DATA_PHASE) != PHASE_ONE)
-                    {
-                        me->RemoveAura(SPELL_PORTAL_OPENED);
-                        DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
-                    }
-                }
+                _active = false;
+                me->RemoveAllAuras();
             }
+
+            if (!_active)
+                return;
+
+            if (!me->HasAura(SPELL_PORTAL_VISUAL_CLOSED) && !me->HasAura(SPELL_PORTAL_OPENED))
+                DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
 
             if (!me->HasAura(SPELL_PORTAL_OPENED))
                 return;
 
             if (_summonTimer <= diff)
             {
-                DoCast(SPELL_SUMMON_POWER_PARK);
+                DoCast(SPELL_SUMMON_POWER_SPARK);
+                // uncomment after reordering the says malygos->AI()->Talk(EMOTE_POWER_SPARK);
+                DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
+                me->RemoveAura(SPELL_PORTAL_OPENED);
                 _summonTimer = urand(5, 7)*IN_MILLISECONDS;
             } else
                 _summonTimer -= diff;
@@ -1054,6 +1061,7 @@ public:
         }
 
     private:
+        bool _active;
         uint32 _summonTimer;
         InstanceScript* _instance;
     };
@@ -1078,7 +1086,7 @@ public:
             if (_instance = creature->GetInstanceScript())
             {
                 me->GetMotionMaster()->MoveIdle();
-                if (Creature* malygos = Unit::GetCreature(*me, instance->GetData64(DATA_MALYGOS)))
+                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
                      me->GetMotionMaster()->MoveFollow(malygos, -malygos->GetObjectSize(), 0.0f);
             }
 
@@ -1124,7 +1132,7 @@ public:
             if (damage > me->GetHealth())
             {
                 damage = 0;
-                isDead = true;
+                _isDead = true;
                 me->RemoveAllAuras();
                 me->GetMotionMaster()->MoveFall(GROUND_Z);
                 me->GetMotionMaster()->MoveIdle();
