@@ -113,6 +113,11 @@ public:
                 data = LIGHT_CLOUDS << 16;
 
             LightHandling(data, player);
+
+            if (GetBossState(DATA_MALYGOS_EVENT) == DONE)
+                if (GameObject* platform = instance->GetGameObject(platformGUID))
+                    if (platform->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))     // platform may be intact, due to server crash
+                        player->CastSpell(player, SPELL_SUMMOM_RED_DRAGON, true);
         }
 
         void OnGameObjectCreate(GameObject* go)

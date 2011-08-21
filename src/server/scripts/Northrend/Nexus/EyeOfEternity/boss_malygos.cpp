@@ -287,6 +287,7 @@ public:
             me->SetHomePosition(_homePosition);
 
             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            HandleRedDrakes(false);
 
             BossAI::EnterEvadeMode();
 
@@ -316,18 +317,7 @@ public:
             summons.DespawnAll();
             // players that used Hover Disk are no in the aggro list
             me->SetInCombatWithZone();
-            std::list<HostileReference*> &m_threatlist = me->getThreatManager().getThreatList();
-            for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
-            {
-                if (Unit* target = (*itr)->getTarget())
-                {
-                    if (target->GetTypeId() != TYPEID_PLAYER)
-                        continue;
-
-                    // The rest is handled in the AI of the vehicle.
-                    target->CastSpell(target, SPELL_SUMMOM_RED_DRAGON, true);
-                }
-            }
+            HandleRedDrakes(true);
 
             if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_PLATFORM)))
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED); // In sniffs it has this flag, but i don't know how is applied.
@@ -657,6 +647,27 @@ public:
             }
             return result;
         }
+
+        void HandleRedDrakes(bool apply)
+        {
+            Map::PlayerList const &PlayerList = instance->instance->GetPlayers();
+            if (!PlayerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (Player* player = i->getSource())
+                    {
+                        if (player->isAlive())
+                        {
+                            if (apply)
+                                player->CastSpell(player, SPELL_SUMMOM_RED_DRAGON, true);
+                            else
+                                player->ExitVehicle();
+                        }
+                    }
+                }
+            }
+         }
 
         void JustDied(Unit* /*killer*/)
         {
@@ -1284,6 +1295,13 @@ public:
             _entered = false;
         }
 
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (InstanceScript* script = me->GetInstanceScript())
+                if (script->GetBossState(0) == IN_PROGRESS) // DATA_MALYGOS_EVENT: 0
+                    me->SetPosition(summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ()-40.0f, summoner->GetOrientation());
+        }
+
         void PassengerBoarded(Unit* /*unit*/, int8 /*seat*/, bool apply)
         {
             if (!apply)
@@ -1302,7 +1320,6 @@ public:
                 {
                     summoner->CastSpell(me, SPELL_RIDE_RED_DRAGON, true);
                     float victimThreat = malygos->getThreatManager().getThreat(summoner);
-                    malygos->getThreatManager().resetAllAggro();
                     malygos->AI()->AttackStart(me);
                     malygos->AddThreat(me, victimThreat);
                 }
