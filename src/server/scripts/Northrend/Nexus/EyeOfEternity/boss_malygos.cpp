@@ -22,9 +22,8 @@ Script Data End */
 // TO-DOs:
 // Implement a better pathing for Malygos.
 // Find sniffed spawn position for chest
-// Implement a better way to disappear the gameobjects
-// Implement achievements
 // Remove hack that re-adds targets to the aggro list after they enter to a vehicle when it works as expected
+// Platform is susceptible to siege damage. sniff-conform sollution? e.g. not upping hitpoints or changing faction to 35
 // Improve whatever can be improved :)
 
 #include "ScriptPCH.h"
@@ -448,6 +447,8 @@ public:
                     me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[_currentPos]);
                     break;
                 case MOVE_INIT_PHASE_ONE:
+                    if (GameObject* iris = instance->instance->GetGameObject(instance->GetData64(DATA_IRIS)))
+                        iris->SetPhaseMask(0x1000, true);   // random value, just be invisible
                     me->SetInCombatWithZone();
                     break;
                 case MOVE_CENTER_PLATFORM:
@@ -673,6 +674,29 @@ public:
         {
             Talk(SAY_DEATH);
             _JustDied();
+
+            Map::PlayerList const &PlayerList = instance->instance->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            {
+                if (Player* player = i->getSource())
+                {
+                    if (player->GetQuestStatus(RAID_MODE(QUEST_JUDGEMENT_10, QUEST_JUDGEMENT_25)) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        GameObject* go = new GameObject;
+                        if (go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), RAID_MODE(GO_HEART_OF_MAGIC_10, GO_HEART_OF_MAGIC_25), instance->instance, PHASEMASK_NORMAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 120, GO_STATE_READY))
+                        {
+                            go->SetRespawnTime(1*WEEK);
+                            instance->instance->Add(go);
+                        }
+                        else
+                            delete go;
+                        break;
+                    }
+                }
+            }
         }
 
     private:
@@ -1354,6 +1378,16 @@ enum AlexstraszaYells
     SAY_FOUR
 };
 
+enum AlexstraszaEvents
+{
+    EVENT_MOVE_IN     = 1,
+    EVENT_CREATE_GIFT = 2,
+    EVENT_SAY_ONE     = 3,
+    EVENT_SAY_TWO     = 4,
+    EVENT_SAY_THREE   = 5,
+    EVENT_SAY_FOUR    = 6
+};
+
 class npc_alexstrasza_eoe : public CreatureScript
 {
 public:
@@ -1370,29 +1404,63 @@ public:
 
         void Reset()
         {
+            me->SetFlying(true);
+            me->SetSpeed(MOVE_FLIGHT, 2.0f);
             _events.Reset();
-            _events.ScheduleEvent(EVENT_YELL_1, 0);
+            _events.ScheduleEvent(EVENT_MOVE_IN, 0);
+            _gift = me->FindNearestCreature(NPC_ALEXSTRASZA_S_GIFT, 200.0f);
+
+            // stop gift from visually hopping around or falling to void
+            _gift->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            _gift->SetFlying(true);
+            _gift->GetMotionMaster()->MoveIdle(MOTION_SLOT_IDLE);
         }
 
-        void UpdateAI(uint32 const /*diff*/)
+        void UpdateAI(uint32 const diff)
         {
+            _events.Update(diff);
             while (uint32 eventId = _events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                    case EVENT_YELL_1:
+                    case EVENT_MOVE_IN:
+                        // arbitrary point - ToDo: get sniffed position
+                        me->GetMotionMaster()->MovePoint(0, 788.254761f, 1326.236938f, 227.795822f);
+                        _events.ScheduleEvent(EVENT_CREATE_GIFT, 8*IN_MILLISECONDS);
+                        break;
+                    case EVENT_CREATE_GIFT:
+                        me->SetFacing(0, _gift);
+                        DoCast(_gift, SPELL_GIFT_VISUAL, true);
+                        DoCast(_gift, SPELL_GIFT_CHANNEL);
+                        _events.ScheduleEvent(EVENT_SAY_ONE, 2*IN_MILLISECONDS);
+                        break;
+                    case EVENT_SAY_ONE:
+                        if (_gift)
+                        {
+                            if (InstanceScript* script = me->GetInstanceScript())
+                            {
+                                GameObject* go = new GameObject;
+                                if (go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), RAID_MODE(GO_ALEXSTRASZA_S_GIFT_10, GO_ALEXSTRASZA_S_GIFT_25), script->instance, PHASEMASK_NORMAL, _gift->GetPositionX(), _gift->GetPositionY(), _gift->GetPositionZ(), _gift->GetOrientation(), 0, 0, 0, 0, 120, GO_STATE_READY))
+                                {
+                                    go->SetRespawnTime(1*WEEK);
+                                    script->instance->Add(go);
+                                }
+                                else
+                                    delete go;
+                            }
+                        }
                         Talk(SAY_ONE);
-                        _events.ScheduleEvent(EVENT_YELL_2, 4*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_SAY_TWO, 4*IN_MILLISECONDS);
                         break;
-                    case EVENT_YELL_2:
+                    case EVENT_SAY_TWO:
                         Talk(SAY_TWO);
-                        _events.ScheduleEvent(EVENT_YELL_3, 4*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_SAY_THREE, 4*IN_MILLISECONDS);
                         break;
-                    case EVENT_YELL_3:
+                    case EVENT_SAY_THREE:
                         Talk(SAY_THREE);
-                        _events.ScheduleEvent(EVENT_YELL_4, 7*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_SAY_FOUR, 7*IN_MILLISECONDS);
                         break;
-                    case EVENT_YELL_4:
+                    case EVENT_SAY_FOUR:
                         Talk(SAY_FOUR);
                         break;
                 }
@@ -1400,6 +1468,7 @@ public:
         }
     private:
         EventMap _events;
+        Creature* _gift;
     };
 };
 
