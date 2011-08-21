@@ -46,6 +46,7 @@ public:
             surgeGUID = 0;
             alexstraszaProxyGUID = 0;
             currentLight = 1773;
+            checkFallingPlayersTimer = 1000;
         };
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -86,6 +87,36 @@ public:
                 }
             }
             return true;
+        }
+
+        void Update(uint32 diff)
+        {
+            Creature* malygos = instance->GetCreature(malygosGUID);
+            if (!malygos)
+                return;
+
+            if (malygos->AI()->GetData(DATA_PHASE) != 3)    // PHASE_THREE
+                return;
+
+            if (checkFallingPlayersTimer < diff)
+            {
+                Map::PlayerList const &PlayerList = instance->GetPlayers();
+                if (PlayerList.isEmpty())
+                    return;
+
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    Player* plr = i->getSource();
+                    if (plr->isAlive() && !plr->GetVehicleBase() && plr->GetPositionZ() <= 150.0f)
+                    {
+                        plr->SetMovement(MOVE_ROOT);
+                        plr->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, plr->GetMaxHealth());
+                    }
+                }
+                checkFallingPlayersTimer = 1000;
+            }
+           else
+                checkFallingPlayersTimer -= diff;
         }
 
         void OnPlayerEnter(Player* player)
@@ -336,6 +367,7 @@ public:
             uint64 surgeGUID;
             uint64 alexstraszaProxyGUID;
             uint32 currentLight;
+            uint16 checkFallingPlayersTimer;
     };
 };
 
