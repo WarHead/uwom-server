@@ -62,7 +62,7 @@ public:
                         }
                     }
 
-                    SpawnGameObject(GO_FOCUSING_IRIS, focusingIrisPosition);
+                    SpawnGameObject(GO_FOCUSING_IRIS_10, focusingIrisPosition);
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
@@ -108,15 +108,15 @@ public:
                 case GO_NEXUS_RAID_PLATFORM:
                     platformGUID = go->GetGUID();
                     break;
-                case GO_FOCUSING_IRIS:
+                case GO_FOCUSING_IRIS_10:
                     go->GetPosition(&focusingIrisPosition);
                     break;
                 case GO_EXIT_PORTAL:
                     exitPortalGUID = go->GetGUID();
                     go->GetPosition(&exitPortalPosition);
                     break;
-                case GO_ALEXSTRASZA_S_GIFT:
-                case GO_ALEXSTRASZA_S_GIFT_2:
+                case GO_ALEXSTRASZA_S_GIFT_10:
+                case GO_ALEXSTRASZA_S_GIFT_25:
                     chestGUID = go->GetGUID();
                     break;
             }
@@ -226,7 +226,7 @@ public:
         {
             switch (data)
             {
-                case DATA_TRIGGER:
+                case DATA_VORTEX:
                     return vortexTriggers.front();
                 case DATA_MALYGOS:
                     return malygosGUID;

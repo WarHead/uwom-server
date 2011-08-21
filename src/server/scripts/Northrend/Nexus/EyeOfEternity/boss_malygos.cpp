@@ -35,7 +35,7 @@ Script Data End */
 // not implemented
 enum Achievements
 {
-    ACHIEV_TIMED_START_EVENT                      = 20387,
+    ACHIEV_TIMED_START_EVENT   = 20387,
 };
 
 enum Events
@@ -71,30 +71,51 @@ enum Phases
 
 enum Spells
 {
-    SPELL_ARCANE_BREATH = 56272,
-    SPELL_ARCANE_STORM  = 57459,
-    SPELL_BERSEKER      = 60670,
-
-    SPELL_VORTEX_1 = 56237, // seems that frezze object animation
-    SPELL_VORTEX_2 = 55873, // visual effect
-    SPELL_VORTEX_3 = 56105, // this spell must handle all the script - casted by the boss and to himself
-    //SPELL_VORTEX_4 = 55853, // damage | used to enter to the vehicle - defined in eye_of_eternity.h
-    //SPELL_VORTEX_5 = 56263, // damage | used to enter to the vehicle - defined in eye_of_eternity.h
-    SPELL_VORTEX_6 = 73040, // teleport - (casted to all raid) | caster 30090 | target player
-
+    // ============= PREFIGHT ==============
+    SPELL_BERSERKER            = 60670,
     SPELL_PORTAL_VISUAL_CLOSED = 55949,
-    SPELL_SUMMON_POWER_PARK = 56142,
-    SPELL_POWER_SPARK_DEATH = 55852,
-    SPELL_POWER_SPARK_MALYGOS = 56152,
+    SPELL_PORTAL_BEAM          = 56046,
+    SPELL_IRIS_OPENED          = 61012,
 
-    SPELL_SURGE_POWER = 56505, // used in phase 2
-    SPELL_SUMMON_ARCANE_BOMB = 56429,
-    SPELL_ARCANE_OVERLOAD = 56432,
+    // =========== PHASE ONE ===============
+    SPELL_ARCANE_BREATH_10     = 56272,
+    SPELL_ARCANE_STORM_10      = 57459,
+    SPELL_ARCANE_BREATH_25     = 60072,
+    SPELL_ARCANE_STORM_25      = 61694,
+
+    SPELL_VORTEX_1             = 56237,                     // seems that frezze object animation
+    SPELL_VORTEX_2             = 55873,                     // visual effect
+    SPELL_VORTEX_3             = 56105,                     // this spell must handle all the script - casted by the boss and to himself
+    //SPELL_VORTEX_4           = 55853,                     // damage | used to enter to the vehicle - defined in eye_of_eternity.h
+    //SPELL_VORTEX_5           = 56263,                     // damage | used to enter to the vehicle - defined in eye_of_eternity.h
+    SPELL_VORTEX_6             = 73040,                     // teleport - (casted to all raid) | caster 30090 | target player
+
+    SPELL_SUMMON_POWER_PARK    = 56142,
+    SPELL_POWER_SPARK_DEATH    = 55852,
+    SPELL_POWER_SPARK_MALYGOS  = 56152,
+
+    // =========== PHASE TWO ===============
+    SPELL_SURGE_POWER_P2       = 56505,                     // used in phase 2
+    SPELL_ARCANE_BOMB_SUMMON   = 56429,
+    SPELL_ARCANE_BOMB_MISSILE  = 56430,
+    SPELL_ARCANE_BOMB_EFFECT   = 56431,
+    SPELL_ARCANE_OVERLOAD      = 56432,
     SPELL_ARCANE_OVERLOAD_SIZE = 56435,
-    SPELL_ARCANE_BARRAGE_TRIG = 56397,
-    SPELL_SUMMOM_RED_DRAGON = 56070,
-    SPELL_SURGE_POWER_PHASE_3 = 57407,
-    SPELL_STATIC_FIELD = 57430
+
+    SPELL_ARCANE_BARRAGE_TRIG  = 56397,
+    SPELL_TELEPORT_VISUAL      = 51347,
+
+    // ========== PHASE THREE ==============
+    SPELL_PLATTFORM_CHANNEL    = 58842,
+    SPELL_PLATTFORM_BOOM       = 59084,
+    SPELL_SURGE_POWER_P3       = 60936,
+    SPELL_STATIC_FIELD         = 57430,
+    SPELL_ARCANE_PULSE         = 57432,
+
+    // ========= ALEXSTRASZA OUTRO =========
+
+    SPELL_GIFT_CHANNEL         = 61028,
+    SPELL_GIFT_VISUAL          = 61023
 };
 
 enum Movements
@@ -122,14 +143,6 @@ enum Actions
     ACTION_HOVER_DISK_START_WP_1,
     ACTION_HOVER_DISK_START_WP_2
 };
-
-enum MalygosEvents
-{
-    DATA_SUMMON_DEATHS, // phase 2
-    DATA_PHASE
-};
-
-#define TEN_MINUTES 600000
 
 enum MalygosSays
 {
@@ -364,7 +377,7 @@ public:
             if (instance)
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
 
-            DoCast(SPELL_BERSEKER);
+            DoCast(SPELL_BERSERKER);
         }
 
         void KilledUnit(Unit* who)
@@ -553,11 +566,11 @@ public:
                         Talk(SAY_AGGRO_P_TWO);
                         break;
                     case EVENT_ARCANE_BREATH:
-                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH);
+                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH_10);
                         events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(35, 60)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_ARCANE_STORM:
-                        DoCast(me->getVictim(), SPELL_ARCANE_STORM);
+                        DoCast(me->getVictim(), SPELL_ARCANE_STORM_10);
                         events.ScheduleEvent(EVENT_ARCANE_STORM, urand(5, 10)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_VORTEX:
@@ -571,15 +584,15 @@ public:
                     case EVENT_SURGE_POWER:
                         me->GetMotionMaster()->MoveIdle();
                         _delayedMovement = true;
-                        DoCast(SPELL_SURGE_POWER);
+                        DoCast(SPELL_SURGE_POWER_P2);
                         events.ScheduleEvent(EVENT_SURGE_POWER, urand(60, 70)*IN_MILLISECONDS, 0, PHASE_TWO);
                         break;
                     case EVENT_SUMMON_ARCANE:
-                        DoCast(SPELL_SUMMON_ARCANE_BOMB);
+                        DoCast(SPELL_ARCANE_BOMB_SUMMON);
                         events.ScheduleEvent(EVENT_SUMMON_ARCANE, urand(12, 15)*IN_MILLISECONDS, 0, PHASE_TWO);
                         break;
                     case EVENT_SURGE_POWER_PHASE_3:
-                        DoCast(SPELL_SURGE_POWER_PHASE_3);  // target selection and Boss-Warning in SpellScript
+                        DoCast(SPELL_SURGE_POWER_P3);       // target selection and Boss-Warning in SpellScript
                         events.ScheduleEvent(EVENT_SURGE_POWER_PHASE_3, urand(7, 16)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     case EVENT_STATIC_FIELD:
@@ -726,7 +739,7 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
                             if (InstanceScript* instance = caster->GetInstanceScript())
                             {
                                 // teleport spell - i am not sure but might be it must be casted by each vehicle when its passenger leaves it
-                                if (Creature* trigger = caster->GetMap()->GetCreature(instance->GetData64(DATA_TRIGGER)))
+                                if (Creature* trigger = caster->GetMap()->GetCreature(instance->GetData64(DATA_VORTEX)))
                                     trigger->CastSpell(targetPlayer, SPELL_VORTEX_6, true);
                             }
                         }
