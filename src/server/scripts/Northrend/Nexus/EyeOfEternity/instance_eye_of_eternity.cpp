@@ -41,6 +41,7 @@ public:
             lastPortalGUID = 0;
             platformGUID = 0;
             exitPortalGUID = 0;
+            currentLight = 1773;
         };
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -99,6 +100,19 @@ public:
             }
 
             instance->Add(go);
+        }
+
+        void OnPlayerEnter(Player* player)
+        {
+            Creature* malygos = instance->GetCreature(malygosGUID);
+            if (!malygos)
+                return;
+
+            uint32 data = LIGHT_NATIVE << 16;
+            if (GetBossState(DATA_MALYGOS_EVENT) == DONE)
+                data = LIGHT_CLOUDS << 16;
+
+            LightHandling(data, player);
         }
 
         void OnGameObjectCreate(GameObject* go)
@@ -190,7 +204,7 @@ public:
 
         void PowerSparksHandling()
         {
-            bool next =  (lastPortalGUID == portalTriggers.back() || !lastPortalGUID ? true : false);
+            bool next = (lastPortalGUID == portalTriggers.back() || !lastPortalGUID ? true : false);
 
             for (std::list<uint64>::const_iterator itr_trigger = portalTriggers.begin(); itr_trigger != portalTriggers.end(); ++itr_trigger)
             {
@@ -209,7 +223,35 @@ public:
             }
         }
 
-        void SetData(uint32 data, uint32 /*value*/)
+        // eliminate compile warning
+        void ProcessEvent(Unit* /*unit*/, uint32 /*eventId*/)
+        {
+        }
+
+        void LightHandling(uint32 lightData, Player* player = NULL)
+        {
+            uint32 transition = lightData & 0xFFFF;
+            uint32 newLight = (lightData >> 16);
+
+            if (!player)
+            {
+                if (currentLight == newLight)
+                    return;
+
+                currentLight = newLight;
+            }
+
+            WorldPacket data(SMSG_OVERRIDE_LIGHT, 12);
+            data << uint32(LIGHT_NATIVE);
+            data << newLight;
+            data << transition;
+            if (player)
+                player->GetSession()->SendPacket(&data);
+            else
+                instance->SendToPlayers(&data);
+        }
+
+        void SetData(uint32 data, uint32 value)
         {
             switch (data)
             {
@@ -218,6 +260,9 @@ public:
                     break;
                 case DATA_POWER_SPARKS_HANDLING:
                     PowerSparksHandling();
+                    break;
+                case DATA_LIGHT_HANDLING:
+                    LightHandling(value);
                     break;
             }
         }
@@ -289,6 +334,7 @@ public:
             uint64 chestGUID;
             Position focusingIrisPosition;
             Position exitPortalPosition;
+            uint32 currentLight;
     };
 };
 
