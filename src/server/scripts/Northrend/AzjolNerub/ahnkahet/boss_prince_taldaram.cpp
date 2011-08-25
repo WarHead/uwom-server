@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -82,6 +83,7 @@ public:
         boss_taldaramAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            me->AddAura(SPELL_BEAM_VISUAL, me);
         }
 
         uint32 uiBloodthirstTimer;
@@ -125,6 +127,8 @@ public:
                 pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, IN_PROGRESS);
 
             DoScriptText(SAY_AGGRO, me);
+
+            DoZoneInCombat();
         }
 
         void UpdateAI(const uint32 diff)
@@ -329,6 +333,7 @@ public:
             me->RemoveAurasDueToSpell(SPELL_BEAM_VISUAL);
             me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), DATA_GROUND_POSITION_Z, me->GetOrientation());
+            me->GetMotionMaster()->MoveTargetedHome();
             uint64 prison_GUID = pInstance->GetData64(DATA_PRINCE_TALDARAM_PLATFORM);
             pInstance->HandleGameObject(prison_GUID, true);
         }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -98,6 +99,8 @@ class boss_elder_nadox : public CreatureScript
 
                 if (instance)
                     instance->SetData(DATA_ELDER_NADOX_EVENT, IN_PROGRESS);
+
+                DoZoneInCombat();
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -285,7 +288,7 @@ public:
         }
         void Reset() {}
         void EnterCombat(Unit* /*who*/) {}
-        void AttackStart(Unit* /*victim*/) {}
+        void AttackStart(Unit* /*victim*/, float /*dist*/ = 0) {}
         void MoveInLineOfSight(Unit* /*who*/) {}
         void UpdateAI(const uint32 /*diff*/) {}
     };

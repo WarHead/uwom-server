@@ -1004,7 +1004,7 @@ void Group::EndRoll(Loot *pLoot)
             itr = RollId.begin();
         }
         else
-            itr++;
+            ++itr;
     }
 }
 
