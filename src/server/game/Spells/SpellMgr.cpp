@@ -1302,7 +1302,7 @@ void SpellMgr::LoadSpellLearnSkills()
 
     // search auto-learned skills and add its to map also for use in unlearn spells/talents
     uint32 dbc_count = 0;
-    for (uint32 spell = 0; spell < sSpellMgr->GetSpellInfoStoreSize(); ++spell)
+    for (uint32 spell = 0; spell < GetSpellInfoStoreSize(); ++spell)
     {
         SpellInfo const* entry = GetSpellInfo(spell);
 
@@ -2638,6 +2638,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                     break;
             }
+
             switch (spellInfo->Effects[j].Effect)
             {
                 case SPELL_EFFECT_SCHOOL_DAMAGE:
@@ -2673,7 +2674,7 @@ void SpellMgr::LoadSpellCustomAttr()
                             if (enchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                                 continue;
 
-                            SpellInfo* procInfo = (SpellInfo*)sSpellMgr->GetSpellInfo(enchant->spellid[s]);
+                            SpellInfo* procInfo = (SpellInfo*)GetSpellInfo(enchant->spellid[s]);
                             if (!procInfo)
                                 continue;
 
@@ -2816,14 +2817,14 @@ void SpellMgr::LoadSpellCustomAttr()
             case 67860: // Impale
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
             case 63278: // Mark of the Faceless (General Vezax)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                break;
+            default:
                 break;
         }
 
@@ -2918,8 +2919,6 @@ void SpellMgr::LoadDbcDataCorrections()
             case 62136: // Energize Cores
             case 54069: // Energize Cores
             case 56251: // Energize Cores
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENTRY;
-                break;
             case 50785: // Energize Cores
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
@@ -3255,6 +3254,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71159: // Awaken Plagued Zombies
                 spellInfo->DurationIndex = 21;
                 break;
+            case 71302: // Awaken Ymirjar Fallen
+                spellInfo->DurationIndex = 30;
+                break;
             // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS IS NOT IMPLEMENTED
             case 71604: // Mutated Strength (Professor Putricide)
             case 72673: // Mutated Strength (Professor Putricide)
@@ -3325,15 +3327,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 // Starfall Target Selection
                 if (spellInfo->SpellFamilyFlags[2] & 0x100)
                     spellInfo->MaxAffectedTargets = 2;
-                else
-                    break;
                 break;
             case SPELLFAMILY_PALADIN:
                 // Seals of the Pure should affect Seal of Righteousness
                 if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
                     spellInfo->EffectSpellClassMask[0][1] |= 0x20000000;
-                else
-                    break;
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Icy Touch - extend FamilyFlags (unused value) for Sigil of the Frozen Conscience to use
