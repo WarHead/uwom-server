@@ -57,149 +57,157 @@ const Position FallenAddsWegPunkte[2] =
     { 4357.551758f, 3023.074463f, 360.518707f, 1.539818f },
 };
 
-enum ICC_RAID_TRASH_NPCS_UND_SPELLS
+enum ICC_RAID_TRASH_NPCS
 {
-        DIE_VERDAMMTEN                                                  = 37011,
+    DIE_VERDAMMTEN                          = 37011,
+    DIENER_DES_THRONS                       = 36724,
+    TODESGEWEIHTER_WAECHTER                 = 37007,
+    URALTER_SKELETT_SOLDAT                  = 37012,
+    BRUTHUETER_DER_NERUBAR                  = 36725,
+    AUFERSTANDENER_DIENER_DER_TODESSPRECHER = 36844,
+    ZELOT_DER_TODESSPRECHER                 = 36808,
+    DIENER_DER_TODESSPRECHER                = 36805,
+    JUENGER_DER_TODESSPRECHER               = 36807,
+    KNECHT_DER_TODESSPRECHER                = 36811,
+    HOHEPRIESTER_DER_TODESSPRECHER          = 36829,
+    BOTIN_DER_VALKYR                        = 37098,
+    ABGETRENNTE_ESSENZ                      = 38410,
+    VERSEUCHTE_MONSTROSITAET                = 37022,
+    EITERNDER_SCHRECKEN                     = 10404,
+    SEUCHENWISSENSCHAFTLER                  = 37023,
+    RACHSUECHTIGER_FLEISCHERNTER            = 37038,
+    VERWESENDER_KOLOSS                      = 36880,
+    SINISTRER_ERZMAGIER                     = 37664,
+    SINISTRER_ADLIGER                       = 37663,
+    SINISTRER_BLUTRITTER                    = 37595,
+    SINISTRER_BERATER                       = 37571,
+    SINISTRER_LEUTNANT                      = 37665,
+    SINISTRER_TAKTIKER                      = 37666,
+    SINISTRER_KOMMANDANT                    = 37662,
+    RASENDE_MONSTROSITAET                   = 37546,
+    BASTIONSGARGOYLE                        = 37544,
+    BASTIONSDIENER                          = 37545,
+    BASTIONSFROSTWYRM                       = 37230,
+    FROSTBINDER_DER_YMIRJAR                 = 37127,
+    KRIEGSMAID_DER_YMIRJAR                  = 37132,
+    KRIEGSFUERST_DER_YMIRJAR                = 37133,
+    JAEGERIN_DER_YMIRJAR                    = 37134,
+    TODESBRINGER_DER_YMIRJAR                = 38125
+};
+
+enum ICC_RAID_TRASH_SPELLS
+{
         DIE_VERDAMMTEN_KNOCHENWIRBEL                                    = 70960,
         DIE_VERDAMMTEN_ZERSCHMETTERTE_KNOCHEN                           = 70961,
 
-        DIENER_DES_THRONS                                               = 36724,
         DIENER_DES_THRONS_GLETSCHEREXPLOSION                            = 71029,
 
-        TODESGEWEIHTER_WAECHTER                                         = 37007,
         TODESGEWEIHTER_WAECHTER_SAEBELHIEB                              = 71021,
         TODESGEWEIHTER_WAECHTER_UNTERBRECHENDER_SCHREI                  = 71022,
         TODESGEWEIHTER_WAECHTER_STEINGESTALT                            = 70733,
 
-        URALTER_SKELETT_SOLDAT                                          = 37012,
         URALTER_SKELETT_SOLDAT_SCHILDHIEB                               = 70964,
 
-        BRUTHUETER_DER_NERUBAR                                          = 36725,
         BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG                         = 71020,
         BRUTHUETER_DER_NERUBAR_FANGNETZ                                 = 70980,
         BRUTHUETER_DER_NERUBAR_GRUFTSKARABAEEN                          = 70965,
 
-        AUFERSTANDENER_DIENER_DER_TODESSPRECHER                         = 36844,
         AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN    = 69405,
 #define AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ              RAID_MODE(69576,71108,69576,71108)
 #define AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN          RAID_MODE(69404,71112,69404,71112)
 
-        ZELOT_DER_TODESSPRECHER                                         = 36808,
         ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN                         = 69492,
 
-        DIENER_DER_TODESSPRECHER                                        = 36805,
         DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN                   = 69405,
 #define DIENER_DER_TODESSPRECHER_CHAOSBLITZ                             RAID_MODE(69576,71108,69576,71108)
 #define DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN                         RAID_MODE(69404,71112,69404,71112)
 
-        JUENGER_DER_TODESSPRECHER                                       = 36807,
         JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN                         = 69391,
         JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ                         = 69387,
 #define JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG                       RAID_MODE(69389,71107,69389,71107)
 
-        KNECHT_DER_TODESSPRECHER                                        = 36811,
         KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ                          = 69387,
 #define KNECHT_DER_TODESSPRECHER_SCHATTENNOVA                           RAID_MODE(69355,71106,69355,71106)
 
-        HOHEPRIESTER_DER_TODESSPRECHER                                  = 36829,
         HOHEPRIESTER_DER_TODESSPRECHER_AURA_DER_DUNKELHEIT              = 69491,
         HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG                = 69483,
 
-        BOTIN_DER_VALKYR                                                = 37098,
 #define BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ                             RAID_MODE(71906,71942,71906,71942)
+        BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ_AURA                        = 57537,
 
-        VERSEUCHTE_MONSTROSITAET                                        = 37022,
         VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN                           = 71140,
         VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE                           = 71150,
         VERSEUCHTE_MONSTROSITAET_SPALTEN                                = 40504,
 
-        EITERNDER_SCHRECKEN                                             = 10404,
         EITERNDER_SCHRECKEN_SEUCHENBOMBE                                = 71088,
 #define EITERNDER_SCHRECKEN_SPRUDELNDER_EITER                           RAID_MODE(71089,71090,71089,71090)
 
-        SEUCHENWISSENSCHAFTLER                                          = 37023,
         SEUCHENWISSENSCHAFTLER_MUTATIONSAUSLOESENDES_SPRAY              = 71103,
         SEUCHENWISSENSCHAFTLER_SEUCHENSCHLAG                            = 73079,
         SEUCHENWISSENSCHAFTLER_SEUCHENSTROM                             = 69871,
 
-        RACHSUECHTIGER_FLEISCHERNTER                                    = 37038,
         RACHSUECHTIGER_FLEISCHERNTER_EINGESPRUNGENER_GESICHTSZERMALMER  = 71164,
 
-        VERWESENDER_KOLOSS                                              = 36880,
 #define VERWESENDER_KOLOSS_MASSIVES_STAMPFEN                            RAID_MODE(71114,71115,71114,71115)
 
-        SINISTRER_ERZMAGIER                                             = 37664,
         SINISTRER_ERZMAGIER_ESSENZ_ENTZIEHEN                            = 70299,
         SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE                          = 70410,
 #define SINISTRER_ERZMAGIER_DRUCKWELLE                                  RAID_MODE(70407,71151,70407,71151)
 #define SINISTRER_ERZMAGIER_FEUERBALL                                   RAID_MODE(70409,71153,70409,71153)
 #define SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN                           RAID_MODE(70408,72336,70408,72336)
 
-        SINISTRER_ADLIGER                                               = 37663,
         SINISTRER_ADLIGER_ESSENZ_ENTZIEHEN                              = 70299,
         SINISTRER_ADLIGER_KETTEN_DES_SCHATTENS                          = 70645,
 #define SINISTRER_ADLIGER_SCHATTENBLITZ                                 RAID_MODE(72960,72961,72960,72961)
 
-        SINISTRER_BLUTRITTER                                            = 37595,
         SINISTRER_BLUTRITTER_ESSENZ_ENTZIEHEN                           = 70299,
         SINISTRER_BLUTRITTER_BLUTSPIEGEL                                = 70450,
         SINISTRER_BLUTRITTER_UNHEILIGER_STOSS                           = 70437,
         SINISTRER_BLUTRITTER_VAMPIRAURA                                 = 71736,
 
-        SINISTRER_BERATER                                               = 37571,
         SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES                       = 72065,
         SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES                 = 72066,
 #define SINISTRER_BERATER_LICHKLATSCHER                                 RAID_MODE(72057,72421,72057,72421)
 
-        SINISTRER_LEUTNANT                                              = 37665,
         SINISTRER_LEUTNANT_VAMPIRFLUCH                                  = 70423,
 #define SINISTRER_LEUTNANT_FLEISCHZERREISSEN                            RAID_MODE(70435,71154,70435,71154)
 
-        SINISTRER_TAKTIKER                                              = 37666,
         SINISTRER_TAKTIKER_BLUTENTZUG                                   = 70432,
         SINISTRER_TAKTIKER_UNHEILIGER_STOSS                             = 70437,
 
-        SINISTRER_KOMMANDANT                                            = 37662,
         SINISTRER_KOMMANDANT_SCHLACHTRUF                                = 70750,
 #define SINISTRER_KOMMANDANT_VAMPIRANSTURM                              RAID_MODE(70449,71155,70449,71155)
 
-        RASENDE_MONSTROSITAET                                           = 37546,
         RASENDE_MONSTROSITAET_SPALTEN                                   = 70191,
         RASENDE_MONSTROSITAET_WUTANFALL                                 = 70371,
 
-        BASTIONSGARGOYLE                                                = 37544,
         BASTIONSGARGOYLE_GIFT_SPUCKEN                                   = 70189,
 
-        BASTIONSDIENER                                                  = 37545,
         BASTIONSDIENER_GHOULSCHLITZEN                                   = 70396,
         BASTIONSDIENER_KANNIBALISMUS                                    = 70363,
 
-        BASTIONSFROSTWYRM                                               = 37230,
         BASTIONSFROSTWYRM_SPALTEN                                       = 70361,
 #define BASTIONSFROSTWYRM_BLIZZARD                                      RAID_MODE(70362,71118,70362,71118)
 #define BASTIONSFROSTWYRM_FROSTATEM                                     RAID_MODE(70116,72641,70116,72641)
 
-        FROSTBINDER_DER_YMIRJAR                                         = 37127,
         FROSTBINDER_DER_YMIRJAR_ARKTISCHE_KUEHLE                        = 71270, // Aggro
-        FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL                         = 71274, // Random Target - Ohne Funktion im Moment! Cast Funzt, aber kein Effekt!
+        FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_CAST                    = 71274, // Cast
+        FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_MISSILE                 = 71285, // Missile / Schaden für FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_CAST / Random Target
+
         FROSTBINDER_DER_YMIRJAR_GEISTERFLUSS                            = 69929, // Außerhalb des Kampfes casten...
         FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE                         = 71306, // Random Target - Kein Effekt im Moment!
 
-        KRIEGSMAID_DER_YMIRJAR                                          = 37132,
         KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS                       = 71257, // Victim
         KRIEGSMAID_DER_YMIRJAR_ADRENALINRAUSCH                          = 71258, // Aura!
 
-        KRIEGSFUERST_DER_YMIRJAR                                        = 37133,
         KRIEGSFUERST_DER_YMIRJAR_WIRBELWIND                             = 41056, // Selbst
 
-        JAEGERIN_DER_YMIRJAR                                            = 37134,
         JAEGERIN_DER_YMIRJAR_FLINKSCHUSS                                = 71251, // Selbst
         JAEGERIN_DER_YMIRJAR_FROSTFALLE                                 = 71249, // 20 Meter
         JAEGERIN_DER_YMIRJAR_KRIEGSFALKEN_BESCHWOEREN                   = 71705, // Nach Spawn
         JAEGERIN_DER_YMIRJAR_SALVE                                      = 71252, // Random Target - 10 - 40 Meter
         JAEGERIN_DER_YMIRJAR_SCHIESSEN                                  = 71253, // Target - 5 - 30 Meter
 
-        TODESBRINGER_DER_YMIRJAR                                        = 38125,
         TODESBRINGER_DER_YMIRJAR_GEISTERFLUSS                           = 69929, // Außerhalb des Kampfes casten...
 #define TODESBRINGER_DER_YMIRJAR_SCHATTENBLITZ                          RAID_MODE(71296,71297,71296,71297) // Target - 40 Meter
 #define TODESBRINGER_DER_YMIRJAR_UMARMUNG_DES_TODES                     RAID_MODE(71299,71300,71299,71300) // Selbst - Dauer 10 Sek.
@@ -279,7 +287,8 @@ enum eICC_Raid_Events
     EVENT_TODESBRINGER_DER_YMIRJAR_GEISTERFLUSS
 };
 
-#define NUM_YMIRJAR RAID_MODE(10,25,10,25)
+#define NUM_YMIRJAR     RAID_MODE(10,25,10,25)
+#define MAX_ESSENZEN    RAID_MODE(10,25,10,25)
 
 class mob_icc_raid_trash : public CreatureScript
 {
@@ -306,6 +315,7 @@ public:
         EventMap events;
         EventMap OOCevents;
         SummonList _summons;
+        uint8 EssenzenCnt;
 
         bool DieVerdammtenKnochenwirbel,
             DieVerdammtenZerschmKnochen,
@@ -320,6 +330,7 @@ public:
             EiternderSchreckenBombe = false;
             RasendeMonstrositaetWut = false;
             BastionsdienerKannibalismus = false;
+            EssenzenCnt = 0;
 
             events.Reset();
             OOCevents.Reset();
@@ -356,8 +367,12 @@ public:
         void JustSummoned(Creature * summon)
         {
             _summons.Summon(summon);
+
             if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 summon->AI()->AttackStart(target);
+
+            if (summon->GetEntry() == ABGETRENNTE_ESSENZ)
+                ++EssenzenCnt;
         }
 
         void SummonedCreatureDespawn(Creature * summon)
@@ -468,7 +483,7 @@ public:
             events.ScheduleEvent(EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ, 100);
             events.ScheduleEvent(EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENNOVA, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG, 5000);
-            events.ScheduleEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, SEKUNDEN_10);
+            events.ScheduleEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, 5 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN, urand(100,5000));
             events.ScheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SPALTEN, urand(3000,5000));
@@ -499,7 +514,7 @@ public:
             events.ScheduleEvent(EVENT_BASTIONSFROSTWYRM_SPALTEN, urand(3000,5000));
             events.ScheduleEvent(EVENT_BASTIONSFROSTWYRM_BLIZZARD, urand(8000,12000));
             events.ScheduleEvent(EVENT_BASTIONSFROSTWYRM_FROSTATEM, urand(5000,8000));
-            events.ScheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL, urand(15 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+            events.ScheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE, urand(SEKUNDEN_10, SEKUNDEN_20));
             events.ScheduleEvent(EVENT_KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS, urand(SEKUNDEN_10, SEKUNDEN_20));
             events.ScheduleEvent(EVENT_KRIEGSMAID_DER_YMIRJAR_ADRENALINRAUSCH, urand(SEKUNDEN_10, SEKUNDEN_20));
@@ -633,7 +648,7 @@ public:
                     case URALTER_SKELETT_SOLDAT:
                         if (eventId == EVENT_URALTER_SKELETT_SOLDAT_SCHILDHIEB)
                         {
-                            DoCast(URALTER_SKELETT_SOLDAT_SCHILDHIEB);
+                            DoCastVictim(URALTER_SKELETT_SOLDAT_SCHILDHIEB);
                             events.RescheduleEvent(EVENT_URALTER_SKELETT_SOLDAT_SCHILDHIEB, urand(5000,8000));
                         }
                         break;
@@ -642,19 +657,19 @@ public:
                         {
                             case EVENT_BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG:
                                 if (Unit * pTarget = DoSelectLowestHpFriendly(40, 50000))
-                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG, true);
+                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG);
                                 else
                                     DoCast(me, BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG, true);
                                 events.RescheduleEvent(EVENT_BRUTHUETER_DER_NERUBAR_DUNKLE_BESSERUNG, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_BRUTHUETER_DER_NERUBAR_FANGNETZ:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, me->GetMaxCastRange(), true))
-                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_FANGNETZ, true);
-                                events.RescheduleEvent(EVENT_BRUTHUETER_DER_NERUBAR_FANGNETZ, SEKUNDEN_10);
+                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_FANGNETZ);
+                                events.RescheduleEvent(EVENT_BRUTHUETER_DER_NERUBAR_FANGNETZ, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_BRUTHUETER_DER_NERUBAR_GRUFTSKARABAEEN:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, me->GetMaxCastRange(), true))
-                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_GRUFTSKARABAEEN, true);
+                                    DoCast(pTarget, BRUTHUETER_DER_NERUBAR_GRUFTSKARABAEEN);
                                 events.RescheduleEvent(EVENT_BRUTHUETER_DER_NERUBAR_GRUFTSKARABAEEN, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                         }
@@ -663,40 +678,42 @@ public:
                         switch(eventId)
                         {
                             case EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN:
-                                DoCast(AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN);
-                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN, SEKUNDEN_20);
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                    DoCast(pTarget, AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN);
+                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ:
-                                DoCast(AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ);
-                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ, SEKUNDEN_10);
+                                DoCastVictim(AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ);
+                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_CHAOSBLITZ, 5 * IN_MILLISECONDS);
                                 break;
                             case EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN:
-                                DoCast(AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN);
-                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN, 23000);
+                                DoCastVictim(AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN);
+                                events.RescheduleEvent(EVENT_AUFERSTANDENER_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN, 23 * IN_MILLISECONDS);
                                 break;
                         }
                         break;
                     case ZELOT_DER_TODESSPRECHER:
                         if (eventId == EVENT_ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN)
                         {
-                            DoCast(ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN);
-                            events.RescheduleEvent(EVENT_ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN, urand(6100,8000));
+                            DoCastVictim(ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN);
+                            events.RescheduleEvent(EVENT_ZELOT_DER_TODESSPRECHER_SCHATTENSPALTEN, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                         }
                         break;
                     case DIENER_DER_TODESSPRECHER:
                         switch(eventId)
                         {
                             case EVENT_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN:
-                                DoCast(DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN);
-                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN, SEKUNDEN_20);
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                DoCast(pTarget, DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN);
+                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_VERZEHRENDE_SCHATTEN, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_DIENER_DER_TODESSPRECHER_CHAOSBLITZ:
-                                DoCast(DIENER_DER_TODESSPRECHER_CHAOSBLITZ);
-                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_CHAOSBLITZ, SEKUNDEN_10);
+                                DoCastVictim(DIENER_DER_TODESSPRECHER_CHAOSBLITZ);
+                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_CHAOSBLITZ, 5 * IN_MILLISECONDS);
                                 break;
                             case EVENT_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN:
-                                DoCast(DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN);
-                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN, SEKUNDEN_30);
+                                DoCastVictim(DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN);
+                                events.RescheduleEvent(EVENT_DIENER_DER_TODESSPRECHER_FLUCH_DER_PEIN, 23 * IN_MILLISECONDS);
                                 break;
                         }
                         break;
@@ -704,22 +721,22 @@ public:
                         switch(eventId)
                         {
                             case EVENT_JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN:
-                                if (Unit * pTarget = DoSelectLowestHpFriendly(30, 1))
-                                    DoCast(pTarget, JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN, true);
+                                if (Unit * pTarget = DoSelectLowestHpFriendly(30))
+                                    DoCast(pTarget, JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN);
                                 else
-                                    DoCast(me, JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN, true);
-                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN, urand(10000,15000));
+                                    DoCast(me, JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN);
+                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_DUNKLER_SEGEN, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                             case EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ:
-                                DoCast(JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ);
-                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ, urand(6000,8000));
+                                DoCastVictim(JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ);
+                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENBLITZ, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                             case EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG:
-                                if (Unit * pTarget = DoSelectLowestHpFriendly(30, 90000))
-                                    DoCast(pTarget, JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG, true);
+                                if (Unit * pTarget = DoSelectLowestHpFriendly(30, 50000))
+                                    DoCast(pTarget, JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG);
                                 else
-                                    DoCast(me, JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG, true);
-                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG, urand(10000,15000));
+                                    DoCast(me, JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG);
+                                events.RescheduleEvent(EVENT_JUENGER_DER_TODESSPRECHER_SCHATTENHEILUNG, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
@@ -727,53 +744,75 @@ public:
                         switch(eventId)
                         {
                             case EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ:
-                                DoCast(KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ);
+                                DoCastVictim(KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ);
                                 events.RescheduleEvent(EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENBLITZ, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                             case EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENNOVA:
-                                DoCast(KNECHT_DER_TODESSPRECHER_SCHATTENNOVA);
-                                events.RescheduleEvent(EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENNOVA, urand(10000,15000));
+                                DoCastAOE(KNECHT_DER_TODESSPRECHER_SCHATTENNOVA);
+                                events.RescheduleEvent(EVENT_KNECHT_DER_TODESSPRECHER_SCHATTENNOVA, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
                     case HOHEPRIESTER_DER_TODESSPRECHER:
                         if (eventId == EVENT_HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG)
                         {
-                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, me->GetMaxCastRange(), true))
-                                DoCast(pTarget, HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG, true);
-                            events.RescheduleEvent(EVENT_HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG, 15000);
+                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
+                                DoCast(pTarget, HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG);
+                            events.RescheduleEvent(EVENT_HOHEPRIESTER_DER_TODESSPRECHER_DUNKLE_ABRECHNUNG, 15 * IN_MILLISECONDS);
                         }
                         break;
                     case BOTIN_DER_VALKYR:
                         if (eventId == EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ)
                         {
-                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(pTarget, BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, true);
-                            events.RescheduleEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, 6000);
+                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f))
+                            {
+                                if (EssenzenCnt >= MAX_ESSENZEN)
+                                {
+                                    events.CancelEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ);
+                                    break;
+                                }
+                                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+
+                                DoCast(pTarget, BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ);
+                                pTarget->AddAura(BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ_AURA, pTarget);
+
+                                Position pos;
+                                pTarget->GetPosition(&pos);
+
+                                if (TempSummon * summon = me->SummonCreature(ABGETRENNTE_ESSENZ, pos, TEMPSUMMON_CORPSE_DESPAWN))
+                                    if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                        summon->AI()->AttackStart(pTarget);
+
+                                events.RescheduleEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, urand(8 * IN_MILLISECONDS, SEKUNDEN_10));
+                            }
+                            else
+                                events.RescheduleEvent(EVENT_BOTIN_DER_VALKYR_ABGETRENNTE_ESSENZ, 1 * IN_MILLISECONDS);
                         }
                         break;
                     case VERSEUCHTE_MONSTROSITAET:
                         switch(eventId)
                         {
                             case EVENT_VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                    DoCast(pTarget, VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN, true);
-                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN, urand(10000,15000));
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                    DoCast(pTarget, VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN);
+                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_GEISSELHAKEN, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                             case EVENT_VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE:
-                                DoCast(VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE);
-                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE, urand(10000,15000));
+                                DoCastAOE(VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE);
+                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SEUCHENWOLKE, SEKUNDEN_20);
                                 break;
                             case EVENT_VERSEUCHTE_MONSTROSITAET_SPALTEN:
-                                DoCast(VERSEUCHTE_MONSTROSITAET_SPALTEN);
-                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SPALTEN, urand(3000,5000));
+                                DoCastVictim(VERSEUCHTE_MONSTROSITAET_SPALTEN);
+                                events.RescheduleEvent(EVENT_VERSEUCHTE_MONSTROSITAET_SPALTEN, urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
                     case EITERNDER_SCHRECKEN:
                         if (eventId == EVENT_EITERNDER_SCHRECKEN_SPRUDELNDER_EITER)
                         {
-                            DoCast(EITERNDER_SCHRECKEN_SPRUDELNDER_EITER);
+                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f))
+                                DoCast(pTarget, EITERNDER_SCHRECKEN_SPRUDELNDER_EITER);
                             events.RescheduleEvent(EVENT_EITERNDER_SCHRECKEN_SPRUDELNDER_EITER, urand(SEKUNDEN_10, SEKUNDEN_20));
                         }
                         break;
@@ -781,9 +820,9 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SEUCHENWISSENSCHAFTLER_MUTATIONSAUSLOESENDES_SPRAY:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, me->GetMaxCastRange(), true))
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                     DoCast(pTarget, SEUCHENWISSENSCHAFTLER_MUTATIONSAUSLOESENDES_SPRAY);
-                                events.RescheduleEvent(EVENT_SEUCHENWISSENSCHAFTLER_MUTATIONSAUSLOESENDES_SPRAY, urand(8000,10000));
+                                events.RescheduleEvent(EVENT_SEUCHENWISSENSCHAFTLER_MUTATIONSAUSLOESENDES_SPRAY, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                             case EVENT_SEUCHENWISSENSCHAFTLER_SEUCHENSCHLAG:
                                 DoCastVictim(SEUCHENWISSENSCHAFTLER_SEUCHENSCHLAG);
@@ -794,8 +833,8 @@ public:
                     case RACHSUECHTIGER_FLEISCHERNTER:
                         if (eventId == EVENT_RACHSUECHTIGER_FLEISCHERNTER_EINGESPRUNGENER_GESICHTSZERMALMER)
                         {
-                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                                DoCast(pTarget, RACHSUECHTIGER_FLEISCHERNTER_EINGESPRUNGENER_GESICHTSZERMALMER, true);
+                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 30.0f))
+                                DoCast(pTarget, RACHSUECHTIGER_FLEISCHERNTER_EINGESPRUNGENER_GESICHTSZERMALMER);
                             events.RescheduleEvent(EVENT_RACHSUECHTIGER_FLEISCHERNTER_EINGESPRUNGENER_GESICHTSZERMALMER, urand(SEKUNDEN_10, SEKUNDEN_20));
                         }
                         break;
@@ -810,22 +849,22 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, me->GetMaxCastRange(), true))
-                                    DoCast(pTarget, SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE, true);
-                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE, urand(10000,15000));
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 30.0f))
+                                    DoCast(pTarget, SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE);
+                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_VERWANDLUNG_SPINNE, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                             case EVENT_SINISTRER_ERZMAGIER_DRUCKWELLE:
-                                DoCast(SINISTRER_ERZMAGIER_DRUCKWELLE);
-                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_DRUCKWELLE, urand(10000,15000));
+                                DoCastAOE(SINISTRER_ERZMAGIER_DRUCKWELLE);
+                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_DRUCKWELLE, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                             case EVENT_SINISTRER_ERZMAGIER_FEUERBALL:
-                                DoCast(SINISTRER_ERZMAGIER_FEUERBALL);
-                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_FEUERBALL, urand(8000,13000));
+                                DoCastVictim(SINISTRER_ERZMAGIER_FEUERBALL);
+                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_FEUERBALL, urand(8 * IN_MILLISECONDS, 13 * IN_MILLISECONDS));
                                 break;
                             case EVENT_SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                    DoCast(pTarget, SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN, true);
-                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN, urand(10000,15000));
+                                    DoCast(pTarget, SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN);
+                                events.RescheduleEvent(EVENT_SINISTRER_ERZMAGIER_MAGIE_VERSTAERKEN, urand(SEKUNDEN_10, 15 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
@@ -833,12 +872,12 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_ADLIGER_KETTEN_DES_SCHATTENS:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, me->GetMaxCastRange(), true))
-                                    DoCast(pTarget, SINISTRER_ADLIGER_KETTEN_DES_SCHATTENS, true);
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 30.0f))
+                                    DoCast(pTarget, SINISTRER_ADLIGER_KETTEN_DES_SCHATTENS);
                                 events.RescheduleEvent(EVENT_SINISTRER_ADLIGER_KETTEN_DES_SCHATTENS, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_SINISTRER_ADLIGER_SCHATTENBLITZ:
-                                DoCast(SINISTRER_ADLIGER_SCHATTENBLITZ);
+                                DoCastVictim(SINISTRER_ADLIGER_SCHATTENBLITZ);
                                 events.RescheduleEvent(EVENT_SINISTRER_ADLIGER_SCHATTENBLITZ, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                         }
@@ -847,12 +886,12 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_BLUTRITTER_BLUTSPIEGEL:
-                                DoCastVictim(SINISTRER_BLUTRITTER_BLUTSPIEGEL, true);
+                                DoCastVictim(SINISTRER_BLUTRITTER_BLUTSPIEGEL);
                                 events.RescheduleEvent(EVENT_SINISTRER_BLUTRITTER_BLUTSPIEGEL, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_SINISTRER_BLUTRITTER_UNHEILIGER_STOSS:
-                                DoCastVictim(SINISTRER_BLUTRITTER_UNHEILIGER_STOSS, true);
-                                events.RescheduleEvent(EVENT_SINISTRER_BLUTRITTER_UNHEILIGER_STOSS, urand(5000,8000));
+                                DoCastVictim(SINISTRER_BLUTRITTER_UNHEILIGER_STOSS);
+                                events.RescheduleEvent(EVENT_SINISTRER_BLUTRITTER_UNHEILIGER_STOSS, urand(5 * IN_MILLISECONDS, 8 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
@@ -860,21 +899,21 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES:
-                                if (Unit * pTarget = DoSelectLowestHpFriendly(40, 1))
-                                    DoCast(pTarget, SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES, true);
+                                if (Unit * pTarget = DoSelectLowestHpFriendly(40))
+                                    DoCast(pTarget, SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES);
                                 else
-                                    DoCast(me, SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES, true);
+                                    DoCast(me, SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES);
                                 events.RescheduleEvent(EVENT_SINISTRER_BERATER_UMHUELLUNG_DES_SCHUTZES, urand(SEKUNDEN_20, SEKUNDEN_30));
                                 break;
                             case EVENT_SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES:
-                                if (Unit * pTarget = DoSelectLowestHpFriendly(40, 1))
-                                    DoCast(pTarget, SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES, true);
+                                if (Unit * pTarget = DoSelectLowestHpFriendly(40))
+                                    DoCast(pTarget, SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES);
                                 else
-                                    DoCast(me, SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES, true);
+                                    DoCast(me, SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES);
                                 events.RescheduleEvent(EVENT_SINISTRER_BERATER_UMHUELLUNG_DES_ZAUBERSCHUTZES, urand(SEKUNDEN_20, SEKUNDEN_30));
                                 break;
                             case EVENT_SINISTRER_BERATER_LICHKLATSCHER:
-                                DoCastVictim(SINISTRER_BERATER_LICHKLATSCHER, true);
+                                DoCastVictim(SINISTRER_BERATER_LICHKLATSCHER);
                                 events.RescheduleEvent(EVENT_SINISTRER_BERATER_LICHKLATSCHER, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                         }
@@ -883,11 +922,11 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_LEUTNANT_VAMPIRFLUCH:
-                                DoCastVictim(SINISTRER_LEUTNANT_VAMPIRFLUCH, true);
+                                DoCastVictim(SINISTRER_LEUTNANT_VAMPIRFLUCH);
                                 events.RescheduleEvent(EVENT_SINISTRER_LEUTNANT_VAMPIRFLUCH, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_SINISTRER_LEUTNANT_FLEISCHZERREISSEN:
-                                DoCastVictim(SINISTRER_LEUTNANT_FLEISCHZERREISSEN, true);
+                                DoCastVictim(SINISTRER_LEUTNANT_FLEISCHZERREISSEN);
                                 events.RescheduleEvent(EVENT_SINISTRER_LEUTNANT_FLEISCHZERREISSEN, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                         }
@@ -896,38 +935,38 @@ public:
                         switch(eventId)
                         {
                             case EVENT_SINISTRER_TAKTIKER_BLUTENTZUG:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                                    DoCast(pTarget, SINISTRER_TAKTIKER_BLUTENTZUG, true);
-                                events.RescheduleEvent(EVENT_SINISTRER_TAKTIKER_BLUTENTZUG, urand(5 * IN_MILLISECONDS, SEKUNDEN_20));
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 15.0f))
+                                    DoCast(pTarget, SINISTRER_TAKTIKER_BLUTENTZUG);
+                                events.RescheduleEvent(EVENT_SINISTRER_TAKTIKER_BLUTENTZUG, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                             case EVENT_SINISTRER_TAKTIKER_UNHEILIGER_STOSS:
-                                DoCastVictim(SINISTRER_TAKTIKER_UNHEILIGER_STOSS, true);
-                                events.RescheduleEvent(EVENT_SINISTRER_TAKTIKER_UNHEILIGER_STOSS, urand(3000,5000));
+                                DoCastVictim(SINISTRER_TAKTIKER_UNHEILIGER_STOSS);
+                                events.RescheduleEvent(EVENT_SINISTRER_TAKTIKER_UNHEILIGER_STOSS, urand(3 * IN_MILLISECONDS, 5 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
                     case SINISTRER_KOMMANDANT:
                         if (eventId == EVENT_SINISTRER_KOMMANDANT_VAMPIRANSTURM)
                         {
-                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                                DoCast(pTarget, SINISTRER_KOMMANDANT_VAMPIRANSTURM, true);
-                            events.RescheduleEvent(EVENT_SINISTRER_KOMMANDANT_VAMPIRANSTURM, urand(8000,12000));
+                            if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 45.0f))
+                                DoCast(pTarget, SINISTRER_KOMMANDANT_VAMPIRANSTURM);
+                            events.RescheduleEvent(EVENT_SINISTRER_KOMMANDANT_VAMPIRANSTURM, urand(8 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
                         }
                         break;
                     case RASENDE_MONSTROSITAET:
                         if (eventId == EVENT_RASENDE_MONSTROSITAET_SPALTEN)
                             DoCastVictim(RASENDE_MONSTROSITAET_SPALTEN);
-                        events.RescheduleEvent(EVENT_RASENDE_MONSTROSITAET_SPALTEN, urand(5000,8000));
+                        events.RescheduleEvent(EVENT_RASENDE_MONSTROSITAET_SPALTEN, urand(5 * IN_MILLISECONDS, 8 * IN_MILLISECONDS));
                         break;
                     case BASTIONSGARGOYLE:
                         if (eventId == EVENT_BASTIONSGARGOYLE_GIFT_SPUCKEN)
                             DoCastVictim(BASTIONSGARGOYLE_GIFT_SPUCKEN);
-                        events.RescheduleEvent(EVENT_BASTIONSGARGOYLE_GIFT_SPUCKEN, urand(3000,5000));
+                        events.RescheduleEvent(EVENT_BASTIONSGARGOYLE_GIFT_SPUCKEN, urand(3 * IN_MILLISECONDS, 5 * IN_MILLISECONDS));
                         break;
                     case BASTIONSDIENER:
                         if (eventId == EVENT_BASTIONSDIENER_GHOULSCHLITZEN)
                             DoCastVictim(BASTIONSDIENER_GHOULSCHLITZEN);
-                        events.RescheduleEvent(EVENT_BASTIONSDIENER_GHOULSCHLITZEN, urand(3000,5000));
+                        events.RescheduleEvent(EVENT_BASTIONSDIENER_GHOULSCHLITZEN, urand(3 * IN_MILLISECONDS, 5 * IN_MILLISECONDS));
                         break;
                     case BASTIONSFROSTWYRM:
                         switch(eventId)
@@ -936,21 +975,21 @@ public:
                                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                                 DoCastVictim(BASTIONSFROSTWYRM_SPALTEN);
-                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_SPALTEN, urand(3000,5000));
+                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_SPALTEN, urand(3 * IN_MILLISECONDS, 5 * IN_MILLISECONDS));
                                 break;
                             case EVENT_BASTIONSFROSTWYRM_BLIZZARD:
                                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
                                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                    DoCast(pTarget, BASTIONSFROSTWYRM_BLIZZARD, true);
-                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_BLIZZARD, urand(8000,12000));
+                                    DoCast(pTarget, BASTIONSFROSTWYRM_BLIZZARD);
+                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_BLIZZARD, urand(8 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
                                 break;
                             case EVENT_BASTIONSFROSTWYRM_FROSTATEM:
                                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                                    DoCast(pTarget, BASTIONSFROSTWYRM_FROSTATEM, true);
-                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_FROSTATEM, urand(8000,12000));
+                                    DoCast(pTarget, BASTIONSFROSTWYRM_FROSTATEM);
+                                events.RescheduleEvent(EVENT_BASTIONSFROSTWYRM_FROSTATEM, urand(8 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
                                 break;
                         }
                         break;
@@ -958,13 +997,17 @@ public:
                         switch(eventId)
                         {
                             case EVENT_FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                    DoCast(pTarget, FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL, false);
-                                events.RescheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL, urand(SEKUNDEN_20, SEKUNDEN_30));
+                                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f))
+                                    // TODO: FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_CAST muss automatisch FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_MISSILE auf das selbe Ziel casten,
+                                    //       nachdem FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_CAST beendet wurde! Wie?
+                                    DoCast(pTarget, FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL_MISSILE);
+                                events.RescheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_GEFRORENE_KUGEL, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                    DoCast(pTarget, FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE, false);
+                                    DoCast(pTarget, FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE);
                                 events.RescheduleEvent(EVENT_FROSTBINDER_DER_YMIRJAR_VERDREHTE_WINDE, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                         }
@@ -974,7 +1017,7 @@ public:
                         {
                             case EVENT_KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS:
                                 DoCastVictim(KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS);
-                                events.RescheduleEvent(EVENT_KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS, urand(SEKUNDEN_10, SEKUNDEN_20));
+                                events.RescheduleEvent(EVENT_KRIEGSMAID_DER_YMIRJAR_BARBARISCHER_STOSS, urand(5 * IN_MILLISECONDS, SEKUNDEN_10));
                                 break;
                             case EVENT_KRIEGSMAID_DER_YMIRJAR_ADRENALINRAUSCH:
                                 me->AddAura(KRIEGSMAID_DER_YMIRJAR_ADRENALINRAUSCH, me);
@@ -985,7 +1028,7 @@ public:
                     case KRIEGSFUERST_DER_YMIRJAR:
                         if (eventId == EVENT_KRIEGSFUERST_DER_YMIRJAR_WIRBELWIND)
                         {
-                            DoCast(KRIEGSFUERST_DER_YMIRJAR_WIRBELWIND);
+                            DoCastAOE(KRIEGSFUERST_DER_YMIRJAR_WIRBELWIND);
                             events.RescheduleEvent(EVENT_KRIEGSFUERST_DER_YMIRJAR_WIRBELWIND, urand(SEKUNDEN_10, SEKUNDEN_20));
                         }
                         break;
@@ -997,13 +1040,13 @@ public:
                                 events.RescheduleEvent(EVENT_JAEGERIN_DER_YMIRJAR_FLINKSCHUSS, urand(SEKUNDEN_20, SEKUNDEN_30));
                                 break;
                             case EVENT_JAEGERIN_DER_YMIRJAR_FROSTFALLE:
-                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f))
-                                    DoCast(pTarget, JAEGERIN_DER_YMIRJAR_FROSTFALLE, false);
+                                if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 20.0f))
+                                    DoCast(pTarget, JAEGERIN_DER_YMIRJAR_FROSTFALLE);
                                 events.RescheduleEvent(EVENT_JAEGERIN_DER_YMIRJAR_FROSTFALLE, urand(SEKUNDEN_20, SEKUNDEN_30));
                                 break;
                             case EVENT_JAEGERIN_DER_YMIRJAR_SALVE:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f))
-                                    DoCast(pTarget, JAEGERIN_DER_YMIRJAR_SALVE, false);
+                                    DoCast(pTarget, JAEGERIN_DER_YMIRJAR_SALVE);
                                 events.RescheduleEvent(EVENT_JAEGERIN_DER_YMIRJAR_SALVE, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                             case EVENT_JAEGERIN_DER_YMIRJAR_SCHIESSEN:
@@ -1025,7 +1068,7 @@ public:
                                 break;
                             case EVENT_TODESBRINGER_DER_YMIRJAR_VERBANNEN:
                                 if (Unit * pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 20.0f))
-                                    DoCast(pTarget, TODESBRINGER_DER_YMIRJAR_VERBANNEN, false);
+                                    DoCast(pTarget, TODESBRINGER_DER_YMIRJAR_VERBANNEN);
                                 events.RescheduleEvent(EVENT_TODESBRINGER_DER_YMIRJAR_VERBANNEN, urand(SEKUNDEN_10, SEKUNDEN_20));
                                 break;
                         }
