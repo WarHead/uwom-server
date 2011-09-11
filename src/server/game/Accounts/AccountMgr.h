@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -19,9 +20,8 @@
 #ifndef _ACCMGR_H
 #define _ACCMGR_H
 
+#include "Define.h"
 #include <string>
-
-#include "Common.h"
 
 enum AccountOpResult
 {
@@ -35,12 +35,8 @@ enum AccountOpResult
 
 #define MAX_ACCOUNT_STR 16
 
-class AccountMgr
+namespace AccountMgr
 {
-    public:
-        AccountMgr();
-        ~AccountMgr();
-
         AccountOpResult CreateAccount(std::string username, std::string password);
         AccountOpResult DeleteAccount(uint32 accountId);
         AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
@@ -54,8 +50,14 @@ class AccountMgr
         uint32 GetCharactersCount(uint32 accountId);
         std::string CalculateShaPassHash(std::string& name, std::string& password);
 
-        static bool normalizeString(std::string& utf8String);
+        bool normalizeString(std::string& utf8String);
+        bool IsPlayerAccount(uint32 gmlevel);
+        bool IsModeratorAccount(uint32 gmlevel);
+        bool IsGMAccount(uint32 gmlevel);
+        bool IsHGMAccount(uint32 gmlevel);
+        bool IsOGMAccount(uint32 gmlevel);
+        bool IsAdminAccount(uint32 gmlevel);
+        bool IsConsoleAccount(uint32 gmlevel);
 };
 
-#define sAccountMgr ACE_Singleton<AccountMgr, ACE_Null_Mutex>::instance()
 #endif

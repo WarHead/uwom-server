@@ -152,8 +152,9 @@ enum Actions
     ACTION_DEATH        = 3,
 };
 
-const Position ValithriaSpawnPos    = { 4210.813f, 2484.443f, 364.9558f, 0.01745329f };
-const Position Ziel                 = { 4205.066895f, 2484.696533f, 364.871521f, 0.0f };
+const Position ValithriaSpawnPos    = { 4210.813f, 2484.443f, 364.9558f,  0.01745329f };
+const Position ZielVorne            = { 4240.891f, 2484.378f, 364.87039f, 0.0f };
+const Position ZielHinten           = { 4170.970f, 2484.396f, 364.87332f, 0.0f };
 
 class RisenArchmageCheck
 {
@@ -248,14 +249,12 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_COLUMN_OF_FROST:
                 case NPC_ROT_WORM:
                     creature->DespawnOrUnsummon();
-                    return;
+                    break;
                 case NPC_RISEN_ARCHMAGE:
                     if (!creature->GetDBTableGUIDLow())
-                    {
                         creature->DespawnOrUnsummon();
-                        return;
-                    }
-                    creature->Respawn(true);
+                    else
+                        creature->Respawn(true);
                     break;
                 default:
                     return;
@@ -268,12 +267,11 @@ class ValithriaDespawner : public BasicEvent
 
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
-            creature->ForcedDespawn();
 
+            creature->ForcedDespawn();
             creature->SetCorpseDelay(corpseDelay);
             creature->SetRespawnDelay(respawnDelay);
         }
-
     private:
         Creature* _creature;
 };
@@ -507,6 +505,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 _Reset();
                 me->SetReactState(REACT_PASSIVE);
+                instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
             }
 
             void EnterCombat(Unit* target)
@@ -571,7 +570,8 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 // check if there is any player on threatlist, if not - evade
                 for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                     if (Unit* target = (*itr)->getTarget())
-                        if (target->GetTypeId() == TYPEID_PLAYER)
+                        // Hier muss unbedingt auf GM geprüft werden!
+                        if (target->GetTypeId() == TYPEID_PLAYER && !target->ToPlayer()->isGameMaster() && target->ToPlayer()->isGMVisible())
                             return; // found any player, return
 
                 EnterEvadeMode();
@@ -594,8 +594,7 @@ class npc_the_lich_king_controller : public CreatureScript
 
         struct npc_the_lich_king_controllerAI : public ScriptedAI
         {
-            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature),
-                _instance(creature->GetInstanceScript())
+            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature), summons(me), instance(creature->GetInstanceScript())
             {
             }
 
@@ -608,6 +607,7 @@ class npc_the_lich_king_controller : public CreatureScript
                 _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 20000);
                 _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 30000);
                 me->SetReactState(REACT_PASSIVE);
+                summons.DespawnAll();
             }
 
             void JustReachedHome()
@@ -623,6 +623,8 @@ class npc_the_lich_king_controller : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+                summons.Summon(summon);
+
                 // must not be in dream phase
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true);
                 if (summon->GetEntry() != NPC_SUPPRESSER)
@@ -630,8 +632,12 @@ class npc_the_lich_king_controller : public CreatureScript
                     if (Unit * target = summon->AI()->SelectTarget(SELECT_TARGET_NEAREST, 0, 0.0f, true))
                         summon->AI()->AttackStart(target);
                     else
-                        summon->GetMotionMaster()->MovePoint(0, Ziel);
-
+                    {
+                        if (summon->GetPositionX() < 4200.0f)
+                            summon->GetMotionMaster()->MovePoint(0, ZielHinten);
+                        else
+                            summon->GetMotionMaster()->MovePoint(0, ZielVorne);
+                    }
                     summon->AI()->DoZoneInCombat();
                 }
             }
@@ -640,6 +646,9 @@ class npc_the_lich_king_controller : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+
+                if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
+                    EnterEvadeMode();
 
                 _events.Update(diff);
 
@@ -673,7 +682,8 @@ class npc_the_lich_king_controller : public CreatureScript
 
         private:
             EventMap _events;
-            InstanceScript* _instance;
+            SummonList summons;
+            InstanceScript * instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -917,8 +927,6 @@ class npc_suppresser : public CreatureScript
                             break;
                     }
                 }
-
-                DoMeleeAttackIfReady();
             }
 
         private:

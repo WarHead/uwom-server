@@ -61,51 +61,67 @@ enum TeleporterSpells
     DEATHBRINGER_S_RISE_TELEPORT    = 70858,
     UPPER_SPIRE_TELEPORT            = 70859,
     FROZEN_THRONE_TELEPORT          = 70860,
-    SINDRAGOSA_S_LAIR_TELEPORT      = 70861,
+    SINDRAGOSA_S_LAIR_TELEPORT      = 70861
 };
 
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
-    DATA_LORD_MARROWGAR             = 0,
-    DATA_LADY_DEATHWHISPER          = 1,
-    DATA_GUNSHIP_EVENT              = 2,
-    DATA_DEATHBRINGER_SAURFANG      = 3,
-    DATA_FESTERGUT                  = 4,
-    DATA_ROTFACE                    = 5,
-    DATA_PROFESSOR_PUTRICIDE        = 6,
-    DATA_BLOOD_PRINCE_COUNCIL       = 7,
-    DATA_BLOOD_QUEEN_LANA_THEL      = 8,
-    DATA_SISTER_SVALNA              = 9,
-    DATA_VALITHRIA_DREAMWALKER      = 10,
-    DATA_SINDRAGOSA                 = 11,
-    DATA_THE_LICH_KING              = 12,
+    DATA_LORD_MARROWGAR,
+    DATA_LADY_DEATHWHISPER,
+    DATA_GUNSHIP_EVENT,
+    DATA_DEATHBRINGER_SAURFANG,
+    DATA_FESTERGUT,
+    DATA_ROTFACE,
+    DATA_PROFESSOR_PUTRICIDE,
+    DATA_BLOOD_PRINCE_COUNCIL,
+    DATA_BLOOD_QUEEN_LANA_THEL,
+    DATA_SISTER_SVALNA,
+    DATA_VALITHRIA_DREAMWALKER,
+    DATA_SINDRAGOSA,
+    DATA_THE_LICH_KING,
 
     // Additional data
-    DATA_SAURFANG_EVENT_NPC         = 13,
-    DATA_BONED_ACHIEVEMENT          = 14,
-    DATA_OOZE_DANCE_ACHIEVEMENT     = 15,
-    DATA_PUTRICIDE_TABLE            = 16,
-    DATA_NAUSEA_ACHIEVEMENT         = 17,
-    DATA_ORB_WHISPERER_ACHIEVEMENT  = 18,
-    DATA_PRINCE_KELESETH_GUID       = 19,
-    DATA_PRINCE_TALDARAM_GUID       = 20,
-    DATA_PRINCE_VALANAR_GUID        = 21,
-    DATA_BLOOD_PRINCES_CONTROL      = 22,
-    DATA_SINDRAGOSA_FROSTWYRMS      = 23,
-    DATA_SPINESTALKER               = 24,
-    DATA_RIMEFANG                   = 25,
-    DATA_COLDFLAME_JETS             = 26,
-    DATA_TEAM_IN_INSTANCE           = 27,
-    DATA_BLOOD_QUICKENING_STATE     = 28,
-    DATA_HEROIC_ATTEMPTS            = 29,
-    DATA_CROK_SCOURGEBANE           = 30,
-    DATA_CAPTAIN_ARNATH             = 31,
-    DATA_CAPTAIN_BRANDON            = 32,
-    DATA_CAPTAIN_GRONDEL            = 33,
-    DATA_CAPTAIN_RUPERT             = 34,
-    DATA_VALITHRIA_TRIGGER          = 35,
-    DATA_VALITHRIA_LICH_KING        = 36,
+    DATA_SAURFANG_EVENT_NPC,
+    DATA_BONED_ACHIEVEMENT,
+    DATA_OOZE_DANCE_ACHIEVEMENT,
+    DATA_PUTRICIDE_TABLE,
+    DATA_NAUSEA_ACHIEVEMENT,
+    DATA_ORB_WHISPERER_ACHIEVEMENT,
+    DATA_PRINCE_KELESETH_GUID,
+    DATA_PRINCE_TALDARAM_GUID,
+    DATA_PRINCE_VALANAR_GUID,
+    DATA_BLOOD_PRINCES_CONTROL,
+    DATA_SINDRAGOSA_FROSTWYRMS,
+    DATA_SPINESTALKER,
+    DATA_RIMEFANG,
+    DATA_COLDFLAME_JETS,
+    DATA_TEAM_IN_INSTANCE,
+    DATA_BLOOD_QUICKENING_STATE,
+    DATA_HEROIC_ATTEMPTS,
+    DATA_CROK_SCOURGEBANE,
+    DATA_CAPTAIN_ARNATH,
+    DATA_CAPTAIN_BRANDON,
+    DATA_CAPTAIN_GRONDEL,
+    DATA_CAPTAIN_RUPERT,
+    DATA_VALITHRIA_TRIGGER,
+    DATA_VALITHRIA_LICH_KING,
+
+    // For Lich King script only
+    GUID_TIRION,
+    GUID_TERENAS_FIGHTER,
+    GUID_SPIRIT_WARDEN,
+    GUID_ICE_SHARD_1,
+    GUID_ICE_SHARD_2,
+    GUID_ICE_SHARD_3,
+    GUID_ICE_SHARD_4,
+    GUID_LAVAMAN,
+    GUID_HANGINGMAN,
+    GUID_FROSTY_EDGE_OUTER,
+    GUID_FROSTY_EDGE_INNER,
+    GUID_EDGE_DESTROY_WARNING,
+    DATA_BEEN_WAITING_ACHIEVEMENT,
+    DATA_NECK_DEEP_ACHIEVEMENT,
 
     DATA_FALLEN_ADDS_SPAWNEN,
     DATA_KILL_CREDIT
@@ -257,6 +273,20 @@ enum CreaturesIds
 
     // The Lich King
     NPC_THE_LICH_KING                           = 36597,
+    NPC_TIRION_ICC                              = 38995,
+    NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER      = 22515,
+    NPC_TERENAS_MENETHIL                        = 38579,
+    NPC_FROSTMOURNE_TRIGGER                     = 38584,
+    NPC_TERENAS_FIGHTER                         = 36823, // for frostmourne
+    NPC_SPIRIT_WARDEN                           = 36824,
+    NPC_ICE_SPHERE                              = 36633,
+    NPC_DRUDGE_GHOUL                            = 37695,
+    NPC_SHAMBLING_HORROR                        = 37698,
+    NPC_VALKYR                                  = 36609,
+    NPC_DEFILE                                  = 38757,
+    NPC_RAGING_SPIRIT                           = 36701,
+    NPC_TRIGGER                                 = 38667,
+    NPC_VILE_SPIRIT                             = 37799
 };
 
 enum GameObjectsIds
@@ -339,6 +369,19 @@ enum GameObjectsIds
     GO_ICE_WALL                             = 202396,
     GO_ICE_BLOCK                            = 201722,
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
+
+    // Lich King
+    GO_ARTHAS_PLATFORM                      = 202161,
+    GO_ICE_SHARD_1                          = 202141,
+    GO_ICE_SHARD_2                          = 202142,
+    GO_ICE_SHARD_3                          = 202143,
+    GO_ICE_SHARD_4                          = 202144,
+    GO_FROSTY_EDGE_OUTER                    = 202188,
+
+    GO_FROSTY_EDGE_INNER                    = 202189,
+    GO_EDGE_DESTROY_WARNING                 = 202190,
+    GO_LAVAMAN                              = 202436,
+    GO_HANGINGMAN                           = 202437
 };
 
 enum AchievementCriteriaIds
@@ -374,6 +417,16 @@ enum AchievementCriteriaIds
     CRITERIA_ONCE_BITTEN_TWICE_SHY_25N  = 13012,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_10V  = 13011,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_25V  = 13013,
+
+    // Lich King
+    CRITERIA_WAITING_A_LONG_TIME_25N    = 13244,
+    CRITERIA_WAITING_A_LONG_TIME_25H    = 13245,
+    CRITERIA_WAITING_A_LONG_TIME_10N    = 13246,
+    CRITERIA_WAITING_A_LONG_TIME_10H    = 13247,
+    CRITERIA_NECK_DEEP_IN_VILE_10N      = 12823,
+    CRITERIA_NECK_DEEP_IN_VILE_10H      = 13163,
+    CRITERIA_NECK_DEEP_IN_VILE_25H      = 13164,
+    CRITERIA_NECK_DEEP_IN_VILE_25N      = 13243
 };
 
 enum SharedActions
@@ -400,7 +453,7 @@ enum SharedActions
 
     // Sindragosa
     ACTION_START_FROSTWYRM      = -368530,
-    ACTION_TRIGGER_ASPHYXIATION = -368531,
+    ACTION_TRIGGER_ASPHYXIATION = -368531
 };
 
 enum WeekliesICC
@@ -414,7 +467,7 @@ enum WeekliesICC
     QUEST_BLOOD_QUICKENING_10               = 24874,
     QUEST_BLOOD_QUICKENING_25               = 24879,
     QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_10  = 24872,
-    QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_25  = 24880,
+    QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_25  = 24880
 };
 
 enum WorldStatesICC
@@ -423,7 +476,7 @@ enum WorldStatesICC
     WORLDSTATE_EXECUTION_TIME       = 4904,
     WORLDSTATE_SHOW_ATTEMPTS        = 4940,
     WORLDSTATE_ATTEMPTS_REMAINING   = 4941,
-    WORLDSTATE_ATTEMPTS_MAX         = 4942,
+    WORLDSTATE_ATTEMPTS_MAX         = 4942
 };
 
 class spell_trigger_spell_from_caster : public SpellScriptLoader
@@ -476,5 +529,7 @@ CreatureAI* GetIcecrownCitadelAI(Creature* creature)
                 return new AI(creature);
     return NULL;
 }
+
+//void TeleportPlayerToFrozenThrone(Player * player);
 
 #endif // ICECROWN_CITADEL_H_
