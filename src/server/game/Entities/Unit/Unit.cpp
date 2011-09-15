@@ -6137,6 +6137,22 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 37378;
                     break;
                 }
+                //Glyph of Fear 
+                case 42458: 
+                { 
+                    triggered_spell_id = 56244; 
+                    break; 
+                }
+                case 1122: 
+                { 
+                    triggered_spell_id = 22703; 
+                    break; 
+                } 
+                case 18540: 
+                { 
+                    triggered_spell_id = 60478; 
+                    break; 
+                }
             }
             break;
         }
