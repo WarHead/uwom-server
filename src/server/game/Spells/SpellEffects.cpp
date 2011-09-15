@@ -1268,6 +1268,55 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     unitTarget->Kill(unitTarget);
                     return;
                 }
+                // Glyph of Dragon's Breath
+                case 56989:  
+                {				
+                    if (unitTarget)
+                       m_caster->CastSpell(m_caster, 56373, false, NULL);
+                    return;
+                }
+                case 69922:                                 // Temper Quel'Delar
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    // Return Tempered Quel'Delar
+                    unitTarget->CastSpell(m_caster, 69956, true);
+                    return;
+                }
+                case 55804:           // quest=12937 Healing Finished
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    m_caster->CastSpell(m_caster, 55809, true, NULL);       // Trigger Aid of the Earthen
+                    m_caster->ToPlayer()->KilledMonsterCredit(30035, unitTarget->GetGUID());
+                    unitTarget->ToCreature()->ForcedDespawn();
+                    break;
+                }
+                case 55046:            // Ice Shard
+                {
+                    if (!m_caster || !unitTarget)
+                        return;
+                    if (m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Creature *target_crature = unitTarget->ToCreature();
+                    Creature *caster_crature = m_caster->ToCreature();
+                    if (Player *plr = caster_crature->GetCharmer()->ToPlayer())
+                    {
+                        if (target_crature && caster_crature && target_crature->GetEntry() == 29639)
+                        {
+                            plr->KilledMonsterCredit(29734,0);
+                            plr->KilledMonsterCredit(29709,0);
+                        target_crature->ForcedDespawn();
+                        //caster_crature->ForcedDespawn();
+                        }
+                    }
+                    return;
+                }
             }
 
             break;
