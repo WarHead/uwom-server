@@ -1194,6 +1194,35 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->SendMessageToSet(&data, true);
                     return;
                 }
+                case 51962:                                 // Offer Jungle Punch
+                {
+
+                    if (!m_caster || !unitTarget)
+                        return;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Creature *target_crature = unitTarget->ToCreature();
+                    Player *caster_player = m_caster->ToPlayer();
+                    if(target_crature && caster_player)
+                    {
+                        switch(target_crature->GetEntry())
+                        {
+                            case 27986:
+                            case 28047:
+                            case 28568:
+                                caster_player->KilledMonsterCredit(target_crature->GetEntry(),0);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    return;
+                }
                 case 53808:                                 // Pygmy Oil
                 {
                     Aura* pAura = m_caster->GetAura(53806);
