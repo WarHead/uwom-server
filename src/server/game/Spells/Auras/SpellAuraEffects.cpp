@@ -5754,6 +5754,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->RemoveAura(64821);
                     }
                     break;
+                case 75765: // [DND] Music (Operation Gnomeregan event)
+                    target->CastSpell(target, 75782, true);
+                    break;
             }
             break;
         case SPELLFAMILY_MAGE:
