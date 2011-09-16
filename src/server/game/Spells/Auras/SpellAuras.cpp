@@ -1919,8 +1919,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (apply) target->RemoveAurasDueToSpell(spell_immune);
                     target->ApplySpellImmune(0, IMMUNITY_ID, spell_immune, apply);
                 }
+            }
         }
-
 }
 
 bool Aura::CanBeAppliedOn(Unit* target)
