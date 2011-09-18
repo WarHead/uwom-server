@@ -469,7 +469,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             Talk(SAY_DOMINATE_MIND);
                             for (uint8 i = 0; i < _dominateMindCount; i++)
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_DOMINATE_MIND_H))
-                                    if (target != me->getVictim()) // Aus irgend einem Grund ist es sonst mˆglich, dass der Tank ¸bernommen wird! NO GO!
+                                    if (target != me->getVictim()) // Aus irgend einem Grund ist es sonst m√∂glich, dass der Tank √ºbernommen wird! NO GO!
                                     {
                                         DoCast(target, SPELL_DOMINATE_MIND_H);
                                         events.ScheduleEvent(EVENT_DOMINATE_MIND_H, urand(SEKUNDEN_40, 45 * IN_MILLISECONDS));
