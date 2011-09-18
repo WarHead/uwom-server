@@ -4606,7 +4606,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
     if (!*args)
         return false;
 
-    Player* player = getSelectedPlayer();
+    Player * player = NULL;
+
+    if (!AccountMgr::IsPlayerAccount(m_session->GetSecurity()))
+        player = getSelectedPlayer();
+
     if (!player)
         player = m_session->GetPlayer();
 
