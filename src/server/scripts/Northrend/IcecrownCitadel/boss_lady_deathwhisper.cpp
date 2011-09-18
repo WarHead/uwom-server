@@ -196,6 +196,8 @@ Position const SummonPositions[7] =
     {-524.2480f, 2211.920f, 62.90960f, 3.141592f}  // 7 Upper (Random Cultist)
 };
 
+const Position MovePoint = { -597.709f, 2211.578f, 49.47659f, 0.0f };
+
 class DaranavanMoveEvent : public BasicEvent
 {
     public:
@@ -411,15 +413,21 @@ class boss_lady_deathwhisper : public CreatureScript
                     summons.Summon(summon);
 
                 Unit* target = NULL;
+
                 if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
                 {
-                    target = ObjectAccessor::GetUnit(*me, _nextVengefulShadeTargetGUID);   // Vengeful Shade
+                    target = ObjectAccessor::GetUnit(*me, _nextVengefulShadeTargetGUID); // Vengeful Shade
                     _nextVengefulShadeTargetGUID = 0;
                 }
                 else
-                    target = SelectTarget(SELECT_TARGET_RANDOM);                        // Wave adds
+                {
+                    target = SelectTarget(SELECT_TARGET_RANDOM); // Wave adds
+                    if (target)
+                        summon->AI()->AttackStart(target);
+                    else
+                        summon->GetMotionMaster()->MovePoint(0, MovePoint);
+                }
 
-                summon->AI()->AttackStart(target);                                      // CAN be NULL
                 if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
                     summon->CastSpell(summon, SPELL_FANATIC_S_DETERMINATION, true);
                 else if (summon->GetEntry() == NPC_REANIMATED_ADHERENT)
