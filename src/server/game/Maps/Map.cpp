@@ -2501,11 +2501,6 @@ void InstanceMap::PermBindAllPlayers(Player* player)
         sLog->outError("Cannot bind player (GUID: %u, Name: %s), because no instance save is available for instance map (Name: %s, Entry: %u, InstanceId: %u)!", player->GetGUIDLow(), player->GetName(), player->GetMap()->GetMapName(), player->GetMapId(), GetInstanceId());
         return;
     }
-    else if (!IsRaid()) // Nur Raidinstanzen permanent binden
-    {
-        save->SetCanReset(true);
-        return;
-    }
 
     Group* group = player->GetGroup();
     // group members outside the instance group don't get bound

@@ -239,7 +239,7 @@ Player* ScriptedAI::SelectRandomPlayer(float range)
 
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {
-            if ((range == 0.0f || me->IsWithinDistInMap(i->getSource(), range)) && i->getSource()->isTargetableForAttack())
+            if ((!range || me->IsWithinDistInMap(i->getSource(), range)) && i->getSource()->isTargetableForAttack())
                 return i->getSource();
         }
         return NULL;

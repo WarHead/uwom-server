@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -4606,7 +4607,11 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
     if (!*args)
         return false;
 
-    Player* player = getSelectedPlayer();
+    Player * player = NULL;
+
+    if (!AccountMgr::IsPlayerAccount(m_session->GetSecurity()))
+        player = getSelectedPlayer();
+
     if (!player)
         player = m_session->GetPlayer();
 
