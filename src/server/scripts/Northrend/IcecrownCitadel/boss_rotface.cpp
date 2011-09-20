@@ -20,6 +20,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"
+#include "GridNotifiers.h"
 #include "icecrown_citadel.h"
 
 // KNOWN BUGS:
