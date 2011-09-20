@@ -1321,7 +1321,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                     return;
 
                 std::list<Creature*> summoners;
-                GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
+                GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLDTRIGGER, 100.0f);
                 summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 Trinity::RandomResizeList(summoners, 2);
                 if (summoners.empty())
