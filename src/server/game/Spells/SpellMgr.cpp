@@ -3433,6 +3433,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 if (spellInfo->SpellFamilyFlags[2] & 0x100)
                     spellInfo->MaxAffectedTargets = 2;
                 break;
+            case SPELLFAMILY_SHAMAN:
+                // Flametongue Totem
+                if (spellInfo->SpellFamilyFlags[0] & 0x2000000)
+                    spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+                break;
             case SPELLFAMILY_PALADIN:
                 // Seals of the Pure should affect Seal of Righteousness
                 if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
