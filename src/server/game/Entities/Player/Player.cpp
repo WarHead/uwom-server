@@ -2409,6 +2409,7 @@ bool Player::TeleportToBGEntryPoint()
 
     ScheduleDelayedOperation(DELAYED_BG_MOUNT_RESTORE);
     ScheduleDelayedOperation(DELAYED_BG_TAXI_RESTORE);
+    ScheduleDelayedOperation(DELAYED_BG_GROUP_RESTORE);
     return TeleportTo(m_bgData.joinPos);
 }
 
@@ -2463,7 +2464,13 @@ void Player::ProcessDelayedOperations()
             ContinueTaxiFlight();
         }
     }
-
+    
+    if (m_DelayedOperations & DELAYED_BG_GROUP_RESTORE)
+    {
+        if (Group *g = GetGroup())
+            g->SendUpdateToPlayer(GetGUID());
+    }
+    
     //we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
 }
@@ -7968,6 +7975,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -val, apply);
                 m_spellPenetrationItemMod += apply ? val : -val;
                 break;
+            case ITEM_MOD_BLOCK_VALUE:
+                HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
+                break;
             // deprecated item mods
             case ITEM_MOD_SPELL_HEALING_DONE:
             case ITEM_MOD_SPELL_DAMAGE_DONE:
@@ -8437,7 +8447,22 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 if (spellInfo->IsPositive())
                     CastSpell(this, spellInfo, true, item);
                 else
+               // {
                     CastSpell(target, spellInfo, true, item);
+               /*     // Deadly Poison
+                    if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->SpellFamilyFlags[0] == 0x10000 && spellInfo->SpellFamilyFlags[1] == 0x80000) 
+					{
+                        if (Aura * aur = target->GetAura(pEnchant->spellid[s], GetGUID()))
+                            if (aur->GetStackAmount() == 5)
+                                if (Item* Weapon = GetWeaponForAttack(attType == BASE_ATTACK ? OFF_ATTACK : BASE_ATTACK, true))
+                                    if (SpellItemEnchantmentEntry const *Poison = sSpellItemEnchantmentStore.LookupEntry(Weapon->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)))) 
+                                    {
+                                        SpellInfo const *poisonEntry =  sSpellMgr->GetSpellInfo(Poison->spellid[s]);
+                                        if(poisonEntry && poisonEntry->Dispel == DISPEL_POISON)
+                                            CastSpell(target, poisonEntry, true, Weapon);
+                                    }
+                    }
+                }  */
             }
         }
     }

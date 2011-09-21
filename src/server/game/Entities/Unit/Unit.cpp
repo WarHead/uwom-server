@@ -790,6 +790,23 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 killer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, victim);
         }
 
+        // Heirloom trinkets on "kill a target that yields experience or honor" effect
+        if (this->ToPlayer() && this->isAlive()) 
+            if (this->ToPlayer()->isHonorOrXPTarget(victim))
+            {
+                AuraEffectList const& heirloom = GetAuraEffectsByType(SPELL_AURA_DUMMY);
+                for (AuraEffectList::const_iterator j = heirloom.begin(); j != heirloom.end(); ++j)
+                {
+                    if ((*j)->GetId() == 59915 && this->getPowerType() == POWER_MANA)
+                        this->CastSpell(this,59914,true);
+                    if ((*j)->GetId() == 59906)
+                    {
+                        int32 bonushealth = this->GetMaxHealth() * this->GetAura(59906)->GetEffect(0)->GetAmount() / 100;
+                        this->CastCustomSpell(this,59913,&bonushealth,0,0,true);
+                    }
+                }
+            }
+
         Kill(victim, durabilityLoss);
     }
     else
@@ -1682,6 +1699,10 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
             if ((*j)->GetMiscValue() & schoolMask)
                 AddPctN(damageResisted, -(*j)->GetAmount());
 
+        // These spells should ignore any resistances
+        if (spellInfo && spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
+            damageResisted = 0;
+
         dmgInfo.ResistDamage(uint32(damageResisted));
     }
 
@@ -2295,6 +2316,10 @@ bool Unit::isSpellBlocked(Unit* victim, SpellInfo const* spellProto, WeaponAttac
             victim->ToCreature()->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK)
                 return false;
 
+        // These spells shouldn't be blocked
+        if (spellProto && spellProto->Attributes & SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK)
+            return false;
+
         float blockChance = victim->GetUnitBlockChance();
         blockChance += (int32(GetWeaponSkillValue(attackType)) - int32(victim->GetMaxSkillValueForLevel())) * 0.04f;
         if (roll_chance_f(blockChance))
@@ -2585,7 +2610,18 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
             }
         }
 
-        if (bNegativeAura)
+        // Direct Damage spells should not be fully resisted
+        bool bDirectDamage = false;
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (spell->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE || spell->Effects[i].Effect == SPELL_EFFECT_HEALTH_LEECH)
+            {
+                bDirectDamage = true;
+                break;
+            }
+        }
+
+        if (bNegativeAura && !bDirectDamage)
         {
             tmp += victim->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel)) * 100;
             tmp += victim->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel)) * 100;
@@ -3746,6 +3782,16 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
                 }
                 default:
                     break;
+            }
+            // Wyvern Sting
+            if (aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_HUNTER && (aura->GetSpellInfo()->SpellFamilyFlags[1] & 0x1000))
+            {
+                Unit * caster = aura->GetCaster();
+                if (caster && !(dispeller->GetTypeId() == TYPEID_UNIT && dispeller->ToCreature()->isTotem()))
+                    // Noxious Stings
+                    if (AuraEffect * auraEff = caster->GetAuraEffect(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, SPELLFAMILY_HUNTER, 3521, 1))
+                        if (Aura * newAura = caster->AddAura(aura->GetId(), dispeller))
+                            newAura->SetDuration(aura->GetDuration() / 100 * auraEff->GetAmount());
             }
             return;
         }
@@ -5669,6 +5715,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!procSpell)
                     return false;
 
+                // Very ugly hacks here. This required for triggered and AOE spells
+                uint32 costPercent = procSpell->ManaCostPercentage;
+                if (procSpell->SpellFamilyFlags[0] & 0x200000)     // Arcane Missiles
+                    costPercent = 6;
+                else if (procSpell->SpellFamilyFlags[0] & 0x80)    // Blizzard
+                    costPercent = urand(1,9);
+                else if (procSpell->SpellFamilyFlags[1] & 0x10000) // Living Bomb
+                    costPercent = urand(1,22);
+                // Dragon's Breath, Arcane Explosion, Cone of Cold, Frost Nova, Flamestrike, Blast Wave
+                else if (procSpell->SpellFamilyFlags[0] & 0x801244 || procSpell->SpellFamilyFlags[1] & 0x40)
+                    costPercent = urand(1,costPercent);
+
                 // mana cost save
                 int32 cost = int32(procSpell->ManaCost + CalculatePctU(GetCreateMana(), procSpell->ManaCostPercentage));
                 basepoints0 = CalculatePctN(cost, triggerAmount);
@@ -6079,6 +6137,22 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 37378;
                     break;
                 }
+                //Glyph of Fear 
+                case 42458: 
+                { 
+                    triggered_spell_id = 56244; 
+                    break; 
+                }
+                case 1122: 
+                { 
+                    triggered_spell_id = 22703; 
+                    break; 
+                } 
+                case 18540: 
+                { 
+                    triggered_spell_id = 60478; 
+                    break; 
+                }
             }
             break;
         }
@@ -6297,6 +6371,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // if not found Rip
                     return false;
                 }
+                // Nature's Grasp
+                case 16689:
+                {
+                 if (procSpell->SpellVisual[0] == 212 && procSpell->SpellIconID != 168)
+                        return false;
+						
+                    triggered_spell_id = 19975;
+                    target = this;
+                    break;
+                }
                 // Glyph of Rake
                 case 54821:
                 {
@@ -6500,6 +6584,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     triggered_spell_id = 32747;
                     break;
+                }
+                // Tricks of the Trade
+                case 57934:
+                {
+                    if (Unit * unitTarget = GetMisdirectionTarget())
+                    {
+                        RemoveAura(dummySpell->Id, GetGUID(), 0, AURA_REMOVE_BY_DEFAULT);
+                        CastSpell(this, 59628, true);
+                        CastSpell(unitTarget, 57933, true);
+                        return true;
+                    }
+                    return false;
                 }
             }
 
@@ -7887,6 +7983,13 @@ bool Unit::HandleModDamagePctTakenAuraProc(Unit* victim, uint32 /*damage*/, Aura
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Recklessness - prevent double proc
+            if (dummySpell->Id == 1719)
+                return false;
+            break;
+        }
     }
     // processed charge only counting case
     if (!triggered_spell_id)
@@ -8198,6 +8301,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+                    case 56614:             // Wrecking Crew
+                        trigger_spell_id = 57522;
+                        target = this;
+                        break;
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
@@ -8799,6 +8906,24 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Procs only if damage takes health below $s1%
             if (!HealthBelowPctDamaged(triggerAmount, damage))
+                return false;
+            break;
+        }
+        // Glyph of Shadow only in shadow form
+        case 55689:
+            if (GetTypeId() == TYPEID_PLAYER)
+                if (Player * plr = this->ToPlayer())
+                    if (plr->GetShapeshiftForm() != FORM_SHADOW)
+                        return false;
+            break;
+        case 71761: // Deep Freeze Immunity State
+        {
+            if (!victim->ToCreature())
+                return false;
+
+            if (victim->ToCreature()->GetCreatureInfo()->MechanicImmuneMask & (1 << procSpell->Effects[EFFECT_0].Mechanic))
+                target = victim;
+            else
                 return false;
             break;
         }
@@ -10828,6 +10953,11 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                     if (victim->GetDiseasesByCaster(owner->GetGUID()) > 0)
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
 
+            // Sigil of the Vengeful Heart (Death Coil part)
+            if (spellProto->SpellFamilyFlags[0] & 0x2000)
+                if (AuraEffect * aurEff = GetAuraEffect(64962, 1))
+                    DoneTotal += aurEff->GetAmount();
+
             // Impurity (dummy effect)
             if (GetTypeId() == TYPEID_PLAYER)
             {
@@ -11153,6 +11283,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         case  849: modChance+= 17;
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
+                            // Deep Freeze damage trigger is always shattered and does not consume FoF charges
+                            if ((spellProto->Id == 71757) || victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                             crit_chance+=modChance;
                             break;
                         case 7917: // Glyph of Shadowburn
@@ -11788,6 +11920,14 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
                 ((*iter)->GetMiscValue() & spellInfo->GetSchoolMask()) &&  // Check school
                 !spellInfo->IsPositiveEffect(index))                                  // Harmful
                 return true;
+    }
+
+    if (GetTypeId() == TYPEID_PLAYER && spellInfo->Id != 49560)
+    {
+        if (spellInfo->Effects[index].Effect == SPELL_EFFECT_ATTACK_ME)
+            return true;
+        if (spellInfo->Effects[index].ApplyAuraName == SPELL_AURA_MOD_TAUNT)
+            return true;
     }
 
     return false;
@@ -14743,6 +14883,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                     break;
             }
         }
+        // Stealth shouldn't break if damage is absorbed
+        if ((procFlag & PROC_FLAG_TAKEN_DAMAGE) && !damage)
+           takeCharges = false;
+
         // Remove charge (aura can be removed by triggers)
         if (useCharges && takeCharges)
             i->aura->DropCharge(AURA_REMOVE_BY_EXPIRE);

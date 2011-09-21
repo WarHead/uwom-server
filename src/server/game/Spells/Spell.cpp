@@ -1374,6 +1374,50 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             AuraEffect* aurEff = m_spellAura->GetEffect(1);
             aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
         }
+
+        // Cobra Strikes (can't find any other way that may work)
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags[1] & 0x10000000)
+            if (Unit * owner = caster->GetOwner())
+                if (Aura* pAura = owner->GetAura(53257))
+                    pAura->DropCharge();
+
+         // Improved Devouring Plague
+        if (m_spellInfo->Id == 63675 && damageInfo.damage && caster->isAlive())
+            {
+                uint32 healthGain = damageInfo.damage * 15 / 100;
+                healthGain = caster->SpellHealingBonus(caster, m_spellInfo, healthGain, HEAL);
+                caster->HealBySpell(caster, m_spellInfo, healthGain);
+            } 
+
+        // Scourge Strike
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[1] & 0x08000000)
+        {
+            uint32 count = unitTarget->GetDiseasesByCaster(caster->GetGUID());
+            if (count)
+            {
+                SpellInfo const* ProcSpell = sSpellMgr->GetSpellInfo(70890);
+                SpellNonMeleeDamage damageInfoProc(caster, unitTarget, ProcSpell->Id, ProcSpell->SchoolMask);
+                float ProcModifier = 1.0f;
+                AuraEffect const* pAurEff;
+                pAurEff = caster->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_DEATHKNIGHT, 154, 0);
+                if (pAurEff)
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                pAurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, 1);
+                if (pAurEff)
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 0, 0x800, 0x40, caster->GetGUID());
+                if (pAurEff) 
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                damageInfoProc.damage = count * CalculateDamage(EFFECT_2, unitTarget) * ProcModifier * (damageInfo.damage + damageInfo.absorb) / 100;
+                // Add bonuses and fill damageInfo struct 
+                caster->CalcAbsorbResist(unitTarget, SpellSchoolMask(ProcSpell->SchoolMask), SPELL_DIRECT_DAMAGE, damageInfoProc.damage, &damageInfoProc.absorb, &damageInfoProc.resist, ProcSpell);
+                caster->DealDamageMods(damageInfoProc.target,damageInfoProc.damage,&damageInfoProc.absorb);
+                damageInfoProc.damage -= damageInfoProc.absorb + damageInfoProc.resist;
+                caster->SendSpellNonMeleeDamageLog(&damageInfoProc);
+                caster->DealSpellDamage(&damageInfoProc, true);
+            }
+        }
+
         m_damage = damageInfo.damage;
     }
     // Passive spell hits/misses or active spells only misses (only triggers)
@@ -1581,6 +1625,35 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                     // and duration of auras affected by SPELL_AURA_PERIODIC_HASTE
                     else if (m_originalCaster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, aurSpellInfo) || m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
                         duration = int32(duration * m_originalCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+
+                    // Seduction with Improved Succubus talent - fix duration.
+                    if (m_spellInfo->Id == 6358 && unit->GetTypeId() == TYPEID_PLAYER && m_originalCaster->GetOwner())
+                    {
+                        float mod = 1.0f;
+                        float durationadd = 0.0f;
+                    
+                        if (m_originalCaster->GetOwner()->HasAura(18754))
+                            durationadd += float(1.5*IN_MILLISECONDS*0.22);
+                        else if (m_originalCaster->GetOwner()->HasAura(18755))
+                            durationadd += float(1.5*IN_MILLISECONDS*0.44);
+                        else if (m_originalCaster->GetOwner()->HasAura(18756))
+                            durationadd += float(1.5*IN_MILLISECONDS*0.66);
+
+                        if (durationadd)
+                        {
+                            switch (m_diminishLevel)
+                            {
+                            case DIMINISHING_LEVEL_1: break;
+                            // lol, we lost 1 second here
+                            case DIMINISHING_LEVEL_2: duration += 1000; mod = 0.5f; break;
+                            case DIMINISHING_LEVEL_3: duration += 1000; mod = 0.25f; break;
+                            case DIMINISHING_LEVEL_IMMUNE: { m_spellAura->Remove(); return SPELL_MISS_IMMUNE; }
+                            default: break;
+                            }
+                            durationadd *= mod;
+                            duration += int32(durationadd);
+                        }
+                    }  
 
                     if (duration != m_spellAura->GetMaxDuration())
                     {
@@ -2520,6 +2593,17 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
             case TARGET_UNIT_CONE_ENEMY_24:
             case TARGET_UNIT_CONE_ENEMY_54:
             case TARGET_UNIT_CONE_ENEMY_104:
+                //Spell Decimate with id 71123 has wrong radius value inside Spell.dbc file.
+                //So, there is a hack here: set radius the same as for Gluth's Decimate - 200 yards
+                if (m_spellInfo->Id == 71123 && i == 0 && cur.GetTarget() == TARGET_UNIT_SRC_AREA_ENTRY)
+                    radius = 200.0f;
+                //Stinky's aura has 0 radius, but should apply to everyone in his line of sight
+                else if ((m_spellInfo->Id == 71805 || m_spellInfo->Id == 71161 || m_spellInfo->Id == 71160) && cur.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
+                    radius = 200.0f;
+                //Lich King's Defile. Actual targets are filtered through custom SpellScript.
+                else if (m_spellInfo->Id == 72754 || m_spellInfo->Id == 73708 || m_spellInfo->Id == 73709 || m_spellInfo->Id == 73710)
+                    radius = 200.0f;
+                else
                 radius = m_spellInfo->Effects[i].CalcRadius();
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
@@ -4959,6 +5043,22 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                 }
+                else if (m_spellInfo->Id == 51690)          // Killing Spree
+                {
+                    float range = 10.0f;
+                    Unit *target = NULL;
+                    Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(m_caster, range);
+                    Trinity::UnitLastSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(m_caster, target, u_check);
+                    m_caster->VisitNearbyObject(range, checker);
+
+                    if (target)
+                    {
+                        if (m_caster->GetUnitMovementFlags() & MOVEMENTFLAG_ONTRANSPORT)
+                            return SPELL_FAILED_NOT_HERE;
+                    }
+                    else
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                }
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:
@@ -5272,6 +5372,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
             {
                 if (m_targets.GetUnitTarget() == m_caster)
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
+            case SPELL_EFFECT_REDIRECT_THREAT:
+            {
+                // Tricks of the Trade
+                if (m_spellInfo->Id == 57934 && m_targets.GetUnitTarget() &&
+                    m_targets.GetUnitTarget()->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
                 break;
             }

@@ -847,6 +847,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     }
 
     SetBonusDamage(0);
+
+    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+        LoadCreaturesAddon(true);
+
     switch (petType)
     {
         case SUMMON_PET:
@@ -979,6 +983,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    break;
+                }
+                case 28017: // Bloodworms
+                {
+                    SetCreateHealth(4 * petlevel);
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
                     break;
                 }
             }

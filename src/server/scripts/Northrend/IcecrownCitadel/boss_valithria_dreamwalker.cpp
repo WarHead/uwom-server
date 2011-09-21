@@ -561,7 +561,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 if (me->isInCombat() && !SelectRandomPlayer(120.0f))
                 {
-                    DoAction(ACTION_DEATH);
                     EnterEvadeMode();
                     return;
                 }
@@ -572,7 +571,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 std::list<HostileReference*> const& threatList = me->getThreatManager().getThreatList();
                 if (threatList.empty())
                 {
-                    DoAction(ACTION_DEATH);
                     EnterEvadeMode();
                     return;
                 }
@@ -589,7 +587,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                         if (target->GetTypeId() == TYPEID_PLAYER && !target->ToPlayer()->isGameMaster() && target->ToPlayer()->isGMVisible())
                             return; // found any player, return
 
-                DoAction(ACTION_DEATH);
                 EnterEvadeMode();
             }
 
