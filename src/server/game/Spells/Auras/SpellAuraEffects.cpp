@@ -1986,6 +1986,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
 
         // remove other shapeshift before applying a new one
         target->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT, 0, GetBase());
+        target->RemoveAurasDueToSpell(64904);
 
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
