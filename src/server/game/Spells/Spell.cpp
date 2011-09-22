@@ -1407,7 +1407,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 0, 0x800, 0x40, caster->GetGUID());
                 if (pAurEff) 
                     ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
-                damageInfoProc.damage = count * CalculateDamage(EFFECT_2, unitTarget) * ProcModifier * (damageInfo.damage + damageInfo.absorb) / 100;
+                damageInfoProc.damage = uint32(count * CalculateDamage(EFFECT_2, unitTarget) * ProcModifier * (damageInfo.damage + damageInfo.absorb) / 100);
                 // Add bonuses and fill damageInfo struct 
                 caster->CalcAbsorbResist(unitTarget, SpellSchoolMask(ProcSpell->SchoolMask), SPELL_DIRECT_DAMAGE, damageInfoProc.damage, &damageInfoProc.absorb, &damageInfoProc.resist, ProcSpell);
                 caster->DealDamageMods(damageInfoProc.target,damageInfoProc.damage,&damageInfoProc.absorb);
