@@ -357,6 +357,26 @@ void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount)
         else
             m_effects[i] = NULL;
     }
+
+    // Mixology
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION && caster->HasAura(53042))
+    {
+        if(sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_BATTLE) ||
+            sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_GUARDIAN))
+        {
+            if(caster->HasSpell(m_spellInfo->Effects[0].TriggerSpell))
+            {
+                m_maxDuration *= 2;
+                m_duration = m_maxDuration;
+                for (uint8 i=0 ; i<MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (effMask & (uint8(1) << i))
+                        m_effects[i]->SetAmount((int32)(m_effects[i]->GetAmount() * 1.3f));
+                }
+            }
+        }
+    }
+
 }
 
 Aura::~Aura()
@@ -1629,6 +1649,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
             }
             break;
+        case SPELLFAMILY_DRUID:
+            // Enrage
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000)
+            {
+                if (target->HasAura(70726)) // Druid T10 Feral 4P Bonus
+                {
+                    if (apply)
+                        target->CastSpell(target, 70725, true);
+                }
+                else // armor reduction implemented here
+                    if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
+                    {
+                        int32 value = auraEff->GetAmount();
+                        int32 mod;
+                        switch (auraEff->GetId())
+                        {
+                            case 1178: mod = 27; break;
+                            case 9635: mod = 16; break;
+                        }
+                        mod = value / 100 * mod;
+                        value = value + (apply ? -mod : mod);
+                        auraEff->ChangeAmount(value);
+                    }
+                break;
+            }
+            break;
         case SPELLFAMILY_ROGUE:
             // Stealth
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
@@ -1678,6 +1724,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             switch(GetId())
             {
                 case 19746:
+                    if (GetCasterGUID() != target->GetGUID())
+                        break;
+                    // Improved concentration aura - linked aura
+                    if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                        else target->RemoveAura(63510);
+                    if (apply)
+                    {
+                        if ((GetSpellInfo()->Id == 31821 && target->HasAura(19746, GetCasterGUID())) || (GetSpellInfo()->Id == 19746 && target->HasAura(31821)))
+                            target->CastSpell(target, 64364, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+                    break;
                 case 31821:
                     // Aura Mastery Triggered Spell Handler
                     // If apply Concentration Aura -> trigger -> apply Aura Mastery Immunity
@@ -1704,6 +1765,34 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasDueToSpell(71166);
                     }
                     break;
+            }
+
+            if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
+            {
+                if (GetCasterGUID() == target->GetGUID())
+                {
+                    // Sanctified Retribution
+                    if (target->HasAura(31869))
+                    {
+                        target->RemoveAurasDueToSpell(63531);
+                        if (apply)
+                            target->CastSpell(target, 63531, true);
+                    }
+                    // Improved Devotion Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 291, 1))
+                    {
+                        target->RemoveAurasDueToSpell(63514);
+                        if (apply)
+                            target->CastSpell(target, 63514, true);
+                    }
+                    // Improved Concentration Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 1487, 0))
+                    {
+                        target->RemoveAurasDueToSpell(63510);
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                    }
+                }
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
@@ -1814,8 +1903,47 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->RemoveAurasDueToSpell(100001);
                 }
             }
+            // Health Funnel
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x01000000 && target != caster)
+            {
+                // Improved Health Funnel
+                AuraEffect * aurEff = caster->GetAuraEffectOfRankedSpell(18703, 0);
+                if (apply && aurEff)
+                {
+                    uint32 spell = sSpellMgr->GetSpellWithRank(60955, sSpellMgr->GetSpellRank(aurEff->GetId()));
+                    target->CastSpell(target, spell, true, 0, 0, caster->GetGUID());
+                }
+                else
+                {
+                    target->RemoveAurasDueToSpell(60955);
+                    target->RemoveAurasDueToSpell(60956);
+                }
+            }
             break;
     }
+
+    if (GetSpellInfo()->IsPassive() && !GetCastItemGUID())
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (m_effects[i] && m_effects[i]->GetAuraType() == SPELL_AURA_MECHANIC_DURATION_MOD)
+            {
+                uint32 spell_immune;
+                switch(m_effects[i]->GetMiscValue())
+                {
+                    case 5:  spell_immune = 55357; break;
+                    case 7: 
+                    case 11: spell_immune = 55378; break;
+                    case 9:  spell_immune = 55366; break;
+                    case 12: spell_immune = 55358; break;
+                    default: break;
+                }
+                if (spell_immune)
+                {
+                    if (apply) target->RemoveAurasDueToSpell(spell_immune);
+                    target->ApplySpellImmune(0, IMMUNITY_ID, spell_immune, apply);
+                }
+            }
+        }
 }
 
 bool Aura::CanBeAppliedOn(Unit* target)

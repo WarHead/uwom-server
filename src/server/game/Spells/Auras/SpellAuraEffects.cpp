@@ -485,6 +485,11 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 break;
             switch(GetSpellInfo()->SpellFamilyName)
             {
+                case SPELLFAMILY_GENERIC:
+                    // Stoicism
+                    if (GetId() == 70845)
+                        DoneActualBenefit = caster->GetMaxHealth() * 0.2f;
+                    break;
                 case SPELLFAMILY_MAGE:
                     // Ice Barrier
                     if (GetSpellInfo()->SpellFamilyFlags[1] & 0x1 && GetSpellInfo()->SpellFamilyFlags[2] & 0x8)
@@ -592,7 +597,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 break;
             // Earth Shield
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[1] & 0x400)
+            {
+                // return to unmodified by spellmods value
+                amount = m_spellInfo->Effects[m_effIndex].BasePoints;
+                // apply spell healing bonus
                 amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellInfo(), amount, SPELL_DIRECT_DAMAGE);
+                // apply spellmods
+                amount = caster->ApplyEffectModifiers(GetSpellInfo(), m_effIndex, float(amount));
+            }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
             if (!caster)
@@ -680,6 +692,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 // Bonus from Glyph of Lightwell
                 if (AuraEffect* modHealing = caster->GetAuraEffect(55673, 0))
+                    AddPctN(amount, modHealing->GetAmount());
+                // Bonus from talent Spiritual Healing
+                if (AuraEffect* modHealing = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PRIEST, 46, 1))
                     AddPctN(amount, modHealing->GetAmount());
             }
             break;
@@ -2295,6 +2310,19 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     // Darkspear Pride
                     case 75532:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31737 : 31738);
+                        break;
+                    // Gossip NPC Appearance - Day of the Dead (DotD)
+                    case 65529:
+                        // random, regardless of current gender
+                        target->SetDisplayId(roll_chance_i(50) ? 29203 : 29204);
+                        break;
+                    // Crown Parcel Service Uniform
+                    case 71450:
+                        target->SetDisplayId(target->getGender() == GENDER_MALE ? 31002 : 31003);
+                        break;
+                    // Gnomeregan Pride
+                    case 75531:
+                        target->SetDisplayId(31654);
                         break;
                     default:
                         break;
@@ -4828,6 +4856,21 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->CastCustomSpell(target, 63338, &damage, NULL, NULL, true);
                     break;
                 }
+                case 74401: // Cosmetic - Parachute
+                {
+                    caster->CastSpell(caster, GetAmount(), true);
+                    break;
+                }
+                case 75572: // Eject!
+                {
+                    if (Vehicle *vehicle = caster->GetVehicleKit())
+                        if (Unit *driver = vehicle->GetPassenger(0))
+                        {
+                            driver->ExitVehicle();
+                            driver->GetMotionMaster()->MoveJump(driver->GetPositionX(), driver->GetPositionY(), driver->GetPositionZ()+7.0f, 1.5f, 1.5f);
+                        }
+                    break;
+                }
                 case 71563:
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
@@ -4934,6 +4977,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             // backfire damage
                             target->CastCustomSpell(target, 64085, &damage, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                         }
+                    break;
+                case SPELLFAMILY_ROGUE:
+                    switch(GetId())
+                    {
+                        case 59628: // Tricks of the Trade
+                            caster->SetReducedThreatPercent(0, 0);
+                            break;
+                        case 57934: // Tricks of the Trade
+                            if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
+                                caster->SetReducedThreatPercent(0, 0);
+                            break;
+                    }
                     break;
                 case SPELLFAMILY_WARLOCK:
                     // Haunt
@@ -5231,6 +5286,40 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->ToPlayer()->StopCastingBindSight();
                 return;
             }
+
+            switch(GetId())
+            {
+                // Sentry Totem (Serverside)
+                case 6494:
+                {
+                    if (Player * pCaster = caster->ToPlayer())
+                    {
+                        pCaster->StopCastingBindSight();
+                        if (apply)
+                        {
+                            uint64 guid = pCaster->m_SummonSlot[4];
+                            if (guid)
+                            {
+                                Creature * totem = pCaster->GetMap()->GetCreature(guid);
+                                if (totem && totem->isTotem())
+                                    pCaster->CastSpell(totem, 6496, true);
+                            }
+                        }
+                        else
+                            pCaster->RemoveAurasDueToSpell(6495);
+                    }
+                    break;
+                }
+                // Sentry Totem (hack for login case)
+                case 6495:
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER && apply)
+                        if (!caster->m_SummonSlot[4])
+                            caster->RemoveAurasDueToSpell(6495);
+                    break;
+                }
+            }
+
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -5664,6 +5753,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                         target->RemoveAura(64821);
                     }
+                    break;
+                case 75765: // [DND] Music (Operation Gnomeregan event)
+                    target->CastSpell(target, 75782, true);
                     break;
             }
             break;
@@ -6116,6 +6208,14 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                 // triggered spell is cast as "triggered", reagents are not consumed
                 if (caster)
                     caster->CastSpell(target, triggerSpellId, false);
+                return;
+            }
+            // Rapid Recuperation (triggered energize have basepoints == 0)
+            case 56654:
+            case 58882:
+            {
+                if (int32 mana = target->GetMaxPower(POWER_MANA) / 100 * GetAmount())
+                    target->CastCustomSpell(target, triggerSpellId, &mana, NULL, NULL, true, NULL, this);
                 return;
             }
         }
