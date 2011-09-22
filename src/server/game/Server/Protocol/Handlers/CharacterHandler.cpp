@@ -1779,8 +1779,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
         if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
         {
             // Reset guild
-            if (uint64 guildId = Player::GetGuildIdFromDB(guid))
-                if (Guild* guild = sGuildMgr->GetGuildById(guid))
+            if (uint32 guildId = Player::GetGuildIdFromDB(guid))
+                if (Guild* guild = sGuildMgr->GetGuildById(guildId))
                     guild->DeleteMember(guid);
         }
 
