@@ -1530,7 +1530,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 // Restorative Totems
                 if (Unit* owner = m_caster->GetOwner())
                     if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
+                    {
+                        damage += int32(owner->SpellDamageBonus(unitTarget, m_spellInfo, 0, HEAL) * 0.44f);
+                        if (AuraEffect* dummy = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 338, 1))
                         AddPctN(damage, dummy->GetAmount());
+                    }
 
                 m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
@@ -2687,6 +2691,10 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     int level_diff = 0;
     switch (m_spellInfo->Id)
     {
+        case 2687:                                          // Bloodrage
+            if (m_caster->HasAura(70844))
+                m_caster->CastSpell(m_caster, 70845, true);
+            break;
         case 9512:                                          // Restore Energy
             level_diff = m_caster->getLevel() - 40;
             level_multiplier = 2;
@@ -4194,6 +4202,10 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()));
                 break;
             }
+            // Rune Strike
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x20000000)
+                m_damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.15f);
+
             break;
         }
     }
