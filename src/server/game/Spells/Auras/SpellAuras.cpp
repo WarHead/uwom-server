@@ -1348,7 +1348,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 {
                     // Shattered Barrier
                     if (AuraEffect * dummy = caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2945, 0))
-                        if (roll_chance_i(dummy->GetSpellInfo()->procChance))
+                        if (roll_chance_i(dummy->GetSpellInfo()->ProcChance))
                             caster->CastSpell(target, 55080, true, NULL, GetEffect(0));
                 }
                 break;
