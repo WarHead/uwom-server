@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -357,6 +358,26 @@ void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount)
         else
             m_effects[i] = NULL;
     }
+
+    // Mixology
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION && caster->HasAura(53042))
+    {
+        if(sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_BATTLE) ||
+            sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_GUARDIAN))
+        {
+            if(caster->HasSpell(m_spellInfo->Effects[0].TriggerSpell))
+            {
+                m_maxDuration *= 2;
+                m_duration = m_maxDuration;
+                for (uint8 i=0 ; i<MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (effMask & (uint8(1) << i))
+                        m_effects[i]->SetAmount((int32)(m_effects[i]->GetAmount() * 1.3f));
+                }
+            }
+        }
+    }
+
 }
 
 Aura::~Aura()
@@ -1189,6 +1210,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 break;
+            case SPELLFAMILY_HUNTER:
+                // Rapid Killing
+                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000)
+                {
+                    // Rapid Recuperation
+                    // FIXME: this is completely wrong way to fixing this talent
+                    // but for unknown reason it won't proc if your target are dead
+                    if (AuraEffect * auraEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3560, 1))
+                    {
+                        uint32 spellId;
+                        switch (auraEff->GetId())
+                        {
+                            case 53228: spellId = 56654; break;
+                            case 53232: spellId = 58882; break;
+                        }
+                        target->CastSpell(target, spellId, true);
+                    }
+                }
+                // Animal Handler
+                if (GetId() == 68361)
+                {
+                    if (Unit* owner = target->GetOwner())
+                        if (AuraEffect* auraEff = owner->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2234, 1))
+                            GetEffect(0)->SetAmount(auraEff->GetAmount());
+                }
+                break;
             case SPELLFAMILY_WARLOCK:
                 switch(GetId())
                 {
@@ -1198,6 +1245,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             {
                                 target->NearTeleportTo(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
                                 target->RemoveMovementImpairingAuras();
+                            }
+                        break;
+                    case 6358: // Seduction
+                        if (!caster)
+                            break;
+                        if (Unit *owner = caster->GetOwner())
+                            if (owner->HasAura(56250)) // Glyph of Succubus
+                            {
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                             }
                         break;
                 }
@@ -1245,6 +1303,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // in official maybe there is only one icon?
                     if (target->HasAura(58039)) // Glyph of Blurred Speed
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
+                // Savage Combat triggered at poisons apply
+                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x80000 && caster)
+                {
+                    if (AuraEffect * auraEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_ROGUE, 1959, 0))
+                    {
+                        uint32 spellId = auraEff->GetSpellInfo()->Effects[0].TriggerSpell;
+                        target->RemoveAurasDueToSpell(spellId);
+                        if (Aura * newAura = caster->AddAura(spellId, target))
+                            newAura->SetDuration(GetDuration());
+                    }
+                }
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 if (!caster)
@@ -1316,8 +1385,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             }
                         }
                         break;
+                    case 12281: // Sword Specialization
+                        target->CastSpell(target, 16459, true);
+                        break;
+                    case 61990: // Hodir Flash Freeze immunity remove
+                        if (removeMode == AURA_REMOVE_BY_DEATH)
+                            target->RemoveAura(7940);
+                        break;
                 }
-                break;
             case SPELLFAMILY_MAGE:
                 switch(GetId())
                 {
@@ -1347,8 +1422,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[1] & 0x1)
                 {
                     // Shattered Barrier
-                    if (caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2945, 0))
-                        caster->CastSpell(target, 55080, true, NULL, GetEffect(0));
+                    if (AuraEffect * dummy = caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2945, 0))
+                        if (roll_chance_i(dummy->GetSpellInfo()->ProcChance))
+                            caster->CastSpell(target, 55080, true, NULL, GetEffect(0));
                 }
                 break;
             case SPELLFAMILY_WARRIOR:
@@ -1413,6 +1489,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveGameObject(GetId(), true);
                         target->RemoveAura(62388);
                     break;
+                   case 6358: // Seduction
+                       // Interrupt cast if aura removed from target
+                       // maybe should be used SpellChannelInterruptFlags instead
+                       caster->InterruptNonMeleeSpells(false, 6358, false);
+                       break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
@@ -1512,6 +1593,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Remove Vanish on stealth remove
                 if (GetId() == 1784)
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+                // Savage Combat triggered at poisons apply
+                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x80000 && caster)
+                {
+                    if (AuraEffect * auraEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_ROGUE, 1959, 0))
+                    {
+                        uint32 spellId = auraEff->GetSpellInfo()->Effects[0].TriggerSpell;
+                        target->RemoveAurasDueToSpell(spellId);
+                        if (Aura * newAura = target->AddAura(spellId, caster))
+                            newAura->SetDuration(GetDuration());
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
@@ -1556,6 +1648,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else
                         target->SetReducedThreatPercent(0, 0);
                     break;
+            }
+            break;
+        case SPELLFAMILY_DRUID:
+            // Enrage
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000)
+            {
+                if (target->HasAura(70726)) // Druid T10 Feral 4P Bonus
+                {
+                    if (apply)
+                        target->CastSpell(target, 70725, true);
+                }
+                else // armor reduction implemented here
+                    if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
+                    {
+                        int32 value = auraEff->GetAmount();
+                        int32 mod;
+                        switch (auraEff->GetId())
+                        {
+                            case 1178: mod = 27; break;
+                            case 9635: mod = 16; break;
+                        }
+                        mod = value / 100 * mod;
+                        value = value + (apply ? -mod : mod);
+                        auraEff->ChangeAmount(value);
+                    }
+                break;
             }
             break;
         case SPELLFAMILY_ROGUE:
@@ -1607,6 +1725,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             switch(GetId())
             {
                 case 19746:
+                    if (GetCasterGUID() != target->GetGUID())
+                        break;
+                    // Improved concentration aura - linked aura
+                    if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
+                    {
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                        else
+                            target->RemoveAura(63510);
+                    }
+                    if (apply)
+                    {
+                        if ((GetSpellInfo()->Id == 31821 && target->HasAura(19746, GetCasterGUID())) || (GetSpellInfo()->Id == 19746 && target->HasAura(31821)))
+                            target->CastSpell(target, 64364, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+                    break;
                 case 31821:
                     // Aura Mastery Triggered Spell Handler
                     // If apply Concentration Aura -> trigger -> apply Aura Mastery Immunity
@@ -1633,6 +1769,34 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasDueToSpell(71166);
                     }
                     break;
+            }
+
+            if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
+            {
+                if (GetCasterGUID() == target->GetGUID())
+                {
+                    // Sanctified Retribution
+                    if (target->HasAura(31869))
+                    {
+                        target->RemoveAurasDueToSpell(63531);
+                        if (apply)
+                            target->CastSpell(target, 63531, true);
+                    }
+                    // Improved Devotion Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 291, 1))
+                    {
+                        target->RemoveAurasDueToSpell(63514);
+                        if (apply)
+                            target->CastSpell(target, 63514, true);
+                    }
+                    // Improved Concentration Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 1487, 0))
+                    {
+                        target->RemoveAurasDueToSpell(63510);
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                    }
+                }
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
@@ -1743,8 +1907,47 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->RemoveAurasDueToSpell(100001);
                 }
             }
+            // Health Funnel
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x01000000 && target != caster)
+            {
+                // Improved Health Funnel
+                AuraEffect * aurEff = caster->GetAuraEffectOfRankedSpell(18703, 0);
+                if (apply && aurEff)
+                {
+                    uint32 spell = sSpellMgr->GetSpellWithRank(60955, sSpellMgr->GetSpellRank(aurEff->GetId()));
+                    target->CastSpell(target, spell, true, 0, 0, caster->GetGUID());
+                }
+                else
+                {
+                    target->RemoveAurasDueToSpell(60955);
+                    target->RemoveAurasDueToSpell(60956);
+                }
+            }
             break;
     }
+
+    if (GetSpellInfo()->IsPassive() && !GetCastItemGUID())
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (m_effects[i] && m_effects[i]->GetAuraType() == SPELL_AURA_MECHANIC_DURATION_MOD)
+            {
+                uint32 spell_immune;
+                switch(m_effects[i]->GetMiscValue())
+                {
+                    case 5:  spell_immune = 55357; break;
+                    case 7:
+                    case 11: spell_immune = 55378; break;
+                    case 9:  spell_immune = 55366; break;
+                    case 12: spell_immune = 55358; break;
+                    default: break;
+                }
+                if (spell_immune)
+                {
+                    if (apply) target->RemoveAurasDueToSpell(spell_immune);
+                    target->ApplySpellImmune(0, IMMUNITY_ID, spell_immune, apply);
+                }
+            }
+        }
 }
 
 bool Aura::CanBeAppliedOn(Unit* target)

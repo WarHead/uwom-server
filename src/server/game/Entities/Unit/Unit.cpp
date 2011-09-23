@@ -1615,7 +1615,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
         // Figure out how much armor do we ignore
         float armorPen = CalculatePctF(maxArmorPen, ToPlayer()->GetRatingBonusValue(CR_ARMOR_PENETRATION));
         // Got the value, apply it
-        armor -= armorPen;
+        armor -= std::min(armorPen, maxArmorPen);
     }
 
     if (armor < 0.0f)
@@ -14694,6 +14694,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         bool useCharges  = i->aura->IsUsingCharges();
         // no more charges to use, prevent proc
         if (useCharges && !i->aura->GetCharges())
+            continue;
+
+        // Prayer of Mending
+        if ((i->aura->GetId() == 41635 || i->aura->GetId() == 48110 || i->aura->GetId() == 48111) && !damage)
             continue;
 
         bool takeCharges = false;
