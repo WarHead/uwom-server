@@ -2944,6 +2944,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 36350: //They Must Burn Bomb Aura (self)
                 spellInfo->EffectTriggerSpell[0] = 36325; // They Must Burn Bomb Drop (DND)
                 break;
+            case 49224: // Magic Suppression Rank 1
+            case 49610: // Magic Suppression Rank 2
+            case 49611: // Magic Suppression Rank 3
+                spellInfo->procCharges = 0;
+                break;
             case 49838: // Stop Time
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
@@ -3525,11 +3530,15 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71267: //Swarming Shadows Periodic Damage Aura Huck
                 spellInfo->DurationIndex = 9; // Add 15 seconds cd instead inf
                 break;
+            /* Produziert diesen Fehler:
+               SourceEntry 71189 in `condition` table does not have any implicit target TARGET_UNIT_NEARBY_ENTRY(38) or TARGET_DEST_NEARBY_ENTRY (46), TARGET_UNIT_SRC_AREA_ENTRY(7),
+               TARGET_UNIT_DEST_AREA_ENTRY(8), TARGET_UNIT_CONE_ENTRY(60), TARGET_GAMEOBJECT_NEARBY_ENTRY(40)TARGET_GAMEOBJECT_SRC_AREA(51), TARGET_GAMEOBJECT_DEST_AREA(52)
             case 71189: // Dreamwalker's Rage
                 spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ENEMY;
                 spellInfo->EffectRadiusIndex[0] = 12;
                 break;
+            */
             case 70127: // Mystic Buffet
             case 72528:
             case 72529:
