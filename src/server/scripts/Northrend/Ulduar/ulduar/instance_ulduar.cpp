@@ -504,7 +504,7 @@ class instance_ulduar : public InstanceMapScript
                 }
             }
 
-            void SetData64(uint32 type, uint64 data)
+            void SetData64(uint32 /*type*/, uint64 /*data*/)
             {
             }
 

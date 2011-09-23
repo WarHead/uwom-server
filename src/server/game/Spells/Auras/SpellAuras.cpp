@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -1385,7 +1386,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                         break;
                     case 12281: // Sword Specialization
-                        target->CastSpell(target, 16459, true); 
+                        target->CastSpell(target, 16459, true);
                         break;
                     case 61990: // Hodir Flash Freeze immunity remove
                         if (removeMode == AURA_REMOVE_BY_DEATH)
@@ -1728,9 +1729,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                     // Improved concentration aura - linked aura
                     if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
+                    {
                         if (apply)
                             target->CastSpell(target, 63510, true);
-                        else target->RemoveAura(63510);
+                        else
+                            target->RemoveAura(63510);
+                    }
                     if (apply)
                     {
                         if ((GetSpellInfo()->Id == 31821 && target->HasAura(19746, GetCasterGUID())) || (GetSpellInfo()->Id == 19746 && target->HasAura(31821)))
@@ -1931,7 +1935,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 switch(m_effects[i]->GetMiscValue())
                 {
                     case 5:  spell_immune = 55357; break;
-                    case 7: 
+                    case 7:
                     case 11: spell_immune = 55378; break;
                     case 9:  spell_immune = 55366; break;
                     case 12: spell_immune = 55358; break;

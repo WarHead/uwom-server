@@ -808,7 +808,7 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
 
     switch (m_spellInfo->Effects[effIndex].GetImplicitTargetType())
     {
-        // add explicit object target or self to the target map 
+        // add explicit object target or self to the target map
         case EFFECT_IMPLICIT_TARGET_EXPLICIT:
             // player which not released his spirit is Unit, but target flag for it is TARGET_FLAG_CORPSE_MASK
             if (targetMask & (TARGET_FLAG_UNIT_MASK | TARGET_FLAG_CORPSE_MASK))
@@ -840,7 +840,7 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
                     AddGOTarget(gObjTarget, 1 << effIndex);
             }
             break;
-        // add self to the target map 
+        // add self to the target map
         case EFFECT_IMPLICIT_TARGET_CASTER:
             if (targetMask & TARGET_FLAG_UNIT_MASK)
                 AddUnitTarget(m_caster, 1 << effIndex, false);
@@ -850,6 +850,8 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
             if (targetMask & TARGET_FLAG_UNIT_MASK)
                 if (Guardian* pet = m_caster->GetGuardianPet())
                     AddUnitTarget(pet, 1 << effIndex, false);
+            break;
+        default:
             break;
     }
 }
@@ -1362,7 +1364,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 uint32 healthGain = damageInfo.damage * 15 / 100;
                 healthGain = caster->SpellHealingBonus(caster, m_spellInfo, healthGain, HEAL);
                 caster->HealBySpell(caster, m_spellInfo, healthGain);
-            } 
+            }
 
         // Scourge Strike
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[1] & 0x08000000)
@@ -1381,10 +1383,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 if (pAurEff)
                     ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
                 pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 0, 0x800, 0x40, caster->GetGUID());
-                if (pAurEff) 
+                if (pAurEff)
                     ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
                 damageInfoProc.damage = uint32(count * CalculateDamage(EFFECT_2, unitTarget) * ProcModifier * (damageInfo.damage + damageInfo.absorb) / 100);
-                // Add bonuses and fill damageInfo struct 
+                // Add bonuses and fill damageInfo struct
                 caster->CalcAbsorbResist(unitTarget, SpellSchoolMask(ProcSpell->SchoolMask), SPELL_DIRECT_DAMAGE, damageInfoProc.damage, &damageInfoProc.absorb, &damageInfoProc.resist, ProcSpell);
                 caster->DealDamageMods(damageInfoProc.target,damageInfoProc.damage,&damageInfoProc.absorb);
                 damageInfoProc.damage -= damageInfoProc.absorb + damageInfoProc.resist;
@@ -1606,7 +1608,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                     {
                         float mod = 1.0f;
                         float durationadd = 0.0f;
-                    
+
                         if (m_originalCaster->GetOwner()->HasAura(18754))
                             durationadd += float(1.5*IN_MILLISECONDS*0.22);
                         else if (m_originalCaster->GetOwner()->HasAura(18755))
@@ -1628,7 +1630,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                             durationadd *= mod;
                             duration += int32(durationadd);
                         }
-                    }  
+                    }
 
                     if (duration != m_spellAura->GetMaxDuration())
                     {
@@ -5559,7 +5561,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // Pain Suppression
                 if (m_spellInfo->Id == 33206)
                     if (!m_caster->HasAura(63248) && m_caster->HasAuraType(SPELL_AURA_MOD_STUN))
-                        return SPELL_FAILED_STUNNED;                   
+                        return SPELL_FAILED_STUNNED;
                 break;
             }
             default:

@@ -1270,8 +1270,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     return;
                 }
                 // Glyph of Dragon's Breath
-                case 56989:  
-                {				
+                case 56989:
+                {
                     if (unitTarget)
                        m_caster->CastSpell(m_caster, 56373, false, NULL);
                     return;
@@ -1390,7 +1390,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             // Item - Warrior T10 Melee 4P Bonus
             if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
-                if (Aura * aur = m_caster->GetAura(70847))
+                if (m_caster->GetAura(70847))
                     if (roll_chance_i(20))
                         m_caster->CastSpell(m_caster, 70849, true);
             if (Aura * aura = m_caster->GetAura(46916))
@@ -1530,7 +1530,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     return;
                 // Restorative Totems
                 if (Unit* owner = m_caster->GetOwner())
-                    if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
+                    if (owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
                     {
                         damage += int32(owner->SpellDamageBonus(unitTarget, m_spellInfo, 0, HEAL) * 0.44f);
                         if (AuraEffect* dummy = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 338, 1))
@@ -2198,7 +2198,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
             }
             break;
         }
-        default: 
+        default:
             break;
     }
 }
@@ -4484,7 +4484,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         unitTarget->CastSpell(unitTarget, 70971, true);
 
                     return;
-                } 
+                }
                 // Gender spells
                 case 48762: // A Fall from Grace: Scarlet Raven Priest Image - Master
                 case 45759: // Warsong Orc Disguise
