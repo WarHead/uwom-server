@@ -1144,7 +1144,7 @@ public:
                 pPrisoner->HandleEmoteCommand(EMOTE_ONESHOT_YES);
                 pPrisoner->Whisper(TEXT_ID, pPlayer->GetGUID());
                 pPrisoner->SetTimeUntilDisappear(3 * IN_MILLISECONDS);
-                pPrisoner->SetRespawnDelay(SEKUNDEN_60);
+                pPrisoner->SetRespawnDelay(60);
                 pPrisoner->GetMotionMaster()->MoveFleeing(pPlayer, 3 * IN_MILLISECONDS);
                 pPlayer->KilledMonsterCredit(pPrisoner->GetEntry(), pPrisoner->GetGUID());
             }
