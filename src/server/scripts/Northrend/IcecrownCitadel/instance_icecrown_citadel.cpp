@@ -95,7 +95,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 DeathbringersCacheGUID = 0;
                 KanonenschiffTruheAllyGUID = 0;
                 KanonenschiffTruheHordeGUID = 0;
-                TraumwandlerTruheGUID = 0;
                 SaurfangTeleportGUID = 0;
                 PlagueSigilGUID = 0;
                 BloodwingSigilGUID = 0;
@@ -415,12 +414,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DEATHBRINGER_S_CACHE_25H:
                         DeathbringersCacheGUID = go->GetGUID();
                         break;
-                    case GO_Truhe_des_Traumwandlers_10:
-                    case GO_Truhe_des_Traumwandlers_10H:
-                    case GO_Truhe_des_Traumwandlers_25:
-                    case GO_Truhe_des_Traumwandlers_25H:
-                        TraumwandlerTruheGUID = go->GetGUID();
-                        break;
                     case GO_SCOURGE_TRANSPORTER_SAURFANG:
                         SaurfangTeleportGUID = go->GetGUID();
                         break;
@@ -721,8 +714,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_VALITHRIA_DREAMWALKER:
                         if (state == DONE && sPoolMgr->IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[instance->GetSpawnMode() & 1]))
                             instance->SummonCreature(NPC_VALITHRIA_DREAMWALKER_QUEST, ValithriaSpawnPos);
-                        if (state == DONE)
-                            DoRespawnGameObject(TraumwandlerTruheGUID, 7*DAY);
                         break;
                     case DATA_SINDRAGOSA:
                         HandleGameObject(FrostwingSigilGUID, state != DONE);
@@ -1205,7 +1196,6 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 DeathbringersCacheGUID;
             uint64 KanonenschiffTruheAllyGUID;
             uint64 KanonenschiffTruheHordeGUID;
-            uint64 TraumwandlerTruheGUID;
             uint64 SaurfangTeleportGUID;
             uint64 PlagueSigilGUID;
             uint64 BloodwingSigilGUID;
