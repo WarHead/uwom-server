@@ -2831,22 +2831,23 @@ class spell_icc_sprit_alarm : public SpellScriptLoader
                         // Also erst einmal spawnen, und einfach nach Hause gehen lassen. ;)
                         pAdd->SetTempSummonType(TEMPSUMMON_DEAD_DESPAWN);
 
-                        if (i) // Das erste Add direkt am HOME lassen.
-                            switch(urand(0,1))
-                            {
-                                case 0:
-                                    pAdd->SetHomePosition(FallenAddsWegPunkte[HOME].m_positionX+float(urand(0,8)), FallenAddsWegPunkte[HOME].m_positionY-float(urand(0,8)),
-                                        FallenAddsWegPunkte[HOME].m_positionZ, FallenAddsWegPunkte[HOME].m_orientation);
-                                    break;
-                                case 1:
-                                    pAdd->SetHomePosition(FallenAddsWegPunkte[HOME].m_positionX-float(urand(0,8)), FallenAddsWegPunkte[HOME].m_positionY+float(urand(0,8)),
-                                        FallenAddsWegPunkte[HOME].m_positionZ, FallenAddsWegPunkte[HOME].m_orientation);
-                                    break;
-                            }
+                        switch(urand(0,1))
+                        {
+                            case 0:
+                                pAdd->SetHomePosition(FallenAddsWegPunkte[HOME].m_positionX+float(urand(0,8)), FallenAddsWegPunkte[HOME].m_positionY-float(urand(0,8)),
+                                    FallenAddsWegPunkte[HOME].m_positionZ, FallenAddsWegPunkte[HOME].m_orientation);
+                                break;
+                            case 1:
+                                pAdd->SetHomePosition(FallenAddsWegPunkte[HOME].m_positionX-float(urand(0,8)), FallenAddsWegPunkte[HOME].m_positionY+float(urand(0,8)),
+                                    FallenAddsWegPunkte[HOME].m_positionZ, FallenAddsWegPunkte[HOME].m_orientation);
+                                break;
+                        }
                         // Ausgehend vom vorherigen Add, einen Random HOME Punkt für das nächste setzen, damit nicht alle auf einem Haufen hocken. ;)
                         pAdd->GetNearPosition(pos, 8.0f, float(urand(0,360)));
 
-                        if (!pAdd->isInCombat())
+                        if (Unit * target = GetCaster())
+                            pAdd->AI()->AttackStart(target);
+                        else
                             pAdd->GetMotionMaster()->MoveTargetedHome();
                     }
                 }
