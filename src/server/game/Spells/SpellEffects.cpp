@@ -1743,8 +1743,8 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                 break;
         }
     }
-    //unitTarget->CastSpell(m_caster, spellInfo, true);
-    unitTarget->CastSpell(m_caster, spellInfo, true, NULL, NULL, m_originalCasterGUID);
+    unitTarget->CastSpell(m_caster, spellInfo, true);
+    //unitTarget->CastSpell(m_caster, spellInfo, true, NULL, NULL, m_originalCasterGUID);
 }
 
 void Spell::EffectForceCastWithValue(SpellEffIndex effIndex)
