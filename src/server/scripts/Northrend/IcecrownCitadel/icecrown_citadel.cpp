@@ -635,7 +635,7 @@ public:
                         if (eventId == EVENT_DIENER_DES_THRONS_GLETSCHEREXPLOSION)
                         {
                             DoCast(DIENER_DES_THRONS_GLETSCHEREXPLOSION);
-                            events.RescheduleEvent(EVENT_DIENER_DES_THRONS_GLETSCHEREXPLOSION, 10000);
+                            events.RescheduleEvent(EVENT_DIENER_DES_THRONS_GLETSCHEREXPLOSION, 5 * IN_MILLISECONDS);
                         }
                         break;
                     case TODESGEWEIHTER_WAECHTER:
@@ -643,7 +643,7 @@ public:
                         {
                             case EVENT_TODESGEWEIHTER_WAECHTER_SAEBELHIEB:
                                 DoCast(TODESGEWEIHTER_WAECHTER_SAEBELHIEB);
-                                events.RescheduleEvent(EVENT_TODESGEWEIHTER_WAECHTER_SAEBELHIEB, urand(5000,8000));
+                                events.RescheduleEvent(EVENT_TODESGEWEIHTER_WAECHTER_SAEBELHIEB, urand(5 * IN_MILLISECONDS, 8 * IN_MILLISECONDS));
                                 break;
                             case EVENT_TODESGEWEIHTER_WAECHTER_UNTERBRECHENDER_SCHREI:
                                 DoCast(TODESGEWEIHTER_WAECHTER_UNTERBRECHENDER_SCHREI);
@@ -655,7 +655,7 @@ public:
                         if (eventId == EVENT_URALTER_SKELETT_SOLDAT_SCHILDHIEB)
                         {
                             DoCastVictim(URALTER_SKELETT_SOLDAT_SCHILDHIEB);
-                            events.RescheduleEvent(EVENT_URALTER_SKELETT_SOLDAT_SCHILDHIEB, urand(5000,8000));
+                            events.RescheduleEvent(EVENT_URALTER_SKELETT_SOLDAT_SCHILDHIEB, urand(5 * IN_MILLISECONDS, 8 * IN_MILLISECONDS));
                         }
                         break;
                     case BRUTHUETER_DER_NERUBAR:
@@ -1780,17 +1780,8 @@ class boss_sister_svalna : public CreatureScript
 
         struct boss_sister_svalnaAI : public BossAI
         {
-            boss_sister_svalnaAI(Creature* creature) : BossAI(creature, DATA_SISTER_SVALNA),
-                _isEventInProgress(false)
+            boss_sister_svalnaAI(Creature* creature) : BossAI(creature, DATA_SISTER_SVALNA), _isEventInProgress(false)
             {
-            }
-
-            void InitializeAI()
-            {
-                if (!me->isDead())
-                    Reset();
-
-                me->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
@@ -1798,6 +1789,26 @@ class boss_sister_svalna : public CreatureScript
                 _Reset();
                 me->SetReactState(REACT_DEFENSIVE);
                 _isEventInProgress = false;
+
+                std::list<Creature*> temp;
+                float minY = 2500.0f;
+                float maxY = 2650.0f;
+
+                FrostwingVrykulSearcher check(me, 80.0f);
+                Trinity::CreatureListSearcher<FrostwingVrykulSearcher> searcher(me, temp, check);
+                me->VisitNearbyGridObject(80.0f, searcher);
+
+                _aliveTrash.clear();
+
+                for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+                    if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
+                        _aliveTrash.insert((*itr)->GetGUID());
+
+                if (_aliveTrash.empty())
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                    me->RemoveAllAuras();
+                }
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1939,6 +1950,12 @@ class boss_sister_svalna : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (_isEventInProgress && _aliveTrash.empty() && me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                    me->RemoveAllAuras();
+                }
+
                 if (!UpdateVictim() && !_isEventInProgress)
                     return;
 
@@ -1977,6 +1994,7 @@ class boss_sister_svalna : public CreatureScript
 
         private:
             bool _isEventInProgress;
+            std::set<uint64> _aliveTrash;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2187,6 +2205,12 @@ class npc_crok_scourgebane : public CreatureScript
 
             void UpdateEscortAI(uint32 const diff)
             {
+                if (_instance->GetBossState(DATA_SISTER_SVALNA) == DONE && me->isInCombat())
+                {
+                    _isEventDone = true;
+                    EnterEvadeMode();
+                }
+
                 if (_wipeCheckTimer <= diff)
                     _wipeCheckTimer = 0;
                 else
@@ -2212,7 +2236,10 @@ class npc_crok_scourgebane : public CreatureScript
                             Talk(SAY_CROK_INTRO_3);
                             break;
                         case EVENT_START_PATHING:
-                            Start(true, true);
+                            if (!me->isInCombat())
+                                Start(true, true);
+                            else
+                                _events.RescheduleEvent(EVENT_START_PATHING, SEKUNDEN_10);
                             break;
                         case EVENT_SCOURGE_STRIKE:
                             DoCastVictim(SPELL_SCOURGE_STRIKE);
@@ -2247,7 +2274,7 @@ class npc_crok_scourgebane : public CreatureScript
             {
                 // do not see targets inside Frostwing Halls when we are not there
                 //return (me->GetPositionY() > 2660.0f) == (target->GetPositionY() > 2660.0f);
-                if (target->GetPositionY() < 2650.0f)
+                if (target->GetPositionY() < 2674.0f)
                     return true;
 
                 return false;
