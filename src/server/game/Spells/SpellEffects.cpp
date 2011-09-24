@@ -417,6 +417,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * distance);
                         break;
                     }
+                    // Emalon's Lightning Nova
+                    case 65279:
+                    {
+                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
+                        if (!radius)
+                            return;
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        if (distance > 2.0f)
+                            damage = (int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) / distance) * 2);
+                        break;
+                    }
                     // TODO: add spell specific target requirement hook for spells
                     // Shadowbolts only affects targets with Shadow Mark (Gothik)
                     case 27831:
@@ -641,7 +652,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                                 for (uint32 i = 0; i < doses; ++i)
                                     unitTarget->RemoveAuraFromStack(spellId);
                             damage *= doses;
-                            damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * doses);
+                            damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
                         }
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169))
@@ -1743,8 +1754,8 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                 break;
         }
     }
-    //unitTarget->CastSpell(m_caster, spellInfo, true);
-    unitTarget->CastSpell(m_caster, spellInfo, true, NULL, NULL, m_originalCasterGUID);
+    unitTarget->CastSpell(m_caster, spellInfo, true);
+    //unitTarget->CastSpell(m_caster, spellInfo, true, NULL, NULL, m_originalCasterGUID);
 }
 
 void Spell::EffectForceCastWithValue(SpellEffIndex effIndex)
@@ -3246,13 +3257,12 @@ void Spell::EffectLearnSpell(SpellEffIndex effIndex)
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (unitTarget->ToPet())
             EffectLearnPetSpell(effIndex);
-
         return;
     }
 
-    Player* player = (Player*)unitTarget;
+    Player* player = unitTarget->ToPlayer();
 
     uint32 spellToLearn = (m_spellInfo->Id == 483 || m_spellInfo->Id == 55884) ? damage : m_spellInfo->Effects[effIndex].TriggerSpell;
     player->learnSpell(spellToLearn, false);
@@ -3937,15 +3947,16 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
 
 void Spell::EffectLearnPetSpell(SpellEffIndex effIndex)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget)
         return;
 
-    Player* _player = m_caster->ToPlayer();
-
-    Pet* pet = _player->GetPet();
+    if (unitTarget->ToPlayer())
+    {
+        EffectLearnSpell(effIndex);
+        return;
+    }
+    Pet* pet = unitTarget->ToPet();
     if (!pet)
-        return;
-    if (!pet->isAlive())
         return;
 
     SpellInfo const* learn_spellproto = sSpellMgr->GetSpellInfo(m_spellInfo->Effects[effIndex].TriggerSpell);
@@ -3953,9 +3964,8 @@ void Spell::EffectLearnPetSpell(SpellEffIndex effIndex)
         return;
 
     pet->learnSpell(learn_spellproto->Id);
-
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-    _player->PetSpellInitialize();
+    pet->GetOwner()->PetSpellInitialize();
 }
 
 void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)

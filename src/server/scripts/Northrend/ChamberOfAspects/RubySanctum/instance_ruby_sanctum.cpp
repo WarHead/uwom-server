@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,10 +20,10 @@
 #include "ruby_sanctum.h"
 
 
-DoorData const doorData[] =
+const DoorData doorData[] =
 {
     {GO_FIRE_FIELD,     DATA_BALTHARUS_THE_WARBORN, DOOR_TYPE_PASSAGE,  BOUNDARY_E   },
-    {0,                 0,                          DOOR_TYPE_ROOM,     BOUNDARY_NONE},
+    {0,                 0,                          DOOR_TYPE_ROOM,     BOUNDARY_NONE}
 };
 
 class instance_ruby_sanctum : public InstanceMapScript
@@ -206,17 +207,13 @@ class instance_ruby_sanctum : public InstanceMapScript
                     case DATA_GENERAL_ZARITHRIAN:
                         if (GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
                             HandleGameObject(FlameWallsGUID, state != IN_PROGRESS);
-                        /*
                         if (state == DONE)
                             if (Creature* halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionControllerSpawnPos))
                                 halionController->AI()->DoAction(ACTION_INTRO_HALION);
-                        */
                         break;
                     case DATA_HALION:
-                        /*
                         if (state != IN_PROGRESS)
                             HandleGameObject(FlameRingGUID, true);
-                        */
                         break;
                     default:
                         break;

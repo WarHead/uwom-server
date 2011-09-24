@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,37 +24,37 @@
 #include "Creature.h"
 
 #define RSScriptName "instance_ruby_sanctum"
-uint32 const EncounterCount = 4;
 
-Position const HalionControllerSpawnPos = {3156.037f, 533.2656f, 72.97205f, 0.0f};
+const uint32 EncounterCount = 4;
+const Position HalionControllerSpawnPos = { 3156.037f, 533.2656f, 72.97205f, 0.0f };
 
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
-    DATA_BALTHARUS_THE_WARBORN              = 0,
-    DATA_GENERAL_ZARITHRIAN                 = 1,
-    DATA_SAVIANA_RAGEFIRE                   = 2,
-    DATA_HALION                             = 3,
+    DATA_BALTHARUS_THE_WARBORN,
+    DATA_GENERAL_ZARITHRIAN,
+    DATA_SAVIANA_RAGEFIRE,
+    DATA_HALION,
 
     // Etc
-    DATA_XERESTRASZA                        = 4,
-    DATA_CRYSTAL_CHANNEL_TARGET             = 5,
-    DATA_BALTHARUS_SHARED_HEALTH            = 6,
-    DATA_ZARITHIAN_SPAWN_STALKER_1          = 7,
-    DATA_ZARITHIAN_SPAWN_STALKER_2          = 8,
-    DATA_HALION_CONTROLLER                  = 9,
-    DATA_BURNING_TREE_1                     = 10,
-    DATA_BURNING_TREE_2                     = 11,
-    DATA_BURNING_TREE_3                     = 12,
-    DATA_BURNING_TREE_4                     = 13,
-    DATA_FLAME_RING                         = 14,
+    DATA_XERESTRASZA,
+    DATA_CRYSTAL_CHANNEL_TARGET,
+    DATA_BALTHARUS_SHARED_HEALTH,
+    DATA_ZARITHIAN_SPAWN_STALKER_1,
+    DATA_ZARITHIAN_SPAWN_STALKER_2,
+    DATA_HALION_CONTROLLER,
+    DATA_BURNING_TREE_1,
+    DATA_BURNING_TREE_2,
+    DATA_BURNING_TREE_3,
+    DATA_BURNING_TREE_4,
+    DATA_FLAME_RING
 };
 
 enum SharedActions
 {
     ACTION_INTRO_BALTHARUS                  = -3975101,
     ACTION_BALTHARUS_DEATH                  = -3975102,
-    ACTION_INTRO_HALION                     = -4014601,
+    ACTION_INTRO_HALION                     = -4014601
 };
 
 enum CreaturesIds
@@ -90,7 +91,7 @@ enum CreaturesIds
     NPC_COMBUSTION                          = 40001,
 
     // Xerestrasza
-    NPC_XERESTRASZA                         = 40429,
+    NPC_XERESTRASZA                         = 40429
 };
 
 enum GameObjectsIds
@@ -104,14 +105,14 @@ enum GameObjectsIds
     GO_BURNING_TREE_1                       = 203034,
     GO_BURNING_TREE_2                       = 203035,
     GO_BURNING_TREE_3                       = 203036,
-    GO_BURNING_TREE_4                       = 203037,
+    GO_BURNING_TREE_4                       = 203037
 };
 
 enum WorldStatesRS
 {
     WORLDSTATE_CORPOREALITY_MATERIAL = 5049,
     WORLDSTATE_CORPOREALITY_TWILIGHT = 5050,
-    WORLDSTATE_CORPOREALITY_TOGGLE   = 5051,
+    WORLDSTATE_CORPOREALITY_TOGGLE   = 5051
 };
 
 template<class AI>
