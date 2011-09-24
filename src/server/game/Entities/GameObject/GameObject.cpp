@@ -240,13 +240,11 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
                 m_stealth.AddFlag(STEALTH_TRAP);
                 m_stealth.AddValue(STEALTH_TRAP, 300);
             }
-
             if (GetGOInfo()->trap.invisible)
             {
                 m_invisibility.AddFlag(INVISIBILITY_TRAP);
                 m_invisibility.AddValue(INVISIBILITY_TRAP, 70);
             }
-
             break;
         default:
             SetGoAnimProgress(animprogress);
@@ -401,10 +399,26 @@ void GameObject::Update(uint32 diff)
                     // Type 2 - Bomb (will go away after casting it's spell)
                     if (goInfo->trap.type == 2)
                     {
-                        if (goInfo->trap.spellId)
-                            CastSpell(NULL, goInfo->trap.spellId);  // FIXME: null target won't work for target type 1
-                        SetLootState(GO_JUST_DEACTIVATED);
-                        break;
+                        if (Player * plr = FindNearestPlayer(float(goInfo->trap.radius)))
+                        {
+                            if (goInfo->trap.stealthed)
+                            {
+                                m_stealth.DelFlag(STEALTH_TRAP);
+                                m_stealth.AddValue(STEALTH_TRAP, -m_stealth.GetValue(STEALTH_TRAP));
+                            }
+                            if (goInfo->trap.invisible)
+                            {
+                                m_invisibility.DelFlag(INVISIBILITY_TRAP);
+                                m_invisibility.AddValue(INVISIBILITY_TRAP, -m_invisibility.GetValue(INVISIBILITY_TRAP));
+                            }
+                            UpdateObjectVisibility();
+                            SetGoState(GO_STATE_ACTIVE);
+                            SetLootState(GO_ACTIVATED);
+
+                            if (goInfo->trap.spellId)
+                                plr->CastSpell(plr, goInfo->trap.spellId, true);
+                        }
+                        return;
                     }
                     // Type 0 and 1 - trap (type 0 will not get removed after casting a spell)
                     Unit* owner = GetOwner();
