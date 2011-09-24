@@ -356,7 +356,7 @@ class npc_precious_icc : public CreatureScript
             void EnterCombat(Unit * /*who*/)
             {
                 _events.ScheduleEvent(EVENT_DECIMATE, SEKUNDEN_10);
-                _events.ScheduleEvent(EVENT_MORTAL_WOUND, 5 * IN_MILLISECONDS);
+                _events.ScheduleEvent(EVENT_MORTAL_WOUND, 9 * IN_MILLISECONDS);
                 _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, SEKUNDEN_20);
             }
 
