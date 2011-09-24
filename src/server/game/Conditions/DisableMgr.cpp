@@ -191,28 +191,44 @@ void LoadDisables()
                 {
                     case MAP_COMMON:
                         if (flags & VMAP_DISABLE_AREAFLAG)
-                            sLog->outString("Areaflag disabled for world map %u.", entry);
+                            sLog->outString("Areaflag disabled for world map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_LIQUIDSTATUS)
-                            sLog->outString("Liquid status disabled for world map %u.", entry);
+                            sLog->outString("Liquid status disabled for world map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
+                        if (flags & VMAP_DISABLE_HEIGHT)
+                            sLog->outString("Height disabled for world map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
+                        if (flags & VMAP_DISABLE_LOS)
+                            sLog->outString("LoS disabled for world map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         break;
                     case MAP_INSTANCE:
                     case MAP_RAID:
+                        if (flags & VMAP_DISABLE_AREAFLAG)
+                            sLog->outString("Areaflag disabled for instance map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
+                        if (flags & VMAP_DISABLE_LIQUIDSTATUS)
+                            sLog->outString("Liquid status disabled for instance map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_HEIGHT)
-                            sLog->outString("Height disabled for instance map %u.", entry);
+                            sLog->outString("Height disabled for instance map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_LOS)
-                            sLog->outString("LoS disabled for instance map %u.", entry);
+                            sLog->outString("LoS disabled for instance map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         break;
                     case MAP_BATTLEGROUND:
+                        if (flags & VMAP_DISABLE_AREAFLAG)
+                            sLog->outString("Areaflag disabled for battleground map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
+                        if (flags & VMAP_DISABLE_LIQUIDSTATUS)
+                            sLog->outString("Liquid status disabled for battleground map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_HEIGHT)
-                            sLog->outString("Height disabled for battleground map %u.", entry);
+                            sLog->outString("Height disabled for battleground map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_LOS)
-                            sLog->outString("LoS disabled for battleground map %u.", entry);
+                            sLog->outString("LoS disabled for battleground map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         break;
                     case MAP_ARENA:
+                        if (flags & VMAP_DISABLE_AREAFLAG)
+                            sLog->outString("Areaflag disabled for arena map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
+                        if (flags & VMAP_DISABLE_LIQUIDSTATUS)
+                            sLog->outString("Liquid status disabled for arena map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_HEIGHT)
-                            sLog->outString("Height disabled for arena map %u.", entry);
+                            sLog->outString("Height disabled for arena map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         if (flags & VMAP_DISABLE_LOS)
-                            sLog->outString("LoS disabled for arena map %u.", entry);
+                            sLog->outString("LoS disabled for arena map %s (%u).", mapEntry->name[sObjectMgr->GetDBCLocaleIndex()], entry);
                         break;
                     default:
                         break;
