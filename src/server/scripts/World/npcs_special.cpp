@@ -532,7 +532,7 @@ public:
             events.ScheduleEvent(EVENT_CAST, 3 * IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_TARGET, urand(SEKUNDEN_10, SEKUNDEN_60));
             events.ScheduleEvent(EVENT_CLUSTER, urand(SEKUNDEN_10, SEKUNDEN_60));
-            events.ScheduleEvent(EVENT_PRESENT_1, urand(5 * SEKUNDEN_60, MINUTEN_10));
+            events.ScheduleEvent(EVENT_PRESENT_1, urand(5 * SEKUNDEN_60, MINUTEN_05));
             events.ScheduleEvent(EVENT_JOKE, urand(SEKUNDEN_10, SEKUNDEN_60));
         }
 
