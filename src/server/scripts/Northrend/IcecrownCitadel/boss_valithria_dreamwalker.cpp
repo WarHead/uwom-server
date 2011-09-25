@@ -144,9 +144,9 @@ enum Events
 
 enum Actions
 {
-    ACTION_ENTER_COMBAT = 1,
-    MISSED_PORTALS      = 2,
-    ACTION_DEATH        = 3
+    ACTION_COMBAT = 1,
+    ACTION_DEATH,
+    MISSED_PORTALS
 };
 
 const Position ValithriaSpawnPos    = { 4210.813f, 2484.443f, 364.9558f,  0.01745329f };
@@ -325,15 +325,19 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void DoAction(int32 const action)
             {
-                if (action != ACTION_ENTER_COMBAT)
-                    return;
-
-                DoCast(me, SPELL_COPY_DAMAGE);
-                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
-                _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
-                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
-                if (IsHeroic())
-                    _events.ScheduleEvent(EVENT_BERSERK, 420000);
+                switch(action)
+                {
+                    case ACTION_COMBAT:
+                        DoCast(me, SPELL_COPY_DAMAGE);
+                        _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+                        _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
+                        _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                        if (IsHeroic())
+                            _events.ScheduleEvent(EVENT_BERSERK, 420000);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             void HealReceived(Unit* /*healer*/, uint32& heal)
@@ -520,7 +524,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 DoZoneInCombat();
                 instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, IN_PROGRESS);
                 if (Creature* valithria = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
-                    valithria->AI()->DoAction(ACTION_ENTER_COMBAT);
+                    valithria->AI()->DoAction(ACTION_COMBAT);
             }
 
             void AttackStart(Unit * target, float /*dist*/ = 0)
@@ -554,12 +558,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if (me->isInCombat() && !SelectRandomPlayer(120.0f))
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
                 if (!me->isInCombat())
                     return;
 
@@ -659,9 +657,6 @@ class npc_the_lich_king_controller : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
-                    EnterEvadeMode();
-
                 _events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -740,7 +735,7 @@ class npc_risen_archmage : public CreatureScript
                     Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
                     me->VisitNearbyGridObject(100.0f, searcher);
                     for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
-                        (*itr)->AI()->DoAction(ACTION_ENTER_COMBAT);
+                        (*itr)->AI()->DoAction(ACTION_COMBAT);
 
                     if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
                         lichKing->AI()->DoZoneInCombat();
@@ -753,7 +748,7 @@ class npc_risen_archmage : public CreatureScript
 
             void DoAction(int32 const action)
             {
-                if (action != ACTION_ENTER_COMBAT)
+                if (action != ACTION_COMBAT)
                     return;
 
                 _canCallEnterCombat = false;
