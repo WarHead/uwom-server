@@ -1237,76 +1237,76 @@ enum EventTypes
     // Highlord Bolvar Fordragon (at Light's Hammer)
     // High Overlord Saurfang (at Light's Hammer)
     // Muradin Bronzebeard (at Light's Hammer)
-    EVENT_TIRION_INTRO_2                = 1,
-    EVENT_TIRION_INTRO_3                = 2,
-    EVENT_TIRION_INTRO_4                = 3,
-    EVENT_TIRION_INTRO_5                = 4,
-    EVENT_LK_INTRO_1                    = 5,
-    EVENT_TIRION_INTRO_6                = 6,
-    EVENT_LK_INTRO_2                    = 7,
-    EVENT_LK_INTRO_3                    = 8,
-    EVENT_LK_INTRO_4                    = 9,
-    EVENT_BOLVAR_INTRO_1                = 10,
-    EVENT_LK_INTRO_5                    = 11,
-    EVENT_SAURFANG_INTRO_1              = 12,
-    EVENT_TIRION_INTRO_H_7              = 13,
-    EVENT_SAURFANG_INTRO_2              = 14,
-    EVENT_SAURFANG_INTRO_3              = 15,
-    EVENT_SAURFANG_INTRO_4              = 16,
-    EVENT_SAURFANG_RUN                  = 17,
-    EVENT_MURADIN_INTRO_1               = 18,
-    EVENT_MURADIN_INTRO_2               = 19,
-    EVENT_MURADIN_INTRO_3               = 20,
-    EVENT_TIRION_INTRO_A_7              = 21,
-    EVENT_MURADIN_INTRO_4               = 22,
-    EVENT_MURADIN_INTRO_5               = 23,
-    EVENT_MURADIN_RUN                   = 24,
+    EVENT_TIRION_INTRO_2 = 1,
+    EVENT_TIRION_INTRO_3,
+    EVENT_TIRION_INTRO_4,
+    EVENT_TIRION_INTRO_5,
+    EVENT_LK_INTRO_1,
+    EVENT_TIRION_INTRO_6,
+    EVENT_LK_INTRO_2,
+    EVENT_LK_INTRO_3,
+    EVENT_LK_INTRO_4,
+    EVENT_BOLVAR_INTRO_1,
+    EVENT_LK_INTRO_5,
+    EVENT_SAURFANG_INTRO_1,
+    EVENT_TIRION_INTRO_H_7,
+    EVENT_SAURFANG_INTRO_2,
+    EVENT_SAURFANG_INTRO_3,
+    EVENT_SAURFANG_INTRO_4,
+    EVENT_SAURFANG_RUN,
+    EVENT_MURADIN_INTRO_1,
+    EVENT_MURADIN_INTRO_2,
+    EVENT_MURADIN_INTRO_3,
+    EVENT_TIRION_INTRO_A_7,
+    EVENT_MURADIN_INTRO_4,
+    EVENT_MURADIN_INTRO_5,
+    EVENT_MURADIN_RUN,
 
     // Rotting Frost Giant
-    EVENT_DEATH_PLAGUE                  = 25,
-    EVENT_STOMP                         = 26,
-    EVENT_ARCTIC_BREATH                 = 27,
+    EVENT_DEATH_PLAGUE,
+    EVENT_STOMP,
+    EVENT_ARCTIC_BREATH,
 
     // Frost Freeze Trap
-    EVENT_ACTIVATE_TRAP                 = 28,
+    EVENT_ACTIVATE_TRAP,
 
     // Crok Scourgebane
-    EVENT_SCOURGE_STRIKE                = 29,
-    EVENT_DEATH_STRIKE                  = 30,
-    EVENT_HEALTH_CHECK                  = 31,
-    EVENT_CROK_INTRO_3                  = 32,
-    EVENT_START_PATHING                 = 33,
+    EVENT_SCOURGE_STRIKE,
+    EVENT_DEATH_STRIKE,
+    EVENT_HEALTH_CHECK,
+    EVENT_CROK_INTRO_3,
+    EVENT_START_PATHING,
 
     // Sister Svalna
-    EVENT_ARNATH_INTRO_2                = 34,
-    EVENT_SVALNA_START                  = 35,
-    EVENT_SVALNA_RESURRECT              = 36,
-    EVENT_SVALNA_COMBAT                 = 37,
-    EVENT_IMPALING_SPEAR                = 38,
-    EVENT_AETHER_SHIELD                 = 39,
+    EVENT_ARNATH_INTRO_2,
+    EVENT_SVALNA_START,
+    EVENT_SVALNA_RESURRECT,
+    EVENT_SVALNA_COMBAT,
+    EVENT_IMPALING_SPEAR,
+    EVENT_AETHER_SHIELD,
 
     // Captain Arnath
-    EVENT_ARNATH_FLASH_HEAL             = 40,
-    EVENT_ARNATH_PW_SHIELD              = 41,
-    EVENT_ARNATH_SMITE                  = 42,
-    EVENT_ARNATH_DOMINATE_MIND          = 43,
+    EVENT_ARNATH_FLASH_HEAL,
+    EVENT_ARNATH_PW_SHIELD,
+    EVENT_ARNATH_SMITE,
+    EVENT_ARNATH_DOMINATE_MIND,
 
     // Captain Brandon
-    EVENT_BRANDON_CRUSADER_STRIKE       = 44,
-    EVENT_BRANDON_DIVINE_SHIELD         = 45,
-    EVENT_BRANDON_JUDGEMENT_OF_COMMAND  = 46,
-    EVENT_BRANDON_HAMMER_OF_BETRAYAL    = 47,
+    EVENT_BRANDON_CRUSADER_STRIKE,
+    EVENT_BRANDON_DIVINE_SHIELD,
+    EVENT_BRANDON_JUDGEMENT_OF_COMMAND,
+    EVENT_BRANDON_HAMMER_OF_BETRAYAL,
 
     // Captain Grondel
-    EVENT_GRONDEL_CHARGE_CHECK          = 48,
-    EVENT_GRONDEL_MORTAL_STRIKE         = 49,
-    EVENT_GRONDEL_SUNDER_ARMOR          = 50,
-    EVENT_GRONDEL_CONFLAGRATION         = 51,
+    EVENT_GRONDEL_CHARGE_CHECK,
+    EVENT_GRONDEL_MORTAL_STRIKE,
+    EVENT_GRONDEL_SUNDER_ARMOR,
+    EVENT_GRONDEL_CONFLAGRATION,
 
     // Captain Rupert
-    EVENT_RUPERT_FEL_IRON_BOMB          = 52,
-    EVENT_RUPERT_MACHINE_GUN            = 53,
-    EVENT_RUPERT_ROCKET_LAUNCH          = 54,
+    EVENT_RUPERT_FEL_IRON_BOMB,
+    EVENT_RUPERT_MACHINE_GUN,
+    EVENT_RUPERT_ROCKET_LAUNCH
 };
 
 enum DataTypesICC
@@ -1784,31 +1784,17 @@ class boss_sister_svalna : public CreatureScript
             {
             }
 
+            void InitializeAI()
+            {
+                if (!me->isDead())
+                    Reset();
+            }
+
             void Reset()
             {
                 _Reset();
                 me->SetReactState(REACT_DEFENSIVE);
                 _isEventInProgress = false;
-
-                std::list<Creature*> temp;
-                float minY = 2500.0f;
-                float maxY = 2650.0f;
-
-                FrostwingVrykulSearcher check(me, 80.0f);
-                Trinity::CreatureListSearcher<FrostwingVrykulSearcher> searcher(me, temp, check);
-                me->VisitNearbyGridObject(80.0f, searcher);
-
-                _aliveTrash.clear();
-
-                for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
-                    if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
-                        _aliveTrash.insert((*itr)->GetGUID());
-
-                if (_aliveTrash.empty())
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
-                    me->RemoveAllAuras();
-                }
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1881,7 +1867,6 @@ class boss_sister_svalna : public CreatureScript
                     case ACTION_START_GAUNTLET:
                         me->setActive(true);
                         _isEventInProgress = true;
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
                         events.ScheduleEvent(EVENT_SVALNA_START, 25000);
                         break;
                     case ACTION_RESURRECT_CAPTAINS:
@@ -1915,7 +1900,6 @@ class boss_sister_svalna : public CreatureScript
 
                 _isEventInProgress = false;
                 me->setActive(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1950,12 +1934,6 @@ class boss_sister_svalna : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (_isEventInProgress && _aliveTrash.empty() && me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
-                    me->RemoveAllAuras();
-                }
-
                 if (!UpdateVictim() && !_isEventInProgress)
                     return;
 
@@ -1988,13 +1966,11 @@ class boss_sister_svalna : public CreatureScript
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
 
         private:
             bool _isEventInProgress;
-            std::set<uint64> _aliveTrash;
         };
 
         CreatureAI* GetAI(Creature* creature) const
