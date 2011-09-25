@@ -590,7 +590,7 @@ class spell_combustion_consumption_summon : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_combustion_consumption_summon_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+                OnEffectHit += SpellEffectFn(spell_combustion_consumption_summon_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
             }
         };
 
