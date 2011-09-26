@@ -826,7 +826,7 @@ class npc_blazing_skeleton : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
-                _events.ScheduleEvent(EVENT_LAY_WASTE, SEKUNDEN_20);
+                _events.ScheduleEvent(EVENT_LAY_WASTE, SEKUNDEN_10);
                 done = false;
             }
 
