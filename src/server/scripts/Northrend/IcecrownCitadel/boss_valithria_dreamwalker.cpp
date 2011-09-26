@@ -237,8 +237,14 @@ class ValithriaDespawner : public BasicEvent
             switch (creature->GetEntry())
             {
                 case NPC_VALITHRIA_DREAMWALKER:
-                    if (InstanceScript* instance = creature->GetInstanceScript())
+                    if (InstanceScript * instance = creature->GetInstanceScript())
+                    {
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, creature);
+                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == IN_PROGRESS)
+                            instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
+                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
+                            creature->AI()->EnterEvadeMode();
+                    }
                     break;
                 case NPC_BLAZING_SKELETON:
                 case NPC_SUPPRESSER:
@@ -259,17 +265,10 @@ class ValithriaDespawner : public BasicEvent
                     break;
             }
 
-            uint32 corpseDelay = creature->GetCorpseDelay();
-            uint32 respawnDelay = creature->GetRespawnDelay();
-            creature->SetCorpseDelay(1);
-            creature->SetRespawnDelay(10);
-
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
 
-            creature->ForcedDespawn();
-            creature->SetCorpseDelay(corpseDelay);
-            creature->SetRespawnDelay(respawnDelay);
+            creature->UpdateObjectVisibility();
         }
     private:
         Creature* _creature;
@@ -508,7 +507,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 _Reset();
                 me->SetReactState(REACT_PASSIVE);
-                instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
             }
 
             void EnterCombat(Unit* target)
@@ -600,7 +598,7 @@ class npc_the_lich_king_controller : public CreatureScript
 
         struct npc_the_lich_king_controllerAI : public ScriptedAI
         {
-            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature), summons(me), instance(creature->GetInstanceScript())
+            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
             }
 
@@ -613,7 +611,6 @@ class npc_the_lich_king_controller : public CreatureScript
                 _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 20000);
                 _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 30000);
                 me->SetReactState(REACT_PASSIVE);
-                summons.DespawnAll();
             }
 
             void JustReachedHome()
@@ -629,8 +626,6 @@ class npc_the_lich_king_controller : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-                summons.Summon(summon);
-
                 // must not be in dream phase
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true);
                 if (summon->GetEntry() != NPC_SUPPRESSER)
@@ -689,7 +684,6 @@ class npc_the_lich_king_controller : public CreatureScript
 
         private:
             EventMap _events;
-            SummonList summons;
             InstanceScript * instance;
         };
 
