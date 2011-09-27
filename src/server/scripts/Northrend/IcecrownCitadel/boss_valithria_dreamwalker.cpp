@@ -253,6 +253,10 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_MANA_VOID:
                 case NPC_COLUMN_OF_FROST:
                 case NPC_ROT_WORM:
+                case NPC_DREAM_PORTAL_PRE_EFFECT:
+                case NPC_NIGHTMARE_PORTAL_PRE_EFFECT:
+                case NPC_DREAM_PORTAL:
+                case NPC_NIGHTMARE_PORTAL:
                     creature->DespawnOrUnsummon();
                     break;
                 case NPC_RISEN_ARCHMAGE:
@@ -261,6 +265,9 @@ class ValithriaDespawner : public BasicEvent
                     else
                         creature->Respawn(true);
                     break;
+                case NPC_WORLDTRIGGER:
+                    creature->setDeathState(JUST_DIED);
+                    creature->Respawn(true);
                 default:
                     break;
             }
@@ -1301,6 +1308,11 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 if (!caster)
                     return;
 
+                // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                if (InstanceScript * instance = caster->GetInstanceScript())
+                    if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
+                        return;
+
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLDTRIGGER, 100.0f);
                 summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
@@ -1310,8 +1322,12 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
+                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                    summoners.front()->CastSpell(summoners.front(), 70935, true);
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
+                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                    summoners.back()->CastSpell(summoners.back(), 70935, true);
             }
 
             void Register()
