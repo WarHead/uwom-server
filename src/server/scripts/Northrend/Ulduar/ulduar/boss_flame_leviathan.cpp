@@ -1640,7 +1640,7 @@ class spell_pursue : public SpellScriptLoader
                         caster->AI()->EnterEvadeMode();
             }
 
-            void HandleScript(SpellEffIndex eff)
+            void HandleScript(SpellEffIndex /*eff*/)
             {
                 Creature* caster = GetCaster()->ToCreature();
                 if (!caster)

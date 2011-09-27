@@ -937,18 +937,18 @@ class spell_putricide_ooze_summon : public SpellScriptLoader
         {
             PrepareAuraScript(spell_putricide_ooze_summon_AuraScript);
 
-            void HandleTriggerSpell(AuraEffect const* aurEff)
+            void HandleTriggerSpell(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
                 {
-                    uint32 triggerSpellId = GetSpellInfo()->Effects[caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)].TriggerSpell;
+                    /*uint32 triggerSpellId = GetSpellInfo()->Effects[caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)].TriggerSpell;
                     float x, y, z;
                     GetTarget()->GetPosition(x, y, z);
                     z = GetTarget()->GetMap()->GetHeight(x, y, z, true, 25.0f);
                     x += 10.0f * cosf(caster->GetOrientation());
                     y += 10.0f * sinf(caster->GetOrientation());
-                    //caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());
+                    caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());*/
 
                     // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
                     if (InstanceScript * instance = caster->GetInstanceScript())
