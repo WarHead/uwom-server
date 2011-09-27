@@ -1,4 +1,5 @@
-/*
+ï»¿/*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -899,7 +900,7 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
                 for (std::list<Creature*>::iterator itr = creList.begin(); itr != creList.end(); ++itr)
                 {
                     target = *itr;
-                    //   Grün soll spawnen                               Orange soll spawnen
+                    //   GrÃ¼n soll spawnen                               Orange soll spawnen
                     if ((!stage && target->GetPositionX() > 4356.0f) || (stage && target->GetPositionX() < 4356.0f))
                         break; // Korrekten Trigger gefunden
                 }
@@ -953,7 +954,7 @@ class spell_putricide_ooze_summon : public SpellScriptLoader
                     if (InstanceScript * instance = caster->GetInstanceScript())
                         if (Creature * Prof = caster->GetMap()->GetCreature(instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                         {
-                            if (!caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)) // Grün
+                            if (!caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)) // GrÃ¼n
                                 Prof->SummonCreature(npc_gruener_blubb, GruenSpawnPos);
                             else
                                 Prof->SummonCreature(npc_oranger_blubb, OrangeSpawnPos);
