@@ -237,8 +237,14 @@ class ValithriaDespawner : public BasicEvent
             switch (creature->GetEntry())
             {
                 case NPC_VALITHRIA_DREAMWALKER:
-                    if (InstanceScript* instance = creature->GetInstanceScript())
+                    if (InstanceScript * instance = creature->GetInstanceScript())
+                    {
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, creature);
+                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == IN_PROGRESS)
+                            instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
+                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
+                            creature->AI()->EnterEvadeMode();
+                    }
                     break;
                 case NPC_BLAZING_SKELETON:
                 case NPC_SUPPRESSER:
@@ -247,6 +253,10 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_MANA_VOID:
                 case NPC_COLUMN_OF_FROST:
                 case NPC_ROT_WORM:
+                case NPC_DREAM_PORTAL_PRE_EFFECT:
+                case NPC_NIGHTMARE_PORTAL_PRE_EFFECT:
+                case NPC_DREAM_PORTAL:
+                case NPC_NIGHTMARE_PORTAL:
                     creature->DespawnOrUnsummon();
                     break;
                 case NPC_RISEN_ARCHMAGE:
@@ -255,21 +265,17 @@ class ValithriaDespawner : public BasicEvent
                     else
                         creature->Respawn(true);
                     break;
+                case NPC_WORLDTRIGGER:
+                    creature->setDeathState(JUST_DIED);
+                    creature->Respawn(true);
                 default:
                     break;
             }
 
-            uint32 corpseDelay = creature->GetCorpseDelay();
-            uint32 respawnDelay = creature->GetRespawnDelay();
-            creature->SetCorpseDelay(1);
-            creature->SetRespawnDelay(10);
-
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
 
-            creature->ForcedDespawn();
-            creature->SetCorpseDelay(corpseDelay);
-            creature->SetRespawnDelay(respawnDelay);
+            creature->UpdateObjectVisibility();
         }
     private:
         Creature* _creature;
@@ -508,7 +514,6 @@ class npc_green_dragon_combat_trigger : public CreatureScript
             {
                 _Reset();
                 me->SetReactState(REACT_PASSIVE);
-                instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
             }
 
             void EnterCombat(Unit* target)
@@ -600,7 +605,7 @@ class npc_the_lich_king_controller : public CreatureScript
 
         struct npc_the_lich_king_controllerAI : public ScriptedAI
         {
-            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature), summons(me), instance(creature->GetInstanceScript())
+            npc_the_lich_king_controllerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
             }
 
@@ -613,7 +618,6 @@ class npc_the_lich_king_controller : public CreatureScript
                 _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 20000);
                 _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 30000);
                 me->SetReactState(REACT_PASSIVE);
-                summons.DespawnAll();
             }
 
             void JustReachedHome()
@@ -629,8 +633,6 @@ class npc_the_lich_king_controller : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-                summons.Summon(summon);
-
                 // must not be in dream phase
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true);
                 if (summon->GetEntry() != NPC_SUPPRESSER)
@@ -689,7 +691,6 @@ class npc_the_lich_king_controller : public CreatureScript
 
         private:
             EventMap _events;
-            SummonList summons;
             InstanceScript * instance;
         };
 
@@ -832,7 +833,7 @@ class npc_blazing_skeleton : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
-                _events.ScheduleEvent(EVENT_LAY_WASTE, SEKUNDEN_20);
+                _events.ScheduleEvent(EVENT_LAY_WASTE, SEKUNDEN_10);
                 done = false;
             }
 
@@ -857,9 +858,6 @@ class npc_blazing_skeleton : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
-
                 _events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -870,7 +868,7 @@ class npc_blazing_skeleton : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FIREBALL:
-                            if (!me->IsWithinMeleeRange(me->getVictim()))
+                            if (me->getVictim() && !me->IsWithinMeleeRange(me->getVictim()))
                                 DoCastVictim(SPELL_FIREBALL);
                             _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
                             break;
@@ -912,7 +910,7 @@ class npc_suppresser : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SUPPRESSION, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_SUPPRESSION, 10000);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -939,7 +937,7 @@ class npc_suppresser : public CreatureScript
                     {
                         case EVENT_SUPPRESSION:
                             DoCastAOE(SPELL_SUPPRESSION);
-                            _events.ScheduleEvent(EVENT_SUPPRESSION, 5000);
+                            _events.RescheduleEvent(EVENT_SUPPRESSION, 10000);
                             break;
                         default:
                             break;
@@ -1066,6 +1064,34 @@ class npc_gluttonous_abomination : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return GetIcecrownCitadelAI<npc_gluttonous_abominationAI>(creature);
+        }
+};
+
+class npc_gluttonous_abomination_rot_worm : public CreatureScript
+{
+    public:
+        npc_gluttonous_abomination_rot_worm() : CreatureScript("npc_gluttonous_abomination_rot_worm") { }
+
+        struct npc_gluttonous_abomination_rot_wormAI : public ScriptedAI
+        {
+            npc_gluttonous_abomination_rot_wormAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void EnterCombat(Unit* /*target*/)
+            {
+                DoZoneInCombat();
+            }
+
+            bool CanAIAttack(Unit const* target) const
+            {
+                return target->GetEntry() != NPC_VALITHRIA_DREAMWALKER;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return GetIcecrownCitadelAI<npc_gluttonous_abomination_rot_wormAI>(creature);
         }
 };
 
@@ -1307,6 +1333,11 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 if (!caster)
                     return;
 
+                // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                if (InstanceScript * instance = caster->GetInstanceScript())
+                    if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
+                        return;
+
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLDTRIGGER, 100.0f);
                 summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
@@ -1316,8 +1347,12 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
+                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                    summoners.front()->CastSpell(summoners.front(), 70935, true);
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
+                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                    summoners.back()->CastSpell(summoners.back(), 70935, true);
             }
 
             void Register()
@@ -1519,6 +1554,7 @@ void AddSC_boss_valithria_dreamwalker()
     new npc_suppresser();
     new npc_blistering_zombie();
     new npc_gluttonous_abomination();
+    new npc_gluttonous_abomination_rot_worm();
     new npc_dream_portal();
     new npc_dream_cloud();
     new spell_dreamwalker_mana_void();
