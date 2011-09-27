@@ -493,8 +493,8 @@ class boss_professor_putricide : public CreatureScript
                     case DATA_EXPERIMENT_STAGE:
                     {
                         // ALSO MODIFIES!
-                        uint32 ret = uint32(_experimentState);
-                        _experimentState ^= true;
+                        uint32 ret = _experimentState ? 1 : 0;
+                        _experimentState ^= EXPERIMENT_STATE_GAS;
                         return ret;
                     }
                     case DATA_PHASE:
@@ -895,17 +895,14 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
                 uint32 stage = GetCaster()->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE);
                 Creature* target = NULL;
                 std::list<Creature*> creList;
-                GetCreatureListWithEntryInGrid(creList, GetCaster(), NPC_ABOMINATION_WING_MAD_SCIENTIST_STALKER, 100.0f);
-                // 2 of them are spawned at green place - weird trick blizz
+                GetCreatureListWithEntryInGrid(creList, GetCaster(), NPC_ABOMINATION_WING_MAD_SCIENTIST_STALKER, 110.0f);
                 for (std::list<Creature*>::iterator itr = creList.begin(); itr != creList.end(); ++itr)
                 {
                     target = *itr;
-                    std::list<Creature*> tmp;
-                    GetCreatureListWithEntryInGrid(tmp, target, NPC_ABOMINATION_WING_MAD_SCIENTIST_STALKER, 1.0f);
-                    if ((!stage && tmp.size() > 1) || (stage && tmp.size() == 1))
-                        break;
+                    //   Grün soll spawnen                               Orange soll spawnen
+                    if ((!stage && target->GetPositionX() > 4356.0f) || (stage && target->GetPositionX() < 4356.0f))
+                        break; // Korrekten Trigger gefunden
                 }
-
                 GetCaster()->CastSpell(target, uint32(GetSpellInfo()->Effects[stage].CalcValue()), true, NULL, NULL, GetCaster()->GetGUID());
             }
 
@@ -919,6 +916,15 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
         {
             return new spell_putricide_unstable_experiment_SpellScript();
         }
+};
+
+const Position OrangeSpawnPos = { 4332.705078f, 3207.876465f, 389.399017f, 5.7892299f };
+const Position GruenSpawnPos = { 4379.893066f, 3206.495605f, 389.399017f, 3.071754f };
+
+enum Blubbs
+{
+    npc_gruener_blubb = 37697,
+    npc_oranger_blubb = 37562
 };
 
 class spell_putricide_ooze_summon : public SpellScriptLoader
@@ -935,13 +941,23 @@ class spell_putricide_ooze_summon : public SpellScriptLoader
                 PreventDefaultAction();
                 if (Unit* caster = GetCaster())
                 {
-                    uint32 triggerSpellId = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
+                    uint32 triggerSpellId = GetSpellInfo()->Effects[caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)].TriggerSpell;
                     float x, y, z;
                     GetTarget()->GetPosition(x, y, z);
                     z = GetTarget()->GetMap()->GetHeight(x, y, z, true, 25.0f);
                     x += 10.0f * cosf(caster->GetOrientation());
                     y += 10.0f * sinf(caster->GetOrientation());
-                    caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());
+                    //caster->CastSpell(x, y, z, triggerSpellId, true, NULL, NULL, GetCasterGUID());
+
+                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
+                    if (InstanceScript * instance = caster->GetInstanceScript())
+                        if (Creature * Prof = caster->GetMap()->GetCreature(instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                        {
+                            if (!caster->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE)) // Grün
+                                Prof->SummonCreature(npc_gruener_blubb, GruenSpawnPos);
+                            else
+                                Prof->SummonCreature(npc_oranger_blubb, OrangeSpawnPos);
+                        }
                 }
             }
 
