@@ -858,9 +858,6 @@ class npc_blazing_skeleton : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
-
                 _events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -871,7 +868,7 @@ class npc_blazing_skeleton : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FIREBALL:
-                            if (!me->IsWithinMeleeRange(me->getVictim()))
+                            if (me->getVictim() && !me->IsWithinMeleeRange(me->getVictim()))
                                 DoCastVictim(SPELL_FIREBALL);
                             _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
                             break;
@@ -913,7 +910,7 @@ class npc_suppresser : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SUPPRESSION, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_SUPPRESSION, 10000);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -940,7 +937,7 @@ class npc_suppresser : public CreatureScript
                     {
                         case EVENT_SUPPRESSION:
                             DoCastAOE(SPELL_SUPPRESSION);
-                            _events.ScheduleEvent(EVENT_SUPPRESSION, 5000);
+                            _events.RescheduleEvent(EVENT_SUPPRESSION, 10000);
                             break;
                         default:
                             break;
@@ -1067,6 +1064,34 @@ class npc_gluttonous_abomination : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return GetIcecrownCitadelAI<npc_gluttonous_abominationAI>(creature);
+        }
+};
+
+class npc_gluttonous_abomination_rot_worm : public CreatureScript
+{
+    public:
+        npc_gluttonous_abomination_rot_worm() : CreatureScript("npc_gluttonous_abomination_rot_worm") { }
+
+        struct npc_gluttonous_abomination_rot_wormAI : public ScriptedAI
+        {
+            npc_gluttonous_abomination_rot_wormAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void EnterCombat(Unit* /*target*/)
+            {
+                DoZoneInCombat();
+            }
+
+            bool CanAIAttack(Unit const* target) const
+            {
+                return target->GetEntry() != NPC_VALITHRIA_DREAMWALKER;
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return GetIcecrownCitadelAI<npc_gluttonous_abomination_rot_wormAI>(creature);
         }
 };
 
@@ -1529,6 +1554,7 @@ void AddSC_boss_valithria_dreamwalker()
     new npc_suppresser();
     new npc_blistering_zombie();
     new npc_gluttonous_abomination();
+    new npc_gluttonous_abomination_rot_worm();
     new npc_dream_portal();
     new npc_dream_cloud();
     new spell_dreamwalker_mana_void();
