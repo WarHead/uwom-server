@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -108,6 +109,7 @@ enum Spells
     SPELL_BLOOD_LINK_BEAST              = 72176,
     SPELL_RESISTANT_SKIN                = 72723,
     SPELL_SCENT_OF_BLOOD                = 72769, // Heroic only
+    SPELL_SCENT_OF_BLOOD_TRIGGERED      = 72771,
 
     SPELL_RIDE_VEHICLE                  = 70640, // Outro
     SPELL_ACHIEVEMENT                   = 72928,
@@ -359,8 +361,15 @@ class boss_deathbringer_saurfang : public CreatureScript
                     summon->AI()->AttackStart(target);
 
                 if (IsHeroic())
-                    DoCast(summon, SPELL_SCENT_OF_BLOOD);
-
+                {
+                    summon->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED, summon);
+                    SelectTargetList(playerList, RAID_MODE(10,25,10,25), SELECT_TARGET_RANDOM, 0, true);
+                    for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    {
+                        Unit * Temp = (*itr);
+                        Temp->AddAura(SPELL_SCENT_OF_BLOOD, Temp);
+                    }
+                }
                 summon->AI()->DoCast(summon, SPELL_BLOOD_LINK_BEAST, true);
                 summon->AI()->DoCast(summon, SPELL_RESISTANT_SKIN, true);
                 summons.Summon(summon);
@@ -391,8 +400,28 @@ class boss_deathbringer_saurfang : public CreatureScript
                     case 72444:
                     case 72445:
                     case 72446:
+                    case 72380: // Blood Nova
+                    case 72438:
+                    case 72439:
+                    case 72440:
+                    case 73058: // blood nova targets
+                    case 72378:
+                    case 72408: // rune of blood,triggerer
                         if (me->GetPower(POWER_ENERGY) != me->GetMaxPower(POWER_ENERGY))
-                            target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, me, true);
+                        {
+                            if (_fallenChampionCastCount < 1)
+                            {
+                                if (!IsHeroic())
+                                   target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, me, true);
+                                else target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 2, me, true);
+                            }
+                            else
+                            {
+                                if (!IsHeroic())
+                                    target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, _fallenChampionCastCount + 1, me, true);
+                                else target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 2 * (_fallenChampionCastCount + 1), me, true);
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -549,6 +578,7 @@ class boss_deathbringer_saurfang : public CreatureScript
             uint32 _fallenChampionCastCount;
             bool _introDone;
             bool _frenzied;   // faster than iterating all auras to find Frenzy
+            std::list<Unit *> playerList;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -960,6 +990,51 @@ class npc_saurfang_event : public CreatureScript
         }
 };
 
+class npc_blood_beast : public CreatureScript
+{
+public:
+    npc_blood_beast() : CreatureScript("npc_blood_beast") { }
+
+    struct npc_blood_beastAI : public ScriptedAI
+    {
+        npc_blood_beastAI(Creature* creature) : ScriptedAI(creature) { }
+      
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner)
+                BloodLinkTimer = 2 * IN_MILLISECONDS;
+        }
+      
+        void UpdateAI(uint32 const diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (BloodLinkTimer <= diff && me->IsWithinDist(me->getVictim(), 5.0f))
+            {
+                if (Unit * saurfang = me->FindNearestCreature(NPC_DEATHBRINGER_SAURFANG, 300.0f, true))
+                    if (saurfang->GetPower(POWER_ENERGY) != saurfang->GetMaxPower(POWER_ENERGY))
+                    {
+                        me->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, saurfang, true);
+                        BloodLinkTimer = 2 * IN_MILLISECONDS;
+                    }
+            }
+            else
+                BloodLinkTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    private:
+        uint32 BloodLinkTimer;
+
+    };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
+    }
+};
+
 class spell_deathbringer_blood_link : public SpellScriptLoader
 {
     public:
@@ -1145,7 +1220,8 @@ class spell_deathbringer_blood_nova : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);  // make this the default handler
                 if (GetCaster()->GetPower(POWER_ENERGY) != GetCaster()->GetMaxPower(POWER_ENERGY))
-                    GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 2, GetCaster(), true);
+                    if (Unit * saurfang = GetHitUnit()->FindNearestCreature(NPC_DEATHBRINGER_SAURFANG, 300.0f, true))
+                       GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, saurfang, true);
             }
 
             void Register()
@@ -1247,15 +1323,45 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 unitList.push_back(target);
             }
 
+            void HandleOnHit()
+            {
+                if (GetCaster()->GetPower(POWER_ENERGY) != GetCaster()->GetMaxPower(POWER_ENERGY))
+                    GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, GetCaster(), true);
+            }
+
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_deathbringer_boiling_blood_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnHit += SpellHitFn(spell_deathbringer_boiling_blood_SpellScript::HandleOnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        class spell_deathbringer_boiling_bloodAuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_deathbringer_boiling_bloodAuraScript);
+      
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                if (Unit * target = GetTarget())
+                    if (Unit * saurfang = target->FindNearestCreature(NPC_DEATHBRINGER_SAURFANG, 300.0f, true))
+                        target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, saurfang, true);
+            }
+      
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_deathbringer_boiling_bloodAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+              
+        };
+
+        SpellScript * GetSpellScript() const
         {
             return new spell_deathbringer_boiling_blood_SpellScript();
+        }
+    
+        AuraScript * GetAuraScript() const
+        {
+            return new spell_deathbringer_boiling_bloodAuraScript();
         }
 };
 
@@ -1281,6 +1387,7 @@ void AddSC_boss_deathbringer_saurfang()
     new npc_high_overlord_saurfang_icc();
     new npc_muradin_bronzebeard_icc();
     new npc_saurfang_event();
+    new npc_blood_beast();
     new spell_deathbringer_blood_link();
     new spell_deathbringer_blood_link_aura();
     new spell_deathbringer_blood_power();
