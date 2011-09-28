@@ -22,19 +22,19 @@ Script Data End */
 // TO-DOs:
 // Implement a better pathing for Malygos.
 // Find sniffed spawn position for chest
+// Implement a better way to disappear the gameobjects
+// Implement achievements
 // Remove hack that re-adds targets to the aggro list after they enter to a vehicle when it works as expected
-// Platform is susceptible to siege damage. sniff-conform sollution? e.g. not upping hitpoints or changing faction to 35
 // Improve whatever can be improved :)
 
 #include "ScriptPCH.h"
 #include "eye_of_eternity.h"
 #include "ScriptedEscortAI.h"
-#include "Vehicle.h"
 
 // not implemented
 enum Achievements
 {
-    ACHIEV_TIMED_START_EVENT   = 20387,
+    ACHIEV_TIMED_START_EVENT                      = 20387,
 };
 
 enum Events
@@ -70,51 +70,28 @@ enum Phases
 
 enum Spells
 {
-    // ============= PREFIGHT ==============
-    SPELL_BERSERKER            = 60670,
+    SPELL_ARCANE_BREATH = 56272,
+    SPELL_ARCANE_STORM  = 57459,
+    SPELL_BERSEKER      = 60670,
+
+    SPELL_VORTEX_1 = 56237, // seems that frezze object animation
+    SPELL_VORTEX_2 = 55873, // visual effect
+    SPELL_VORTEX_3 = 56105, // this spell must handle all the script - casted by the boss and to himself
+    //SPELL_VORTEX_4 = 55853, // damage | used to enter to the vehicle - defined in eye_of_eternity.h
+    //SPELL_VORTEX_5 = 56263, // damage | used to enter to the vehicle - defined in eye_of_eternity.h
+    SPELL_VORTEX_6 = 73040, // teleport - (casted to all raid) | caster 30090 | target player
+
     SPELL_PORTAL_VISUAL_CLOSED = 55949,
-    SPELL_PORTAL_BEAM          = 56046,
-    SPELL_IRIS_OPENED          = 61012,
+    SPELL_SUMMON_POWER_PARK = 56142,
+    SPELL_POWER_SPARK_DEATH = 55852,
+    SPELL_POWER_SPARK_MALYGOS = 56152,
 
-    // =========== PHASE ONE ===============
-    SPELL_ARCANE_BREATH_10     = 56272,
-    SPELL_ARCANE_STORM_10      = 57459,
-    SPELL_ARCANE_BREATH_25     = 60072,
-    SPELL_ARCANE_STORM_25      = 61694,
-
-    SPELL_VORTEX_1             = 56237,                     // seems that frezze object animation
-    SPELL_VORTEX_2             = 55873,                     // visual effect
-    SPELL_VORTEX_3             = 56105,                     // this spell must handle all the script - casted by the boss and to himself
-    //SPELL_VORTEX_4           = 55853,                     // damage | used to enter to the vehicle - defined in eye_of_eternity.h
-    //SPELL_VORTEX_5           = 56263,                     // damage | used to enter to the vehicle - defined in eye_of_eternity.h
-    SPELL_VORTEX_6             = 73040,                     // teleport - (casted to all raid) | caster 30090 | target player
-
-    SPELL_SUMMON_POWER_SPARK   = 56142,
-    SPELL_POWER_SPARK_DEATH    = 55852,
-    SPELL_POWER_SPARK_MALYGOS  = 56152,
-
-    // =========== PHASE TWO ===============
-    SPELL_SURGE_POWER_P2       = 56505,                     // used in phase 2
-    SPELL_ARCANE_BOMB_SUMMON   = 56429,
-    SPELL_ARCANE_BOMB_MISSILE  = 56430,
-    SPELL_ARCANE_BOMB_EFFECT   = 56431,
-    SPELL_ARCANE_OVERLOAD      = 56432,
-    SPELL_ARCANE_OVERLOAD_SIZE = 56435,
-
-    SPELL_ARCANE_BARRAGE_TRIG  = 56397,
-    SPELL_TELEPORT_VISUAL      = 51347,
-
-    // ========== PHASE THREE ==============
-    SPELL_PLATTFORM_CHANNEL    = 58842,
-    SPELL_PLATTFORM_BOOM       = 59084,
-    SPELL_SURGE_POWER_P3       = 60936,
-    SPELL_STATIC_FIELD         = 57430,
-    SPELL_ARCANE_PULSE         = 57432,
-
-    // ========= ALEXSTRASZA OUTRO =========
-
-    SPELL_GIFT_CHANNEL         = 61028,
-    SPELL_GIFT_VISUAL          = 61023
+    SPELL_SURGE_POWER = 56505, // used in phase 2
+    SPELL_SUMMON_ARCANE_BOMB = 56429,
+    SPELL_ARCANE_OVERLOAD = 56432,
+    SPELL_SUMMOM_RED_DRAGON = 56070,
+    SPELL_SURGE_POWER_PHASE_3 = 57407,
+    SPELL_STATIC_FIELD = 57430
 };
 
 enum Movements
@@ -142,6 +119,14 @@ enum Actions
     ACTION_HOVER_DISK_START_WP_1,
     ACTION_HOVER_DISK_START_WP_2
 };
+
+enum MalygosEvents
+{
+    DATA_SUMMON_DEATHS, // phase 2
+    DATA_PHASE
+};
+
+#define TEN_MINUTES 600000
 
 enum MalygosSays
 {
@@ -255,9 +240,6 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             _cannotMove = true;
-
-            if (instance)
-                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
         }
 
         uint32 GetData(uint32 data)
@@ -286,7 +268,6 @@ public:
             me->SetHomePosition(_homePosition);
 
             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-            HandleRedDrakes(false);
 
             BossAI::EnterEvadeMode();
 
@@ -316,7 +297,18 @@ public:
             summons.DespawnAll();
             // players that used Hover Disk are no in the aggro list
             me->SetInCombatWithZone();
-            HandleRedDrakes(true);
+            std::list<HostileReference*> &m_threatlist = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
+            {
+                if (Unit* target = (*itr)->getTarget())
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        continue;
+
+                    // The rest is handled in the AI of the vehicle.
+                    target->CastSpell(target, SPELL_SUMMOM_RED_DRAGON, true);
+                }
+            }
 
             if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(DATA_PLATFORM)))
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED); // In sniffs it has this flag, but i don't know how is applied.
@@ -363,10 +355,7 @@ public:
 
             Talk(SAY_AGGRO_P_ONE);
 
-            if (instance)
-                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
-
-            DoCast(SPELL_BERSERKER);
+            DoCast(SPELL_BERSEKER);
         }
 
         void KilledUnit(Unit* who)
@@ -407,9 +396,8 @@ public:
             if (who->GetEntry() == NPC_POWER_SPARK)
             {
                 // not sure about the distance | I think it is better check this here than in the UpdateAI function...
-                if (who->GetDistance(me) <= 0.5f)
-                    if (!who->ToCreature()->AI()->GetData(0))
-                        who->CastSpell(me, SPELL_POWER_SPARK_MALYGOS, true);
+                if (who->GetDistance(me) <= 2.5f)
+                    who->CastSpell(me, SPELL_POWER_SPARK_MALYGOS, true);
             }
         }
 
@@ -448,8 +436,6 @@ public:
                     me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_ROTATION, MalygosPhaseTwoWaypoints[_currentPos]);
                     break;
                 case MOVE_INIT_PHASE_ONE:
-                    if (GameObject* iris = instance->instance->GetGameObject(instance->GetData64(DATA_IRIS)))
-                        iris->SetPhaseMask(0x1000, true);   // random value, just be invisible
                     me->SetInCombatWithZone();
                     break;
                 case MOVE_CENTER_PLATFORM:
@@ -535,9 +521,6 @@ public:
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
 
-            // must be declared outside of loop
-            UnitList fieldTargets;
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -558,11 +541,11 @@ public:
                         Talk(SAY_AGGRO_P_TWO);
                         break;
                     case EVENT_ARCANE_BREATH:
-                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH_10);
+                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH);
                         events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(35, 60)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_ARCANE_STORM:
-                        DoCast(me->getVictim(), SPELL_ARCANE_STORM_10);
+                        DoCast(me->getVictim(), SPELL_ARCANE_STORM);
                         events.ScheduleEvent(EVENT_ARCANE_STORM, urand(5, 10)*IN_MILLISECONDS, 0, PHASE_ONE);
                         break;
                     case EVENT_VORTEX:
@@ -576,21 +559,19 @@ public:
                     case EVENT_SURGE_POWER:
                         me->GetMotionMaster()->MoveIdle();
                         _delayedMovement = true;
-                        DoCast(SPELL_SURGE_POWER_P2);
+                        DoCast(SPELL_SURGE_POWER);
                         events.ScheduleEvent(EVENT_SURGE_POWER, urand(60, 70)*IN_MILLISECONDS, 0, PHASE_TWO);
                         break;
                     case EVENT_SUMMON_ARCANE:
-                        DoCast(SPELL_ARCANE_BOMB_SUMMON);
+                        DoCast(SPELL_SUMMON_ARCANE_BOMB);
                         events.ScheduleEvent(EVENT_SUMMON_ARCANE, urand(12, 15)*IN_MILLISECONDS, 0, PHASE_TWO);
                         break;
                     case EVENT_SURGE_POWER_PHASE_3:
-                        DoCast(SPELL_SURGE_POWER_P3);       // target selection and Boss-Warning in SpellScript
+                        DoCast(GetTargetPhaseThree(), SPELL_SURGE_POWER_PHASE_3);
                         events.ScheduleEvent(EVENT_SURGE_POWER_PHASE_3, urand(7, 16)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     case EVENT_STATIC_FIELD:
-                        fieldTargets = SelectRandomTargets(RAID_MODE(1, 3), true);
-                        for (UnitList::iterator itr = fieldTargets.begin(); itr != fieldTargets.end(); ++itr)
-                            DoCast((*itr), SPELL_STATIC_FIELD, true);
+                        DoCast(GetTargetPhaseThree(), SPELL_STATIC_FIELD);
                         events.ScheduleEvent(EVENT_STATIC_FIELD, urand(20, 30)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     default:
@@ -601,103 +582,29 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        UnitList SelectRandomTargets(uint8 maxCount, bool targetVehicle = false)
+        Unit* GetTargetPhaseThree()
         {
-            UnitList temp;
-            UnitList result;
+            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
 
-            std::list<HostileReference*> &UnitList = me->getThreatManager().getThreatList();
-            if (UnitList.empty())
-                return result;
+            // we are a drake
+            if (target->GetVehicleKit())
+                return target;
 
-            for (std::list<HostileReference*>::iterator itr = UnitList.begin(); itr != UnitList.end(); ++itr)
+            // we are a player using a drake (or at least you should)
+            if (target->GetTypeId() == TYPEID_PLAYER)
             {
-                if (Unit* target = (*itr)->getTarget())
-                {
-                    if (target->GetTypeId() == TYPEID_UNIT && !target->GetVehicleKit())
-                        continue;
-
-                    if (targetVehicle)
-                    {
-                        if (Unit* base = target->GetVehicleBase())
-                            temp.push_back(base);
-                        else if (target->IsVehicle())
-                            temp.push_back(target);
-                    }
-                    else
-                    {
-                        if (!target->IsVehicle())
-                            temp.push_back(target);
-                        else if (Vehicle* kit = target->GetVehicleKit())
-                            if (Unit* rider = kit->GetPassenger(SEAT_0))
-                                temp.push_back(rider);
-
-                    }
-                }
+                if (Unit* base = target->GetVehicleBase())
+                    return base;
             }
 
-            UnitList::iterator j;
-            for (uint8 i = 0; i < maxCount; i++)
-            {
-                if (temp.empty())
-                    break;
-
-                j = temp.begin();
-                advance(j, rand()%temp.size());
-                result.push_back(*j);
-                temp.erase(j);
-            }
-            return result;
+            // is a player falling from a vehicle?
+            return NULL;
         }
-
-        void HandleRedDrakes(bool apply)
-        {
-            Map::PlayerList const &PlayerList = instance->instance->GetPlayers();
-            if (!PlayerList.isEmpty())
-            {
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                {
-                    if (Player* player = i->getSource())
-                    {
-                        if (player->isAlive())
-                        {
-                            if (apply)
-                                player->CastSpell(player, SPELL_SUMMOM_RED_DRAGON, true);
-                            else
-                                player->ExitVehicle();
-                        }
-                    }
-                }
-            }
-         }
 
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
             _JustDied();
-
-            Map::PlayerList const &PlayerList = instance->instance->GetPlayers();
-            if (PlayerList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            {
-                if (Player* player = i->getSource())
-                {
-                    if (player->GetQuestStatus(RAID_MODE(QUEST_JUDGEMENT_10, QUEST_JUDGEMENT_25)) == QUEST_STATUS_INCOMPLETE)
-                    {
-                        GameObject* go = new GameObject;
-                        if (go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), RAID_MODE(GO_HEART_OF_MAGIC_10, GO_HEART_OF_MAGIC_25), instance->instance, PHASEMASK_NORMAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 120, GO_STATE_READY))
-                        {
-                            go->SetRespawnTime(1*WEEK);
-                            instance->instance->Add(go);
-                        }
-                        else
-                            delete go;
-                        break;
-                    }
-                }
-            }
         }
 
     private:
@@ -775,7 +682,7 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
                             if (InstanceScript* instance = caster->GetInstanceScript())
                             {
                                 // teleport spell - i am not sure but might be it must be casted by each vehicle when its passenger leaves it
-                                if (Creature* trigger = caster->GetMap()->GetCreature(instance->GetData64(DATA_VORTEX)))
+                                if (Creature* trigger = caster->GetMap()->GetCreature(instance->GetData64(DATA_TRIGGER)))
                                     trigger->CastSpell(targetPlayer, SPELL_VORTEX_6, true);
                             }
                         }
@@ -808,195 +715,6 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
         }
 };
 
-class spell_malygos_surge_of_power_p3 : public SpellScriptLoader
-{
-public:
-    spell_malygos_surge_of_power_p3() : SpellScriptLoader("spell_malygos_surge_of_power_p3") {}
-
-    class spell_malygos_surge_of_power_p3_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_malygos_surge_of_power_p3_SpellScript)
-
-        void FilterTargets(std::list<Unit*>& unitList)
-        {
-            Unit* caster = GetCaster();
-            if (!caster || !caster->IsAIEnabled || caster->ToCreature()->GetEntry() != NPC_MALYGOS)
-                return;
-
-            uint8 numTargets = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? 3 : 1;
-            unitList = CAST_AI(boss_malygos::boss_malygosAI, (caster->ToCreature()->AI()))->SelectRandomTargets(numTargets, true);
-            /* uncomment after reordering the text
-            for (UnitList::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
-                caster->ToCreature()->AI()->Talk(EMOTE_SURGE_OF_POWER, (*itr)->GetVehicleKit()->GetPassenger(SEAT_0)->GetGUID());
-            */
-        }
-
-        void Register()
-        {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_surge_of_power_p3_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript *GetSpellScript() const
-    {
-        return new spell_malygos_surge_of_power_p3_SpellScript();
-    }
-};
-
-class spell_malygos_arcane_storm : public SpellScriptLoader
-{
-public:
-    spell_malygos_arcane_storm() : SpellScriptLoader("spell_malygos_arcane_storm") {}
-
-    class spell_malygos_arcane_storm_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_malygos_arcane_storm_SpellScript)
-
-        void FilterTargets(std::list<Unit*>& unitList)
-        {
-            Unit* caster = GetCaster();
-            if (!caster || !caster->IsAIEnabled || caster->ToCreature()->GetEntry() != NPC_MALYGOS)
-                return;
-
-            uint8 numTargets = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? urand(7, 9) : urand(1, 3);
-            unitList = CAST_AI(boss_malygos::boss_malygosAI, (caster->ToCreature()->AI()))->SelectRandomTargets(numTargets);
-        }
-
-        void Register()
-        {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript *GetSpellScript() const
-    {
-        return new spell_malygos_arcane_storm_SpellScript();
-    }
-};
-
-class spell_malygos_arcane_barrage : public SpellScriptLoader
-{
-public:
-    spell_malygos_arcane_barrage() : SpellScriptLoader("spell_malygos_arcane_barrage") {}
-
-    class spell_malygos_arcane_barrage_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_malygos_arcane_barrage_SpellScript)
-
-        bool heroic;
-
-        bool Load()
-        {
-            heroic = false;
-            if (Unit* caster = GetCaster())
-                heroic = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL;
-
-            return true;
-        }
-
-        void FilterTargets(std::list<Unit*>& unitList)
-        {
-            if (GetSpellInfo()->Id != SPELL_ARCANE_BARRAGE_TRIG)
-                return;
-
-            if (Unit* caster = GetCaster())
-                if (InstanceScript* iScript = caster->GetInstanceScript())
-                    if (Creature* malygos = Unit::GetCreature(*caster, iScript->GetData64(DATA_MALYGOS)))
-                        unitList = CAST_AI(boss_malygos::boss_malygosAI, (malygos->AI()))->SelectRandomTargets(heroic ? 3 : 1);
-        }
-
-        void DoHeroicDamage()
-        {
-            if (heroic && GetSpellInfo()->Id != SPELL_ARCANE_BARRAGE_TRIG)
-                SetHitDamage(int32(GetHitDamage() * 1.2f));
-        }
-
-        void Register()
-        {
-            OnHit += SpellHitFn(spell_malygos_arcane_barrage_SpellScript::DoHeroicDamage);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_barrage_SpellScript::FilterTargets, EFFECT_0, TARGET_SRC_CASTER);
-        }
-     };
-
-    SpellScript *GetSpellScript() const
-    {
-        return new spell_malygos_arcane_barrage_SpellScript();
-    }
-};
-
-class spell_malygos_arcane_overload : public SpellScriptLoader
-{
-public:
-    spell_malygos_arcane_overload() : SpellScriptLoader("spell_malygos_arcane_overload") {}
-
-    class spell_malygos_arcane_overload_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_malygos_arcane_overload_SpellScript)
-
-        void FilterTargets(std::list<Unit*>& targetList)
-        {
-            uint8 stack = 50;
-            Unit* caster = GetCaster();
-
-            if (!caster)
-                return;
-
-            if (Aura* aur = caster->GetAura(SPELL_ARCANE_OVERLOAD_SIZE))
-                stack -= aur->GetStackAmount();
-
-            for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end();)
-            {
-                if (caster->GetExactDist((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ()) > ((stack / 50.0f) * 18.0f))
-                    itr = targetList.erase(itr);
-                else
-                    itr++;
-            }
-        }
-
-        void Register()
-        {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_arcane_overload_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_malygos_arcane_overload_SpellScript();
-    }
-};
-
-class spell_malygos_surge_of_power : public SpellScriptLoader
-{
-public:
-    spell_malygos_surge_of_power() : SpellScriptLoader("spell_malygos_surge_of_power") {}
-
-    class spell_malygos_surge_of_power_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_malygos_surge_of_power_SpellScript)
-
-        void FilterTargets(std::list<Unit*>& targetList)
-        {
-            for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end();)
-            {
-                if ((*itr)->ToCreature() || (*itr)->ToPlayer()->GetVehicle())
-                    itr = targetList.erase(itr);
-                else
-                    itr++;
-            }
-        }
-
-        void Register()
-        {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_surge_of_power_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_malygos_surge_of_power_SpellScript();
-    }
-};
-
 class npc_portal_eoe: public CreatureScript
 {
 public:
@@ -1017,39 +735,32 @@ public:
         void Reset()
         {
             _summonTimer = urand(5, 7)*IN_MILLISECONDS;
-            _active = true;
         }
 
         void UpdateAI(uint32 const diff)
         {
-            if (!_instance)
-                return;
-
-            Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS));
-            if (!malygos)
-                return;
-
-            if (malygos->AI()->GetData(DATA_PHASE) > PHASE_ONE)
-            {
-                _active = false;
-                me->RemoveAllAuras();
-            }
-
-            if (!_active)
-                return;
-
-            if (!me->HasAura(SPELL_PORTAL_VISUAL_CLOSED) && !me->HasAura(SPELL_PORTAL_OPENED))
+            if (!me->HasAura(SPELL_PORTAL_VISUAL_CLOSED) &&
+                !me->HasAura(SPELL_PORTAL_OPENED))
                 DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
+
+            if (_instance)
+            {
+                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
+                {
+                    if (malygos->AI()->GetData(DATA_PHASE) != PHASE_ONE)
+                    {
+                        me->RemoveAura(SPELL_PORTAL_OPENED);
+                        DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
+                    }
+                }
+            }
 
             if (!me->HasAura(SPELL_PORTAL_OPENED))
                 return;
 
             if (_summonTimer <= diff)
             {
-                DoCast(SPELL_SUMMON_POWER_SPARK);
-                // uncomment after reordering the says malygos->AI()->Talk(EMOTE_POWER_SPARK);
-                DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
-                me->RemoveAura(SPELL_PORTAL_OPENED);
+                DoCast(SPELL_SUMMON_POWER_PARK);
                 _summonTimer = urand(5, 7)*IN_MILLISECONDS;
             } else
                 _summonTimer -= diff;
@@ -1061,11 +772,11 @@ public:
         }
 
     private:
-        bool _active;
         uint32 _summonTimer;
         InstanceScript* _instance;
     };
 };
+
 
 class npc_power_spark: public CreatureScript
 {
@@ -1081,26 +792,25 @@ public:
     {
         npc_power_sparkAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->SetReactState(REACT_PASSIVE);
+            _instance = creature->GetInstanceScript();
 
-            if (_instance = creature->GetInstanceScript())
-            {
-                me->GetMotionMaster()->MoveIdle();
-                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
-                     me->GetMotionMaster()->MoveFollow(malygos, -malygos->GetObjectSize(), 0.0f);
-            }
-
-            _isDead = false;
-        }
-
-        uint32 GetData(uint32 /*data*/)
-        {
-            return _isDead ? 1 : 0;
+            MoveToMalygos();
         }
 
         void EnterEvadeMode()
         {
             me->DespawnOrUnsummon();
+        }
+
+        void MoveToMalygos()
+        {
+            me->GetMotionMaster()->MoveIdle();
+
+            if (_instance)
+            {
+                if (Creature* malygos = Unit::GetCreature(*me, _instance->GetData64(DATA_MALYGOS)))
+                    me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
+            }
         }
 
         void UpdateAI(uint32 const /*diff*/)
@@ -1122,29 +832,23 @@ public:
                     return;
                 }
 
-                if (!_isDead && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
-                    me->GetMotionMaster()->MoveFollow(malygos, -malygos->GetObjectSize(), 0.0f);
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                    me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
             }
         }
 
         void DamageTaken(Unit* /*done_by*/, uint32& damage)
         {
-            if (damage > me->GetHealth())
+            if (damage > me->GetMaxHealth())
             {
                 damage = 0;
-                _isDead = true;
-                me->RemoveAllAuras();
-                me->GetMotionMaster()->MoveFall(GROUND_Z);
-                me->GetMotionMaster()->MoveIdle();
                 DoCast(me, SPELL_POWER_SPARK_DEATH, true);
-                me->DespawnOrUnsummon(60000);               // ToDo: how long should they really stay?
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->DespawnOrUnsummon(1000);
             }
         }
 
     private:
         InstanceScript* _instance;
-        bool _isDead;
     };
 };
 
@@ -1280,36 +984,14 @@ public:
 
         void Reset()
         {
-            _delay = 1000;                                  // cast animation is not played if the model still 'animates in'
-            me->DespawnOrUnsummon(50*IN_MILLISECONDS);
+            DoCast(me, SPELL_ARCANE_OVERLOAD, false);
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 const /*diff*/)
         {
-            if (_delay <= diff && _delay > 0)
-            {
-                _delay = 0;
-                if (InstanceScript* instance = me->GetInstanceScript())
-                    if (Creature* malygos = Unit::GetCreature(*me, instance->GetData64(DATA_MALYGOS)))
-                        malygos->CastSpell(me, SPELL_ARCANE_BOMB_MISSILE, true);
-            }
-            else
-                _delay -=diff;
-
             // we dont do melee damage!
         }
 
-        void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
-        {
-            if (spell->Id == SPELL_ARCANE_BOMB_MISSILE)
-            {
-                me->CastSpell(me, SPELL_ARCANE_BOMB_EFFECT, true);
-                me->CastSpell(me, SPELL_ARCANE_OVERLOAD, true);
-            }
-        }
-
-    private:
-        uint16 _delay;
     };
 };
 
@@ -1334,13 +1016,6 @@ public:
             _entered = false;
         }
 
-        void IsSummonedBy(Unit* summoner)
-        {
-            if (InstanceScript* script = me->GetInstanceScript())
-                if (script->GetBossState(0) == IN_PROGRESS) // DATA_MALYGOS_EVENT: 0
-                    me->SetPosition(summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ()-40.0f, summoner->GetOrientation());
-        }
-
         void PassengerBoarded(Unit* /*unit*/, int8 /*seat*/, bool apply)
         {
             if (!apply)
@@ -1359,6 +1034,7 @@ public:
                 {
                     summoner->CastSpell(me, SPELL_RIDE_RED_DRAGON, true);
                     float victimThreat = malygos->getThreatManager().getThreat(summoner);
+                    malygos->getThreatManager().resetAllAggro();
                     malygos->AI()->AttackStart(me);
                     malygos->AddThreat(me, victimThreat);
                 }
@@ -1393,16 +1069,6 @@ enum AlexstraszaYells
     SAY_FOUR
 };
 
-enum AlexstraszaEvents
-{
-    EVENT_MOVE_IN     = 1,
-    EVENT_CREATE_GIFT = 2,
-    EVENT_SAY_ONE     = 3,
-    EVENT_SAY_TWO     = 4,
-    EVENT_SAY_THREE   = 5,
-    EVENT_SAY_FOUR    = 6
-};
-
 class npc_alexstrasza_eoe : public CreatureScript
 {
 public:
@@ -1419,63 +1085,29 @@ public:
 
         void Reset()
         {
-            me->SetFlying(true);
-            me->SetSpeed(MOVE_FLIGHT, 2.0f);
             _events.Reset();
-            _events.ScheduleEvent(EVENT_MOVE_IN, 0);
-            _gift = me->FindNearestCreature(NPC_ALEXSTRASZA_S_GIFT, 200.0f);
-
-            // stop gift from visually hopping around or falling to void
-            _gift->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            _gift->SetFlying(true);
-            _gift->GetMotionMaster()->MoveIdle(MOTION_SLOT_IDLE);
+            _events.ScheduleEvent(EVENT_YELL_1, 0);
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 const /*diff*/)
         {
-            _events.Update(diff);
             while (uint32 eventId = _events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                    case EVENT_MOVE_IN:
-                        // arbitrary point - ToDo: get sniffed position
-                        me->GetMotionMaster()->MovePoint(0, 788.254761f, 1326.236938f, 227.795822f);
-                        _events.ScheduleEvent(EVENT_CREATE_GIFT, 8*IN_MILLISECONDS);
-                        break;
-                    case EVENT_CREATE_GIFT:
-                        me->SetFacing(0, _gift);
-                        DoCast(_gift, SPELL_GIFT_VISUAL, true);
-                        DoCast(_gift, SPELL_GIFT_CHANNEL);
-                        _events.ScheduleEvent(EVENT_SAY_ONE, 2*IN_MILLISECONDS);
-                        break;
-                    case EVENT_SAY_ONE:
-                        if (_gift)
-                        {
-                            if (InstanceScript* script = me->GetInstanceScript())
-                            {
-                                GameObject* go = new GameObject;
-                                if (go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), RAID_MODE(GO_ALEXSTRASZA_S_GIFT_10, GO_ALEXSTRASZA_S_GIFT_25), script->instance, PHASEMASK_NORMAL, _gift->GetPositionX(), _gift->GetPositionY(), _gift->GetPositionZ(), _gift->GetOrientation(), 0, 0, 0, 0, 120, GO_STATE_READY))
-                                {
-                                    go->SetRespawnTime(1*WEEK);
-                                    script->instance->Add(go);
-                                }
-                                else
-                                    delete go;
-                            }
-                        }
+                    case EVENT_YELL_1:
                         Talk(SAY_ONE);
-                        _events.ScheduleEvent(EVENT_SAY_TWO, 4*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_YELL_2, 4*IN_MILLISECONDS);
                         break;
-                    case EVENT_SAY_TWO:
+                    case EVENT_YELL_2:
                         Talk(SAY_TWO);
-                        _events.ScheduleEvent(EVENT_SAY_THREE, 4*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_YELL_3, 4*IN_MILLISECONDS);
                         break;
-                    case EVENT_SAY_THREE:
+                    case EVENT_YELL_3:
                         Talk(SAY_THREE);
-                        _events.ScheduleEvent(EVENT_SAY_FOUR, 7*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_YELL_4, 7*IN_MILLISECONDS);
                         break;
-                    case EVENT_SAY_FOUR:
+                    case EVENT_YELL_4:
                         Talk(SAY_FOUR);
                         break;
                 }
@@ -1483,7 +1115,6 @@ public:
         }
     private:
         EventMap _events;
-        Creature* _gift;
     };
 };
 
@@ -1509,13 +1140,8 @@ void AddSC_boss_malygos()
     new npc_hover_disk();
     new npc_arcane_overload();
     new npc_wyrmrest_skytalon();
-    new npc_alexstrasza_eoe();
     new spell_malygos_vortex_dummy();
     new spell_malygos_vortex_visual();
-    new spell_malygos_arcane_barrage();
-    new spell_malygos_arcane_storm();
-    new spell_malygos_surge_of_power_p3();
-    new spell_malygos_arcane_overload();
-    new spell_malygos_surge_of_power();
+    new npc_alexstrasza_eoe();
     new achievement_denyin_the_scion();
 }
