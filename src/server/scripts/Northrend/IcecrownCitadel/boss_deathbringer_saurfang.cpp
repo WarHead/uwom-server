@@ -1336,11 +1336,18 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
             }
         };
 
+        /* Produziert folgende Fehler:
+            TSCR: Spell `72385` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
+            TSCR: Spell `72441` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
+            TSCR: Spell `72442` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
+            TSCR: Spell `72443` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
+           Fehlen anscheinend die spell_dbc Einträge dazu! :-(
+
         class spell_deathbringer_boiling_bloodAuraScript : public AuraScript
         {
             PrepareAuraScript(spell_deathbringer_boiling_bloodAuraScript);
       
-            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*//*)
             {
                 if (Unit * target = GetTarget())
                     if (Unit * saurfang = target->FindNearestCreature(NPC_DEATHBRINGER_SAURFANG, 300.0f, true))
@@ -1352,17 +1359,17 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_deathbringer_boiling_bloodAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
             }
               
-        };
+        };*/
 
         SpellScript * GetSpellScript() const
         {
             return new spell_deathbringer_boiling_blood_SpellScript();
         }
     
-        AuraScript * GetAuraScript() const
+        /*AuraScript * GetAuraScript() const
         {
             return new spell_deathbringer_boiling_bloodAuraScript();
-        }
+        }*/
 };
 
 class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
