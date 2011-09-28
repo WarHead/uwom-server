@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -17,6 +18,7 @@
 
 #include "ScriptPCH.h"
 #include "oculus.h"
+#include "Vehicle.h"
 
 #define GOSSIP_ITEM_DRAKES         "So where do we go from here?"
 #define GOSSIP_ITEM_BELGARISTRASZ1 "I want to fly on the wings of the Red Flight"
@@ -26,28 +28,34 @@
 #define GOSSIP_ITEM_ETERNOS1       "I want to fly on the wings of the Bronze Flight"
 #define GOSSIP_ITEM_ETERNOS2       "What abilities do Amber Drakes have?"
 
-#define HAS_ESSENCE(a) ((a)->HasItemCount(ITEM_EMERALD_ESSENCE, 1) || (a)->HasItemCount(ITEM_AMBER_ESSENCE, 1) || (a)->HasItemCount(ITEM_RUBY_ESSENCE, 1))
+#define HAS_ESSENCE(a) ((a)->HasItemCount(ITEM_Smaragdessenz, 1) || (a)->HasItemCount(ITEM_Bernsteinessenz, 1) || (a)->HasItemCount(ITEM_Rubinessenz, 1))
 
-enum Drakes
+enum DrakeGossips
 {
-    GOSSIP_TEXTID_DRAKES                          = 13267,
-    GOSSIP_TEXTID_BELGARISTRASZ1                  = 12916,
-    GOSSIP_TEXTID_BELGARISTRASZ2                  = 13466,
-    GOSSIP_TEXTID_BELGARISTRASZ3                  = 13254,
-    GOSSIP_TEXTID_VERDISA1                        = 1,
-    GOSSIP_TEXTID_VERDISA2                        = 1,
-    GOSSIP_TEXTID_VERDISA3                        = 1,
-    GOSSIP_TEXTID_ETERNOS1                        = 1,
-    GOSSIP_TEXTID_ETERNOS2                        = 1,
-    GOSSIP_TEXTID_ETERNOS3                        = 13256,
+    GOSSIP_TEXTID_DRAKES            = 13267,
+    GOSSIP_TEXTID_BELGARISTRASZ1    = 12916,
+    GOSSIP_TEXTID_BELGARISTRASZ2    = 13466,
+    GOSSIP_TEXTID_BELGARISTRASZ3    = 13254,
+    GOSSIP_TEXTID_VERDISA1          = 1,
+    GOSSIP_TEXTID_VERDISA2          = 1,
+    GOSSIP_TEXTID_VERDISA3          = 1,
+    GOSSIP_TEXTID_ETERNOS1          = 1,
+    GOSSIP_TEXTID_ETERNOS2          = 1,
+    GOSSIP_TEXTID_ETERNOS3          = 13256
+};
 
-    ITEM_EMERALD_ESSENCE                          = 37815,
-    ITEM_AMBER_ESSENCE                            = 37859,
-    ITEM_RUBY_ESSENCE                             = 37860,
+enum VehicleItem
+{
+    ITEM_Smaragdessenz      = 37815, // Grün = Heiler
+    ITEM_Bernsteinessenz    = 37859, // Bronze = DD
+    ITEM_Rubinessenz        = 37860  // Rot = Tank
+};
 
-    NPC_VERDISA                                   = 27657,
-    NPC_BELGARISTRASZ                             = 27658,
-    NPC_ETERNOS                                   = 27659
+enum VehicleNPCs
+{
+    NPC_Smaragddrache   = 27692, // Grün = Heiler
+    NPC_Bernsteindrache = 27755, // Bronze = DD
+    NPC_Rubindrache     = 27756  // Rot = Tank
 };
 
 class npc_oculus_drake : public CreatureScript
@@ -79,9 +87,9 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 2:
             {
                 ItemPosCountVec dest;
-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_EMERALD_ESSENCE, 1);
+                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_Smaragdessenz, 1);
                 if (msg == EQUIP_ERR_OK)
-                    player->StoreNewItem(dest, ITEM_EMERALD_ESSENCE, true);
+                    player->StoreNewItem(dest, ITEM_Smaragdessenz, true);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             }
@@ -109,9 +117,9 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 2:
             {
                 ItemPosCountVec dest;
-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_RUBY_ESSENCE, 1);
+                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_Rubinessenz, 1);
                 if (msg == EQUIP_ERR_OK)
-                    player->StoreNewItem(dest, ITEM_RUBY_ESSENCE, true);
+                    player->StoreNewItem(dest, ITEM_Rubinessenz, true);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             }
@@ -139,9 +147,9 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 2:
             {
                 ItemPosCountVec dest;
-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_AMBER_ESSENCE, 1);
+                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_Bernsteinessenz, 1);
                 if (msg == EQUIP_ERR_OK)
-                    player->StoreNewItem(dest, ITEM_AMBER_ESSENCE, true);
+                    player->StoreNewItem(dest, ITEM_Bernsteinessenz, true);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             }
@@ -174,7 +182,68 @@ public:
 
 };
 
+class npc_oculus_vehicle_drachen : public CreatureScript
+{
+public:
+    npc_oculus_vehicle_drachen() : CreatureScript("npc_oculus_vehicle_drachen") { }
+
+    struct npc_oculus_vehicle_drachenAI : public VehicleAI
+    {
+        npc_oculus_vehicle_drachenAI(Creature * creature) : VehicleAI(creature)
+        {
+            me->SetSpeed(MOVE_FLIGHT, 2.0f, true);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void Reset()
+        {
+            checktimer = 15 * IN_MILLISECONDS; // Am Anfang dem Spieler 15 Sek. (CD vom Item) Zeit zum aufsteigen geben
+        }
+
+        void JustDied(Unit * /*killer*/)
+        {
+            me->GetVehicleKit()->Dismiss();
+        }
+
+        bool CheckRider()
+        {
+            if (me->GetVehicleKit()->GetAvailableSeatCount() == 0)
+                return true;
+
+            if (Unit * passenger = me->GetVehicleKit()->GetPassenger(0))
+                if (passenger->ToPlayer() && passenger->ToPlayer()->isValid())
+                    return true;
+
+            return false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (checktimer && checktimer <= diff)
+            {
+                if (!CheckRider())
+                {
+                    me->GetVehicleKit()->Dismiss();
+                    checktimer = 0;
+                }
+                else
+                    checktimer = 5 * IN_MILLISECONDS;
+            }
+            else
+                checktimer -= diff;
+        }
+    private:
+        uint32 checktimer;
+    };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new npc_oculus_vehicle_drachenAI(creature);
+    }
+};
+
 void AddSC_oculus()
 {
     new npc_oculus_drake();
+    new npc_oculus_vehicle_drachen();
 }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,25 +22,25 @@
 
 enum Says
 {
-    SAY_AGGRO           = 0,
-    SAY_AZURE           = 1,
-    SAY_AZURE_EMOTE     = 2,
-    SAY_DEATH           = 3
+    SAY_AGGRO,
+    SAY_AZURE,
+    SAY_AZURE_EMOTE,
+    SAY_DEATH
 };
 
 enum Spells
 {
-    SPELL_ENERGIZE_CORES_VISUAL                   = 62136,
-    SPELL_ENERGIZE_CORES                          = 50785, //Damage 5938 to 6562, effec2 Triggers 54069, effect3 Triggers 56251
-    SPELL_CALL_AZURE_RING_CAPTAIN                 = 51002, //Effect    Send Event (12229)
-    /*SPELL_CALL_AZURE_RING_CAPTAIN_2               = 51006, //Effect    Send Event (10665)
-    SPELL_CALL_AZURE_RING_CAPTAIN_3               = 51007, //Effect    Send Event (18454)
-    SPELL_CALL_AZURE_RING_CAPTAIN_4               = 51008, //Effect    Send Event (18455)*/
-    SPELL_CALL_AMPLIFY_MAGIC                      = 51054,
+    SPELL_ENERGIZE_CORES_VISUAL     = 62136,
+    SPELL_ENERGIZE_CORES            = 50785, //Damage 5938 to 6562, effec2 Triggers 54069, effect3 Triggers 56251
+    SPELL_CALL_AZURE_RING_CAPTAIN   = 51002, //Effect    Send Event (12229)
+    /*SPELL_CALL_AZURE_RING_CAPTAIN_2 = 51006, //Effect    Send Event (10665)
+    SPELL_CALL_AZURE_RING_CAPTAIN_3 = 51007, //Effect    Send Event (18454)
+    SPELL_CALL_AZURE_RING_CAPTAIN_4 = 51008, //Effect    Send Event (18455)*/
+    SPELL_CALL_AMPLIFY_MAGIC        = 51054,
 
-    SPELL_ICE_BEAM                                = 49549,
-    SPELL_ARCANE_BEAM_PERIODIC                    = 51019,
-    SPELL_SUMMON_ARCANE_BEAM                      = 51017
+    SPELL_ICE_BEAM                  = 49549,
+    SPELL_ARCANE_BEAM_PERIODIC      = 51019,
+    SPELL_SUMMON_ARCANE_BEAM        = 51017
 };
 
 enum Events
@@ -64,8 +65,7 @@ public:
     {
         boss_varosAI(Creature* creature) : BossAI(creature, DATA_VAROS_EVENT)
         {
-            if (instance->GetBossState(DATA_DRAKOS_EVENT) != DONE)
-                DoCast(me, SPELL_CENTRIFUGE_SHIELD);
+            DoCast(me, SPELL_CENTRIFUGE_SHIELD);
         }
 
         void Reset()
@@ -81,10 +81,27 @@ public:
             coreEnergizeOrientation = 0.0f;
         }
 
+        bool VarosErlaubt()
+        {
+            if (!instance)
+                return false;
+
+            if (instance->GetData(DATA_CONSTRUCT_CNT))
+            {
+                if (!me->HasAura(SPELL_CENTRIFUGE_SHIELD))
+                    DoCast(me, SPELL_CENTRIFUGE_SHIELD);
+                return false;
+            }
+            else
+            {
+                me->RemoveAllAuras();
+                return true;
+            }
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-
             Talk(SAY_AGGRO);
         }
 
@@ -93,10 +110,15 @@ public:
             return coreEnergizeOrientation;
         }
 
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            Talk(SAY_DEATH);
+        }
+
         void UpdateAI(const uint32 diff)
         {
-            //Return since we have no target
-            if (!UpdateVictim())
+            if (!VarosErlaubt() || !UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -117,7 +139,8 @@ public:
                         {
                             coreEnergizeOrientation = me->GetOrientation();
                             firstCoreEnergize = true;
-                        } else
+                        }
+                        else
                             coreEnergizeOrientation = MapManager::NormalizeOrientation(coreEnergizeOrientation - 2.0f);
 
                         DoCast(me, SPELL_ENERGIZE_CORES_VISUAL);
@@ -137,15 +160,7 @@ public:
                         break;
                 }
             }
-
             DoMeleeAttackIfReady();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            _JustDied();
-
-            Talk(SAY_DEATH);
         }
     private:
         bool firstCoreEnergize;
@@ -169,7 +184,7 @@ class npc_azure_ring_captain : public CreatureScript
             {
                 targetGUID = 0;
 
-                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING | MOVEMENTFLAG_FLYING);
+                me->SetFlying(true);
                 me->SetReactState(REACT_AGGRESSIVE);
             }
 
@@ -192,8 +207,7 @@ class npc_azure_ring_captain : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id)
             {
-                if (type != POINT_MOTION_TYPE ||
-                    id != ACTION_CALL_DRAGON_EVENT)
+                if (type != POINT_MOTION_TYPE || id != ACTION_CALL_DRAGON_EVENT)
                     return;
 
                 me->GetMotionMaster()->MoveIdle();
@@ -208,28 +222,23 @@ class npc_azure_ring_captain : public CreatureScript
                 {
                    case ACTION_CALL_DRAGON_EVENT:
                         if (instance)
-                        {
-                            if (Creature* varos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VAROS)))
-                            {
-                                if (Unit* victim = varos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (Creature * varos = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VAROS)))
+                                if (Unit * victim = varos->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 {
                                     me->SetReactState(REACT_PASSIVE);
-                                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                                     me->GetMotionMaster()->MovePoint(ACTION_CALL_DRAGON_EVENT, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ() + 20.0f);
                                     targetGUID = victim->GetGUID();
                                 }
-                            }
-                        }
                         break;
                 }
            }
 
         private:
             uint64 targetGUID;
-            InstanceScript* instance;
+            InstanceScript * instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature* creature) const
         {
             return new npc_azure_ring_captainAI(creature);
         }

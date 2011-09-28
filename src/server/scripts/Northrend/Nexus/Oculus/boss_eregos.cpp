@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -17,9 +18,6 @@
 
 #include "ScriptPCH.h"
 #include "oculus.h"
-
-//Types of drake mounts: Ruby(Tank),  Amber(DPS),  Emerald(Healer)
-//Two Repeating phases
 
 enum Events
 {
@@ -122,21 +120,36 @@ public:
 
     struct boss_eregosAI : public BossAI
     {
-        boss_eregosAI(Creature* creature) : BossAI(creature, DATA_EREGOS_EVENT) { }
+        boss_eregosAI(Creature* creature) : BossAI(creature, DATA_EREGOS_EVENT)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
 
         void Reset()
         {
             _Reset();
-
             phase = PHASE_NORMAL;
-
             DoAction(ACTION_SET_NORMAL_EVENTS);
+        }
+
+        bool EregosErlaubt()
+        {
+            if (instance && instance->GetBossState(DATA_DRAKOS_EVENT) == DONE && instance->GetBossState(DATA_VAROS_EVENT) == DONE && instance->GetBossState(DATA_UROM_EVENT) == DONE)
+            {
+                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
+                return true;
+            }
+            return false;
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-
             Talk(SAY_AGGRO);
         }
 
@@ -151,7 +164,7 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_LEY_WHELP, urand(15, 30) * IN_MILLISECONDS, 0, PHASE_NORMAL);
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature * summon)
         {
             BossAI::JustSummoned(summon);
 
@@ -163,22 +176,20 @@ public:
             summon->GetMotionMaster()->MoveRandom(100.0f);
         }
 
-        void SummonedCreatureDespawn(Creature* summon)
+        void SummonedCreatureDespawn(Creature * summon)
         {
             if (summon->GetEntry() != NPC_PLANAR_ANOMALY)
                 return;
 
-            // TO-DO: See why the spell is not casted
-            summon->CastSpell(summon, SPELL_PLANAR_BLAST, true);
+            summon->AI()->DoCastAOE(SPELL_PLANAR_BLAST, true);
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        void DamageTaken(Unit * /*attacker*/, uint32 & /*damage*/)
         {
             if (!me->GetMap()->IsHeroic())
                 return;
 
-            if ( (me->GetHealthPct() < 60.0f  && me->GetHealthPct() > 20.0f && phase < PHASE_FIRST_PLANAR)
-                || (me->GetHealthPct() < 20.0f && phase < PHASE_SECOND_PLANAR) )
+            if ((me->GetHealthPct() < 60.0f  && me->GetHealthPct() > 20.0f && phase < PHASE_FIRST_PLANAR) || (me->GetHealthPct() < 20.0f && phase < PHASE_SECOND_PLANAR))
             {
                 events.Reset();
                 phase = (me->GetHealthPct() < 60.0f  && me->GetHealthPct() > 20.0f) ? PHASE_FIRST_PLANAR : PHASE_SECOND_PLANAR;
@@ -186,16 +197,21 @@ public:
                 DoCast(SPELL_PLANAR_SHIFT);
 
                 // not sure about the amount, and if we should despawn previous spawns (dragon trashs)
-                summons.DespawnAll();
-                for (uint8 i = 0; i < 6; i++)
+                //summons.DespawnAll();
+                for (uint8 i = 0; i < 6; ++i)
                     DoCast(SPELL_PLANAR_ANOMALIES);
             }
         }
 
+        void JustDied(Unit * /*killer*/)
+        {
+            Talk(SAY_DEATH);
+            _JustDied();
+        }
+
         void UpdateAI(const uint32 diff)
         {
-            //Return since we have no target
-            if (!UpdateVictim())
+            if (!EregosErlaubt() || !UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -227,17 +243,8 @@ public:
                         break;
                 }
             }
-
             DoMeleeAttackIfReady();
         }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            Talk(SAY_DEATH);
-
-            _JustDied();
-        }
-
     private:
         uint8 phase;
     };
