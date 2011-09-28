@@ -887,6 +887,10 @@ void Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo
         if (Unit* owner = GetOwner())
             originalCaster=owner->GetGUID();
 
+    // TODO: this is a workaround - not needed anymore, but required for some scripts :(
+    if (!originalCaster && triggeredByAura)
+        originalCaster = triggeredByAura->GetCasterGUID();
+
     Spell* spell = new Spell(this, spellInfo, triggerFlags, originalCaster);
 
     if (value)
@@ -1930,7 +1934,7 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
         return;                                             // ignore ranged case
 
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt
-    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL])
+    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
     else
     {
@@ -1955,15 +1959,14 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
             sLog->outStaticDebug("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                 GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
     }
+}
 
-    if (!extra && m_extraAttacks)
+void Unit::HandleProcExtraAttackFor(Unit* victim)
+{
+    while (m_extraAttacks)
     {
-        while(m_extraAttacks)
-        {
-            AttackerStateUpdate(victim, BASE_ATTACK, true);
-            if (m_extraAttacks > 0)
-                --m_extraAttacks;
-        }
+        AttackerStateUpdate(victim, BASE_ATTACK, true);
+        --m_extraAttacks;
     }
 }
 
@@ -8761,25 +8764,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             break;
     }
 
-    // Sword Specialization
-    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && auraSpellInfo->SpellIconID == 1462 && procSpell)
-    {
-        if (Player* plr = ToPlayer())
-        {
-            if (cooldown && plr->HasSpellCooldown(16459))
-                return false;
-
-            // this required for attacks like Mortal Strike
-            plr->RemoveSpellCooldown(procSpell->Id);
-
-            CastSpell(victim, procSpell->Id, true);
-
-            if (cooldown)
-                plr->AddSpellCooldown(16459, 0, time(NULL) + cooldown);
-            return true;
-        }
-    }
-
     // Blade Barrier
     if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && auraSpellInfo->SpellIconID == 85)
     {
@@ -12136,7 +12120,7 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell) co
 
     // can't attack unattackable units or GMs
     if (target->HasUnitState(UNIT_STAT_UNATTACKABLE)
-        || target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster())
+        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
         return false;
 
     // can't attack own vehicle or passenger
@@ -12230,7 +12214,7 @@ bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) co
 
     // can't assist unattackable units or GMs
     if (target->HasUnitState(UNIT_STAT_UNATTACKABLE)
-        || target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster())
+        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
         return false;
 
     // can't assist own vehicle or passenger
