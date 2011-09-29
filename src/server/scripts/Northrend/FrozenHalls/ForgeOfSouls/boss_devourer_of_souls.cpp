@@ -265,7 +265,7 @@ class boss_devourer_of_souls : public CreatureScript
                     me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                     me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
 
-                    switch(eventId)
+                    switch (eventId)
                     {
                         case EVENT_PHANTOM_BLAST:
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);

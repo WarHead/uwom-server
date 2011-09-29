@@ -92,7 +92,7 @@ public:
 
         void OnCreatureCreate(Creature* creature)
         {
-            switch(creature->GetEntry())
+            switch (creature->GetEntry())
             {
                 case CREATURE_MAIDEN: uiMaidenOfGrief = creature->GetGUID(); break;
                 case CREATURE_KRYSTALLUS: uiKrystallus = creature->GetGUID(); break;
@@ -106,7 +106,7 @@ public:
 
         void OnGameObjectCreate(GameObject* go)
         {
-            switch(go->GetEntry())
+            switch (go->GetEntry())
             {
                 case GO_ABEDNEUM:
                     uiAbedneumGo = go->GetGUID();
@@ -152,7 +152,7 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_MAIDEN_OF_GRIEF_EVENT:
                     m_auiEncounter[1] = data;
@@ -185,7 +185,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_KRYSTALLUS_EVENT:                return m_auiEncounter[0];
                 case DATA_MAIDEN_OF_GRIEF_EVENT:           return m_auiEncounter[1];
@@ -198,7 +198,7 @@ public:
 
         uint64 GetData64(uint32 identifier)
         {
-            switch(identifier)
+            switch (identifier)
             {
                 case DATA_MAIDEN_OF_GRIEF:                 return uiMaidenOfGrief;
                 case DATA_KRYSTALLUS:                      return uiKrystallus;

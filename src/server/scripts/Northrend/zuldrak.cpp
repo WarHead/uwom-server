@@ -376,10 +376,10 @@ public:
             bRemoveFlag = true;
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
-            switch(uiId)
+            switch (uiId)
             {
                 case 1:
-                    switch(uiValue)
+                    switch (uiValue)
                     {
                         case QUEST_AMPHITHEATER_ANGUISH_TUSKARRMAGEDDON:
                             DoScriptText(SAY_QUEST_ACCEPT_TUSKARRMAGEDON, me);
@@ -435,7 +435,7 @@ public:
 
                 if (uiTimer <= uiDiff)
                 {
-                    switch(uiPhase)
+                    switch (uiPhase)
                     {
                         case 1:
                             if (Creature* pSummon = me->SummonCreature(NPC_ORINOKO_TUSKBREAKER, SpawnPosition[0], TEMPSUMMON_CORPSE_DESPAWN, 1000))
@@ -784,7 +784,7 @@ public:
 
             if (!bSummoned && !HealthAbovePct(50))
             {
-                DoScriptText(SAY_CALL_FOR_HELP , me);
+                DoScriptText(SAY_CALL_FOR_HELP, me);
                 //DoCast(me->getVictim(), SPELL_SUMMON_WHISKER); petai is not working correctly???
 
                 if (Creature* pWhisker = me->SummonCreature(NPC_WHISKER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
@@ -871,7 +871,7 @@ public:
 
         void WaypointReached(uint32 uiI)
         {
-            switch(uiI)
+            switch (uiI)
             {
                 case 6:
                     me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0);
@@ -1065,7 +1065,7 @@ public:
 
         void WaypointReached(uint32 uiI)
         {
-            switch(uiI)
+            switch (uiI)
             {
                 case 7:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -1444,7 +1444,7 @@ public:
             {
                 if (m_uiTimer <= uiDiff)
                 {
-                    switch(m_uiPhase)
+                    switch (m_uiPhase)
                     {
                         case 1:
                             // say random text
