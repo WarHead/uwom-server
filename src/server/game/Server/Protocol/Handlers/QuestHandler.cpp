@@ -228,6 +228,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
         }
     }
 
+    _player->SaveToDB();
     _player->PlayerTalkClass->SendCloseGossip();
 }
 
@@ -281,9 +282,7 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket & recv_data)
 
     Quest const* pQuest = sObjectMgr->GetQuestTemplate(quest);
     if (pQuest)
-    {
         _player->PlayerTalkClass->SendQuestQueryResponse(pQuest);
-    }
 }
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
@@ -446,6 +445,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
         _player->SetQuestSlot(slot, 0);
 
         _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_QUEST_ABANDONED, 1);
+        _player->SaveToDB();
     }
 }
 
@@ -481,6 +481,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
             _player->AddQuest(pQuest, NULL);                // NULL, this prevent DB script from duplicate running
 
         _player->SetDivider(0);
+        _player->SaveToDB();
     }
 }
 
