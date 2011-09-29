@@ -1044,7 +1044,7 @@ void World::LoadConfigSettings(bool reload)
             sLog->outError("ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
 
-    m_int_configs[CONFIG_INSTANT_LOGOUT] = sConfig->GetIntDefault("InstantLogout", SEC_ANWAERTER);
+    m_int_configs[CONFIG_INSTANT_LOGOUT] = ConfigMgr::GetIntDefault("InstantLogout", SEC_ANWAERTER);
 
     m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] = ConfigMgr::GetIntDefault("Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS);
     if (m_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] > GUILD_EVENTLOG_MAX_RECORDS)
@@ -1150,21 +1150,21 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_PVP_TOKEN_COUNT] = 1;
 
     // Tausendwinter
-    m_bool_configs[CONFIG_TW_AKTIVIERT]         = sConfig->GetBoolDefault("Tausendwinter.Aktiviert", true);
-    m_bool_configs[CONFIG_TW_AUTOMATISCH]       = sConfig->GetBoolDefault("Tausendwinter.Automatisch", true);
-    m_bool_configs[CONFIG_TW_TELEPORT_DALARAN]  = sConfig->GetBoolDefault("Tausendwinter.TeleportDalaran", false);
-    m_bool_configs[CONFIG_TW_WELTSTARTNACHRICHT]= sConfig->GetBoolDefault("Tausendwinter.WeltStartNachricht", false);
-    m_bool_configs[CONFIG_TW_WELTCOUNTDOWN]     = sConfig->GetBoolDefault("Tausendwinter.WeltStartCountdown", false);
-    m_bool_configs[CONFIG_TW_WELTSIEGNACHRICHT] = sConfig->GetBoolDefault("Tausendwinter.WeltSiegNachricht", false);
-    m_bool_configs[CONFIG_TW_VERSCHIEBE_NPCS]   = sConfig->GetBoolDefault("Tausendwinter.VerschiebeNPCs", false);
+    m_bool_configs[CONFIG_TW_AKTIVIERT]         = ConfigMgr::GetBoolDefault("Tausendwinter.Aktiviert", true);
+    m_bool_configs[CONFIG_TW_AUTOMATISCH]       = ConfigMgr::GetBoolDefault("Tausendwinter.Automatisch", true);
+    m_bool_configs[CONFIG_TW_TELEPORT_DALARAN]  = ConfigMgr::GetBoolDefault("Tausendwinter.TeleportDalaran", false);
+    m_bool_configs[CONFIG_TW_WELTSTARTNACHRICHT]= ConfigMgr::GetBoolDefault("Tausendwinter.WeltStartNachricht", false);
+    m_bool_configs[CONFIG_TW_WELTCOUNTDOWN]     = ConfigMgr::GetBoolDefault("Tausendwinter.WeltStartCountdown", false);
+    m_bool_configs[CONFIG_TW_WELTSIEGNACHRICHT] = ConfigMgr::GetBoolDefault("Tausendwinter.WeltSiegNachricht", false);
+    m_bool_configs[CONFIG_TW_VERSCHIEBE_NPCS]   = ConfigMgr::GetBoolDefault("Tausendwinter.VerschiebeNPCs", false);
 
-    m_int_configs[CONFIG_TW_STARTZEIT]          = sConfig->GetIntDefault("Tausendwinter.Startzeit", 30) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_KAMPFDAUER]         = sConfig->GetIntDefault("Tausendwinter.Kampfdauer", 30) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_INTERVALL]          = sConfig->GetIntDefault("Tausendwinter.KampfIntervall", 130) * IN_MILLISECONDS * MINUTE;
-    m_int_configs[CONFIG_TW_SPEICHER_INTERVALL] = sConfig->GetIntDefault("Tausendwinter.SpeicherIntervall", 5) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_STARTZEIT]          = ConfigMgr::GetIntDefault("Tausendwinter.Startzeit", 30) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_KAMPFDAUER]         = ConfigMgr::GetIntDefault("Tausendwinter.Kampfdauer", 30) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_INTERVALL]          = ConfigMgr::GetIntDefault("Tausendwinter.KampfIntervall", 130) * IN_MILLISECONDS * MINUTE;
+    m_int_configs[CONFIG_TW_SPEICHER_INTERVALL] = ConfigMgr::GetIntDefault("Tausendwinter.SpeicherIntervall", 5) * IN_MILLISECONDS * MINUTE;
 
     // Gildenportal
-    m_int_configs[CONFIG_GILDEN_ID] = sConfig->GetIntDefault("GuildPortal.GuildID", 0);
+    m_int_configs[CONFIG_GILDEN_ID] = ConfigMgr::GetIntDefault("GuildPortal.GuildID", 0);
 
 
     // chat logging

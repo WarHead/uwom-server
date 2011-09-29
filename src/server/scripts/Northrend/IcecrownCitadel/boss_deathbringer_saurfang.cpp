@@ -998,13 +998,13 @@ public:
     struct npc_blood_beastAI : public ScriptedAI
     {
         npc_blood_beastAI(Creature* creature) : ScriptedAI(creature) { }
-      
+
         void IsSummonedBy(Unit* summoner)
         {
             if (summoner)
                 BloodLinkTimer = 2 * IN_MILLISECONDS;
         }
-      
+
         void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
@@ -1341,31 +1341,31 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
             TSCR: Spell `72441` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
             TSCR: Spell `72442` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
             TSCR: Spell `72443` Effect `Index: EFFECT_0 AuraName: 4` of script `spell_deathbringer_boiling_blood` did not match dbc effect data - handler bound to hook `OnEffectPeriodic` of AuraScript won't be executed
-           Fehlen anscheinend die spell_dbc Einträge dazu! :-(
+           Fehlen anscheinend die spell_dbc EintrÃ¤ge dazu! :-(
 
         class spell_deathbringer_boiling_bloodAuraScript : public AuraScript
         {
             PrepareAuraScript(spell_deathbringer_boiling_bloodAuraScript);
-      
-            void HandleEffectPeriodic(AuraEffect const* /*aurEff*//*)
+
+            void HandleEffectPeriodic(AuraEffect const* aurEff)
             {
                 if (Unit * target = GetTarget())
                     if (Unit * saurfang = target->FindNearestCreature(NPC_DEATHBRINGER_SAURFANG, 300.0f, true))
                         target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, saurfang, true);
             }
-      
+
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_deathbringer_boiling_bloodAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
             }
-              
+
         };*/
 
         SpellScript * GetSpellScript() const
         {
             return new spell_deathbringer_boiling_blood_SpellScript();
         }
-    
+
         /*AuraScript * GetAuraScript() const
         {
             return new spell_deathbringer_boiling_bloodAuraScript();

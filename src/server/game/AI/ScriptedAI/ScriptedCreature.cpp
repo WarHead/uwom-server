@@ -21,17 +21,12 @@ struct TSpellSummary
 
 void SummonList::DoZoneInCombat(uint32 entry)
 {
-    for (iterator i = begin(); i != end();)
+    for (iterator itr = begin(); itr != end();)
     {
-        Creature* summon = Unit::GetCreature(*me, *i);
-        ++i;
+        Creature * summon = Unit::GetCreature(*me, *itr);
         if (summon && summon->IsAIEnabled && (!entry || summon->GetEntry() == entry))
-        {
-            if (!me->GetMap()->IsDungeon())
-                summon->AI()->DoZoneInCombat(summon, true);
-            else
-                summon->AI()->DoZoneInCombat();
-        }
+            summon->AI()->DoZoneInCombat(summon);
+        ++itr;
     }
 }
 

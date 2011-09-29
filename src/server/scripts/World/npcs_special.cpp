@@ -1871,16 +1871,16 @@ public:
     {
         npc_uwom_user_pimperAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            ps.Cost_Type = sConfig->GetIntDefault("UserPimper.Costs.Type", 1);
-            ps.Costs_Item = sConfig->GetIntDefault("UserPimper.Costs.Item", 0);
+            ps.Cost_Type = ConfigMgr::GetIntDefault("UserPimper.Costs.Type", 1);
+            ps.Costs_Item = ConfigMgr::GetIntDefault("UserPimper.Costs.Item", 0);
 
-            ps.Costs_AllMiniPets = sConfig->GetIntDefault("UserPimper.Costs.MiniPets", 1000000);
-            ps.Costs_Reputation = sConfig->GetIntDefault("UserPimper.Costs.Reputation", 500000);
-            ps.Costs_Profession = sConfig->GetIntDefault("UserPimper.Costs.Profession", 200000);
-            ps.Costs_AllRecipes = sConfig->GetIntDefault("UserPimper.Costs.Recipes", 50000);
-            ps.Costs_MaxSkill = sConfig->GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
+            ps.Costs_AllMiniPets = ConfigMgr::GetIntDefault("UserPimper.Costs.MiniPets", 1000000);
+            ps.Costs_Reputation = ConfigMgr::GetIntDefault("UserPimper.Costs.Reputation", 500000);
+            ps.Costs_Profession = ConfigMgr::GetIntDefault("UserPimper.Costs.Profession", 200000);
+            ps.Costs_AllRecipes = ConfigMgr::GetIntDefault("UserPimper.Costs.Recipes", 50000);
+            ps.Costs_MaxSkill = ConfigMgr::GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
 
-            ps.PresentsAllowed = sConfig->GetBoolDefault("UserPimper.PresentsAllowed", false);
+            ps.PresentsAllowed = ConfigMgr::GetBoolDefault("UserPimper.PresentsAllowed", false);
 
             if (ps.Cost_Type == 3)
             {
