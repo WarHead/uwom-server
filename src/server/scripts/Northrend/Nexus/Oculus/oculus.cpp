@@ -66,10 +66,10 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch(creature->GetEntry())
+        switch (creature->GetEntry())
         {
         case NPC_VERDISA: //Verdisa
-            switch(uiAction)
+            switch (uiAction)
             {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 if (!HAS_ESSENCE(player))
@@ -99,7 +99,7 @@ public:
             }
             break;
         case NPC_BELGARISTRASZ: //Belgaristrasz
-            switch(uiAction)
+            switch (uiAction)
             {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 if (!HAS_ESSENCE(player))
@@ -129,7 +129,7 @@ public:
             }
             break;
         case NPC_ETERNOS: //Eternos
-            switch(uiAction)
+            switch (uiAction)
             {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 if (!HAS_ESSENCE(player))

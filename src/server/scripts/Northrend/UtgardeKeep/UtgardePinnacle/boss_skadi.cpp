@@ -363,7 +363,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            switch(Phase)
+            switch (Phase)
             {
                 case FLYING:
                     if (!UpdateVictim())

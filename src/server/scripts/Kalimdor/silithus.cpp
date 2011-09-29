@@ -37,7 +37,7 @@ EndContentData */
 ###*/
 
 #define GOSSIP_DEMITRIAN1 "What do you know of it?"
-#define GOSSIP_DEMITRIAN2 "I am listening , Demitrian."
+#define GOSSIP_DEMITRIAN2 "I am listening, Demitrian."
 #define GOSSIP_DEMITRIAN3 "Continue, please."
 #define GOSSIP_DEMITRIAN4 "A battle?"
 #define GOSSIP_DEMITRIAN5 "<Nod>"
@@ -541,7 +541,7 @@ public:
                 switch (AnimationCount)
                 {
                     case 0:
-                        DoScriptText(ANACHRONOS_SAY_1, me , Fandral);
+                        DoScriptText(ANACHRONOS_SAY_1, me, Fandral);
                         break;
                     case 1:
                         Fandral->SetTarget(me->GetGUID());
@@ -762,7 +762,7 @@ public:
                     case 61:
                         me->GetMotionMaster()->MoveCharge(-8057.1f, 1470.32f, 2.61f, 6);
                         if (player->IsInRange(me, 0, 15))
-                            player->GroupEventHappens(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD , me);
+                            player->GroupEventHappens(QUEST_A_PAWN_ON_THE_ETERNAL_BOARD, me);
                         break;
                     case 62:
                         me->SetDisplayId(15500);

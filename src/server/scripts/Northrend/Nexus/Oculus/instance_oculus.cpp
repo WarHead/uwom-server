@@ -99,7 +99,7 @@ public:
 
         void OnCreatureCreate(Creature * creature)
         {
-            switch(creature->GetEntry())
+            switch (creature->GetEntry())
             {
                 case NPC_VERDISA:
                 case NPC_BELGARISTRASZ:
@@ -178,7 +178,7 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_UROM_PLATAFORM: platformUrom = data; break;
             }
@@ -186,7 +186,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_CONSTRUCT_CNT:    return CentrifugeConstructCnt;
                 case DATA_UROM_PLATAFORM:   return platformUrom;
@@ -198,7 +198,7 @@ public:
 
         uint64 GetData64(uint32 identifier)
         {
-            switch(identifier)
+            switch (identifier)
             {
                 case DATA_DRAKOS:   return drakosGUID;
                 case DATA_VAROS:    return varosGUID;

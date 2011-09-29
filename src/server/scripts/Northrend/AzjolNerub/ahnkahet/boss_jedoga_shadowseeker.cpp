@@ -443,7 +443,7 @@ public:
             if (uiType != POINT_MOTION_TYPE || !pInstance)
                 return;
 
-            switch(uiPointId)
+            switch (uiPointId)
             {
                 case 1:
                     {

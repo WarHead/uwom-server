@@ -154,7 +154,7 @@ PlayerTaxi::PlayerTaxi()
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
 {
     // class specific initial known nodes
-    switch(chrClass)
+    switch (chrClass)
     {
         case CLASS_DEATH_KNIGHT:
         {
@@ -165,7 +165,7 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
     }
 
     // race specific initial known nodes: capital and taxi hub masks
-    switch(race)
+    switch (race)
     {
         case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
         case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
@@ -181,7 +181,7 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level
     }
 
     // new continent starting masks (It will be accessible only at new map)
-    switch(Player::TeamForRace(race))
+    switch (Player::TeamForRace(race))
     {
         case ALLIANCE: SetTaximaskNode(100); break;
         case HORDE:    SetTaximaskNode(99);  break;
@@ -1047,7 +1047,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         GetReputationMgr().SetReputation(sFactionStore.LookupEntry(1077), 42999);
 
         // Factions depending on team, like cities and some more stuff
-        switch(GetTeam())
+        switch (GetTeam())
         {
         case ALLIANCE:
             GetReputationMgr().SetReputation(sFactionStore.LookupEntry(72), 42999);
@@ -1144,7 +1144,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
             // special amount for food/drink
             if (iProto->Class == ITEM_CLASS_CONSUMABLE && iProto->SubClass == ITEM_SUBCLASS_FOOD)
             {
-                switch(iProto->Spells[0].SpellCategory)
+                switch (iProto->Spells[0].SpellCategory)
                 {
                     case SPELL_CATEGORY_FOOD:                                // food
                         count = getClass() == CLASS_DEATH_KNIGHT ? 10 : 4;
@@ -1276,7 +1276,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     }
 
     // item can't be added
-    sLog->outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u", titem_id, getRace(), getClass(), msg);
+    sLog->outError("STORAGE: Can't equip or store initial item %u for race %u class %u, error msg = %u", titem_id, getRace(), getClass(), msg);
     return false;
 }
 
@@ -2464,13 +2464,13 @@ void Player::ProcessDelayedOperations()
             ContinueTaxiFlight();
         }
     }
-    
+
     if (m_DelayedOperations & DELAYED_BG_GROUP_RESTORE)
     {
         if (Group *g = GetGroup())
             g->SendUpdateToPlayer(GetGUID());
     }
-    
+
     //we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
 }
@@ -2956,7 +2956,7 @@ void Player::SetGMVisible(bool on)
 
 bool Player::IsGroupVisibleFor(Player const* p) const
 {
-    switch(sWorld->getIntConfig(CONFIG_GROUP_VISIBILITY))
+    switch (sWorld->getIntConfig(CONFIG_GROUP_VISIBILITY))
     {
         default: return IsInSameGroupWith(p);
         case 1:  return IsInSameRaidWith(p);
@@ -3707,7 +3707,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
 
             disabled_case = true;
         }
-        else switch(itr->second->state)
+        else switch (itr->second->state)
         {
             case PLAYERSPELL_UNCHANGED:                     // known saved spell
                 return false;
@@ -3893,7 +3893,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 ((pSkill->id == SKILL_LOCKPICKING || pSkill->id == SKILL_RUNEFORGING) && _spell_idx->second->max_value == 0))
             {
-                switch(GetSkillRangeType(pSkill, _spell_idx->second->racemask != 0))
+                switch (GetSkillRangeType(pSkill, _spell_idx->second->racemask != 0))
                 {
                     case SKILL_RANGE_LANGUAGE:
                         SetSkill(pSkill->id, GetSkillStep(pSkill->id), 300, 300);
@@ -5073,14 +5073,14 @@ void Player::DeleteOldCharacters(uint32 keepDays)
          {
             Field* charFields = resultChars->Fetch();
             Player::DeleteFromDB(charFields[0].GetUInt64(), charFields[1].GetUInt32(), true, true);
-        } while(resultChars->NextRow());
+        } while (resultChars->NextRow());
     }
 }
 
 void Player::SetMovement(PlayerMovementType pType)
 {
     WorldPacket data;
-    switch(pType)
+    switch (pType)
     {
         case MOVE_ROOT:       data.Initialize(SMSG_FORCE_MOVE_ROOT,   GetPackGUID().size()+4); break;
         case MOVE_UNROOT:     data.Initialize(SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size()+4); break;
@@ -5780,7 +5780,7 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
     if (!CanModifyStats())
         return;
 
-    switch(modGroup)
+    switch (modGroup)
     {
         case CRIT_PERCENTAGE:              UpdateCritPercentage(BASE_ATTACK);                          break;
         case RANGED_CRIT_PERCENTAGE:       UpdateCritPercentage(RANGED_ATTACK);                        break;
@@ -6331,7 +6331,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
 
     uint32 weapon_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_WEAPON);
 
-    switch(attType)
+    switch (attType)
     {
         case BASE_ATTACK:
         {
@@ -10265,7 +10265,7 @@ Item* Player::GetShield(bool useable) const
 
 uint8 Player::GetAttackBySlot(uint8 slot)
 {
-    switch(slot)
+    switch (slot)
     {
         case EQUIPMENT_SLOT_MAINHAND: return BASE_ATTACK;
         case EQUIPMENT_SLOT_OFFHAND:  return OFF_ATTACK;
@@ -12248,7 +12248,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
             UpdateExpertise(OFF_ATTACK);
 
-        switch(slot)
+        switch (slot)
         {
         case EQUIPMENT_SLOT_MAINHAND:
         case EQUIPMENT_SLOT_OFFHAND:
@@ -12406,7 +12406,7 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                     else if (slot == EQUIPMENT_SLOT_OFFHAND)
                         UpdateExpertise(OFF_ATTACK);
                     // update armor penetration - passive auras may need it
-                    switch(slot)
+                    switch (slot)
                     {
                         case EQUIPMENT_SLOT_MAINHAND:
                         case EQUIPMENT_SLOT_OFFHAND:
@@ -13359,7 +13359,7 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
         data << uint64(pItem2 ? pItem2->GetGUID() : 0);
         data << uint8(0);                                   // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
 
-        switch(msg)
+        switch (msg)
         {
             case EQUIP_ERR_CANT_EQUIP_LEVEL_I:
             case EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW:
@@ -13662,7 +13662,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
             uint32 enchant_amount = pEnchant->amount[s];
             uint32 enchant_spell_id = pEnchant->spellid[s];
 
-            switch(enchant_display_type)
+            switch (enchant_display_type)
             {
                 case ITEM_ENCHANTMENT_TYPE_NONE:
                     break;
@@ -13963,7 +13963,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                 default:
                     sLog->outError("Unknown item enchantment (id = %d) display type: %d", enchant_id, enchant_display_type);
                     break;
-            }                                               /*switch(enchant_display_type)*/
+            }                                               /*switch (enchant_display_type)*/
         }                                                   /*for*/
     }
 
@@ -17224,7 +17224,7 @@ bool Player::isAllowedToLoot(const Creature* creature)
 {
     if (!creature->isDead() || !creature->IsDamageEnoughForLootingAndReward())
         return false;
-       
+
     if (HasPendingBind())
         return false;
 
@@ -17238,7 +17238,7 @@ bool Player::isAllowedToLoot(const Creature* creature)
     else if (thisGroup != creature->GetLootRecipientGroup())
         return false;
 
-    switch(thisGroup->GetLootMethod())
+    switch (thisGroup->GetLootMethod())
     {
         case FREE_FOR_ALL:
             return true;
@@ -19403,7 +19403,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
     if (returnreagent)
     {
-        switch(pet->GetEntry())
+        switch (pet->GetEntry())
         {
             //warlock pets except imp are removed(?) when logging out
             case 1860:
@@ -20444,7 +20444,7 @@ void Player::InitDisplayIds()
     }
 
     uint8 gender = getGender();
-    switch(gender)
+    switch (gender)
     {
         case GENDER_FEMALE:
             SetDisplayId(info->displayId_f);
@@ -20989,7 +20989,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         // if have <CompareColor> use them as count, else use <value> from Condition
         uint32 _cmp_gem = Condition->CompareColor[i] ? curcount[Condition->CompareColor[i] - 1]: Condition->Value[i];
 
-        switch(Condition->Comparator[i])
+        switch (Condition->Comparator[i])
         {
             case 2:                                         // requires less <color> than (<value> || <comparecolor>) gems
                 activate &= (_cur_gem < _cmp_gem) ? true : false;
@@ -21711,7 +21711,7 @@ void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
     data << uint32(mapid);
     data << uint8(reason);                                 // transfer abort reason
-    switch(reason)
+    switch (reason)
     {
         case TRANSFER_ABORT_INSUF_EXPAN_LVL:
         case TRANSFER_ABORT_DIFFICULTY:
@@ -22630,7 +22630,7 @@ void Player::UpdateAreaDependentAuras(uint32 newArea)
 
     if (newArea == 4273 && GetVehicle() && GetPositionX() > 400) // Ulduar
     {
-        switch(GetVehicleBase()->GetEntry())
+        switch (GetVehicleBase()->GetEntry())
         {
             case 33062:
             case 33109:
@@ -23434,7 +23434,7 @@ void Player::_LoadSkills(PreparedQueryResult result)
             }
 
             // set fixed skill ranges
-            switch(GetSkillRangeType(pSkill, false))
+            switch (GetSkillRangeType(pSkill, false))
             {
                 case SKILL_RANGE_LANGUAGE:                      // 300..300
                     value = max = 300;
@@ -23637,7 +23637,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             }
 
             //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            sLog->outStaticDebug("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
+            sLog->outStaticDebug("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d", movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
         }
     }
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // No fly zone - Parachute
