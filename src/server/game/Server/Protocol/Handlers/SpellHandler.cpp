@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -291,9 +292,10 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
 
-    // ignore for remote control state
+    // ignore for remote control state if mover not player self or vehicle
     if (_player->m_mover != _player)
-        return;
+        if ((_player->m_mover->GetTypeId() == TYPEID_UNIT && !_player->GetVehicle()) || _player->m_mover->GetTypeId() == TYPEID_PLAYER)
+            return;
 
     if (GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid))
         obj->Use(_player);
@@ -362,9 +364,16 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         // not have spell in spellbook or spell passive and not casted by client
         if ((mover->GetTypeId() == TYPEID_UNIT && !mover->ToCreature()->HasSpell(spellId)) || spellInfo->IsPassive())
         {
-            //cheater? kick? ban?
-            recvPacket.rfinish(); // prevent spam at ignore packet
-            return;
+            if (mover->IsVehicle() && _player->HasActiveSpell(spellId) && !spellInfo->IsPassive())
+            {
+                mover = _player;
+            }
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rfinish(); // prevent spam at ignore packet
+                return;
+            }
         }
     }
 

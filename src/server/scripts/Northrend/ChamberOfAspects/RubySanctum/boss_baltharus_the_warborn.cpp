@@ -159,7 +159,7 @@ class boss_baltharus_the_warborn_outdoor : public CreatureScript
             {
                 _EnterCombat();
 
-                DoZoneInCombat(me, true);
+                DoZoneInCombat(me, 150.0f);
 
                 Talk(SAY_AGGRO);
 
@@ -292,7 +292,7 @@ class npc_baltharus_the_warborn_clone_outdoor : public CreatureScript
 
             void EnterCombat(Unit * /*who*/)
             {
-                DoZoneInCombat(me, true);
+                DoZoneInCombat(me, 150.0f);
 
                 _events.ScheduleEvent(EVENT_CLEAVE, 11 * IN_MILLISECONDS);
                 _events.ScheduleEvent(EVENT_BLADE_TEMPEST, 15 * IN_MILLISECONDS);

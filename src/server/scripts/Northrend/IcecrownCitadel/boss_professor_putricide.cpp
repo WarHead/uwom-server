@@ -681,13 +681,19 @@ class npc_volatile_ooze : public CreatureScript
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
             {
                 if (!_newTargetSelectTimer && sSpellMgr->GetSpellDifficultyId(spell->Id) == sSpellMgr->GetSpellDifficultyId(SPELL_OOZE_ERUPTION))
-                    _newTargetSelectTimer = 1000;
+                    _newTargetSelectTimer = 2000;
             }
 
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
+
+                if (me->getVictim() && me->getVictim()->IsWithinDistInMap(me, 1) && me->getVictim()->HasAura(SPELL_VOLATILE_OOZE_ADHESIVE))
+                {
+                    DoCast(me, SPELL_OOZE_ERUPTION);
+                    me->getVictim()->RemoveAurasDueToSpell(SPELL_VOLATILE_OOZE_ADHESIVE, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
+                }
 
                 if (!_newTargetSelectTimer)
                     return;

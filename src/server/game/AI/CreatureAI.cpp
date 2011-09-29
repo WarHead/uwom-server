@@ -43,20 +43,13 @@ void CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
     sCreatureTextMgr->SendChat(me, id, WhisperGuid);
 }
 
-void CreatureAI::DoZoneInCombat(Creature * creature, bool outdoor, float range)
+void CreatureAI::DoZoneInCombat(Creature * creature, float range)
 {
-    if (!creature)
+    if (!creature || creature->isValid())
         creature = me;
 
     if (!creature->CanHaveThreatList())
         return;
-
-    Map* map = creature->GetMap();
-    if (!map->IsDungeon() && !outdoor) //use IsDungeon instead of Instanceable, in case battlegrounds will be instantiated
-    {
-        sLog->outError("DoZoneInCombat call for map that isn't an instance (creature entry = %d)", creature->GetTypeId() == TYPEID_UNIT ? creature->ToCreature()->GetEntry() : 0);
-        return;
-    }
 
     if (!creature->HasReactState(REACT_PASSIVE) && !creature->getVictim())
     {
@@ -82,37 +75,26 @@ void CreatureAI::DoZoneInCombat(Creature * creature, bool outdoor, float range)
         return;
     }
 
+    Map * map = creature->GetMap();
     Map::PlayerList const & PlList = map->GetPlayers();
 
     if (PlList.isEmpty())
         return;
 
-    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-    {
-        if (Player * pPlayer = i->getSource())
-        {
-            if (pPlayer->isAlive() && pPlayer->isValid())
+    for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+        if (Player * pl = itr->getSource())
+            if (pl->isAlive() && pl->isValid())
             {
-                if (pPlayer->isGameMaster())
+                if (pl->isGameMaster())
                     continue;
 
-                if ((outdoor && creature->IsWithinDistInMap(pPlayer, range)) || !outdoor)
+                if (creature->IsWithinDistInMap(pl, range))
                 {
-                    creature->SetInCombatWith(pPlayer);
-                    pPlayer->SetInCombatWith(creature);
-                    creature->AddThreat(pPlayer, 0.0f);
+                    creature->SetInCombatWith(pl);
+                    pl->SetInCombatWith(creature);
+                    creature->AddThreat(pl, 0.0f);
                 }
             }
-
-            /* Causes certain things to never leave the threat list (Priest Lightwell, etc):
-            for (Unit::ControlList::const_iterator itr = pPlayer->m_Controlled.begin(); itr != pPlayer->m_Controlled.end(); ++itr)
-            {
-                creature->SetInCombatWith(*itr);
-                (*itr)->SetInCombatWith(creature);
-                creature->AddThreat(*itr, 0.0f);
-            }*/
-        }
-    }
 }
 
 // scripts does not take care about MoveInLineOfSight loops

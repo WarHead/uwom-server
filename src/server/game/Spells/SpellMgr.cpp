@@ -2849,6 +2849,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)
+            case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)
@@ -2958,6 +2962,17 @@ void SpellMgr::LoadDbcDataCorrections()
             case 50785: // Energize Cores
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
+                break;
+            case 56263: // Vortex (Ride Vehicle Spell)
+            case 55853:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+                break;
+            case 57143: // Life Burst (Wyrmrest Skytalon Vehicle)
+                 spellInfo->EffectBasePoints[1] = 2499;
+                 spellInfo->EffectPointsPerComboPoint[1] = 2500;
+                 break;
+            case 55849: // Power Spark
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 8494: // Mana Shield (rank 2)
                 // because of bug in dbc
@@ -3093,6 +3108,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 47569: // Improved Shadowform (Rank 1)
                 // with this spell atrribute aura can be stacked several times
                 spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFT;
+                break;
+            case 64904: //Hymn of Hope
+                spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
                 break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
