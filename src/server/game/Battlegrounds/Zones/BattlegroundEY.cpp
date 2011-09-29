@@ -256,6 +256,16 @@ void BattlegroundEY::UpdatePointStatuses()
                     if (m_PointState[point] == EY_POINT_UNDER_CONTROL && plr->GetTeam() != m_PointOwnedByTeam[point])
                         this->EventTeamLostPoint(plr, point);
                 }
+                
+                // Fix for Fel Reaver Ruins
+                // This is here because the capture point areatrigger overlays the flag deposit one.
+                // Their respective IDs are 5866 and 4515
+                // Most probably Blizz wanted it to be this way but could not make it
+                // So they removed areaTrigger 5866. Best would be to implement DISABLE_AREATRIGGER.
+                if (point == FEL_REAVER && m_PointOwnedByTeam[point] == plr->GetTeam())
+                    if (m_FlagState && GetFlagPickerGUID() == plr->GetGUID())
+                        if (plr->GetDistance2d(float(2044), float(1730)) < 2.0f)
+                            EventPlayerCapturedFlag(plr, BG_EY_OBJECT_FLAG_FEL_REAVER);
             }
         }
     }
