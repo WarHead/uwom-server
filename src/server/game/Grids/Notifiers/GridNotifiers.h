@@ -720,6 +720,22 @@ namespace Trinity
 
     // Unit checks
 
+    class FriendlyInRange
+    {
+        public:
+            FriendlyInRange(Unit const* obj, float range) : i_obj(obj), i_range(range) {}
+            bool operator()(Unit* u)
+            {
+                if (u->isAlive() && u->isTargetableForAttack() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                    !(u->isFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STAT_STUNNED) || u->HasUnitState(UNIT_STAT_CONFUSED)))
+                    return true;
+                return false;
+            }
+        private:
+            Unit const* i_obj;
+            float i_range;
+    };
+
     class MostHPMissingInRange
     {
         public:
