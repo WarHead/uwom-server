@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,10 +22,10 @@
 
 enum Texts
 {
-    SAY_AGGRO                   = 0,    // Alexstrasza has chosen capable allies.... A pity that I must END YOU!
-    SAY_KILL                    = 1,    // You thought you stood a chance? - It's for the best.
-    SAY_ADDS                    = 2,    // Turn them to ash, minions!
-    SAY_DEATH                   = 3,    // HALION! I...
+    SAY_AGGRO,  // Alexstrasza has chosen capable allies.... A pity that I must END YOU!
+    SAY_KILL,   // You thought you stood a chance? - It's for the best.
+    SAY_ADDS,   // Turn them to ash, minions!
+    SAY_DEATH   // HALION! I...
 };
 
 enum Spells
@@ -36,18 +37,18 @@ enum Spells
     SPELL_SUMMON_FLAMECALLER    = 74398,
     // Onyx Flamecaller
     SPELL_BLAST_NOVA            = 74392,
-    SPELL_LAVA_GOUT             = 74394,
+    SPELL_LAVA_GOUT             = 74394
 };
 
 enum Events
 {
     // General Zarithrian
-    EVENT_CLEAVE                    = 1,
-    EVENT_INTIDMDATING_ROAR         = 2,
-    EVENT_SUMMON_ADDS               = 3,
+    EVENT_CLEAVE = 1,
+    EVENT_INTIDMDATING_ROAR,
+    EVENT_SUMMON_ADDS,
     // Onyx Flamecaller
-    EVENT_BLAST_NOVA                = 4,
-    EVENT_LAVA_GOUT                 = 5,
+    EVENT_BLAST_NOVA,
+    EVENT_LAVA_GOUT
 };
 
 uint32 const MAX_PATH_FLAMECALLER_WAYPOINTS = 12;
@@ -89,7 +90,7 @@ class boss_general_zarithrian : public CreatureScript
 
         struct boss_general_zarithrianAI : public BossAI
         {
-            boss_general_zarithrianAI(Creature* creature) : BossAI(creature, DATA_GENERAL_ZARITHRIAN)
+            boss_general_zarithrianAI(Creature * creature) : BossAI(creature, DATA_GENERAL_ZARITHRIAN)
             {
             }
 
@@ -100,14 +101,14 @@ class boss_general_zarithrian : public CreatureScript
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
                 events.Reset();
-                events.ScheduleEvent(EVENT_CLEAVE, 15000);
-                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
-                events.ScheduleEvent(EVENT_SUMMON_ADDS, 40000);
+                events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_15);
+                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_40);
             }
 
             void JustReachedHome()
@@ -117,18 +118,18 @@ class boss_general_zarithrian : public CreatureScript
             }
 
             // Override to not set adds in combat yet.
-            void JustSummoned(Creature* summon)
+            void JustSummoned(Creature * summon)
             {
                 summons.Summon(summon);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit * /*killer*/)
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit * victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
@@ -136,6 +137,9 @@ class boss_general_zarithrian : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (instance->GetBossState(DATA_GENERAL_ZARITHRIAN) != IN_PROGRESS && !me->isInCombat())
+                    me->DespawnOrUnsummon();
+
                 if (!UpdateVictim())
                     return;
 
@@ -156,32 +160,29 @@ class boss_general_zarithrian : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SUMMON_ADDS:
-                        {
-                            if (Creature* stalker1 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_1)))
+                            if (Creature * stalker1 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_1)))
                                 stalker1->AI()->DoCast(stalker1, SPELL_SUMMON_FLAMECALLER);
-                            if (Creature* stalker2 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_2)))
+                            if (Creature * stalker2 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_2)))
                                 stalker2->AI()->DoCast(stalker2, SPELL_SUMMON_FLAMECALLER);
                             Talk(SAY_ADDS);
-                            events.ScheduleEvent(EVENT_SUMMON_ADDS, 42000);
+                            events.ScheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_40);
                             break;
-                        }
                         case EVENT_INTIDMDATING_ROAR:
                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
-                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
+                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE_ARMOR);
-                            events.ScheduleEvent(EVENT_CLEAVE, 15000);
+                            events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_15);
                             break;
                         default:
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<boss_general_zarithrianAI>(creature);
         }
@@ -194,25 +195,25 @@ class npc_onyx_flamecaller : public CreatureScript
 
         struct npc_onyx_flamecallerAI : public npc_escortAI
         {
-            npc_onyx_flamecallerAI(Creature* creature) : npc_escortAI(creature)
+            npc_onyx_flamecallerAI(Creature * creature) : npc_escortAI(creature)
             {
-                _instance = creature->GetInstanceScript();
+                instance = creature->GetInstanceScript();
                 npc_escortAI::SetDespawnAtEnd(false);
             }
 
             void Reset()
             {
-                _lavaGoutCount = 0;
+                lavaGoutCnt = 0;
                 me->setActive(true);
                 AddWaypoints();
                 Start(true, true);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
-                _events.Reset();
-                _events.ScheduleEvent(EVENT_BLAST_NOVA, urand(20000, 30000));
-                _events.ScheduleEvent(EVENT_LAVA_GOUT, 5000);
+                events.Reset();
+                events.ScheduleEvent(EVENT_BLAST_NOVA, urand(SEKUNDEN_10, SEKUNDEN_20));
+                events.ScheduleEvent(EVENT_LAVA_GOUT, urand(SEKUNDEN_05, SEKUNDEN_10));
             }
 
             void EnterEvadeMode()
@@ -220,10 +221,10 @@ class npc_onyx_flamecaller : public CreatureScript
                 // Prevent EvadeMode
             }
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void IsSummonedBy(Unit * /*summoner*/)
             {
-                // Let Zarithrian count as summoner. _instance cant be null since we got GetRubySanctumAI
-                if (Creature* zarithrian = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_GENERAL_ZARITHRIAN)))
+                // Let Zarithrian count as summoner. instance cant be null since we got GetRubySanctumAI
+                if (Creature * zarithrian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_GENERAL_ZARITHRIAN)))
                     zarithrian->AI()->JustSummoned(me);
             }
 
@@ -255,45 +256,44 @@ class npc_onyx_flamecaller : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                _events.Update(diff);
+                events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
-                while (uint32 eventId = _events.ExecuteEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
                         case EVENT_BLAST_NOVA:
                             DoCastAOE(SPELL_BLAST_NOVA);
-                            _events.ScheduleEvent(EVENT_BLAST_NOVA, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_BLAST_NOVA, urand(SEKUNDEN_10, SEKUNDEN_20));
                             break;
                         case EVENT_LAVA_GOUT:
-                            if (_lavaGoutCount >= 3)
+                            if (lavaGoutCnt >= 3)
                             {
-                                _lavaGoutCount = 0;
-                                _events.ScheduleEvent(EVENT_LAVA_GOUT, 8000);
+                                lavaGoutCnt = 0;
+                                events.ScheduleEvent(EVENT_LAVA_GOUT, 8 * IN_MILLISECONDS);
                                 break;
                             }
                             DoCastVictim(SPELL_LAVA_GOUT);
-                            _lavaGoutCount++;
-                            _events.ScheduleEvent(EVENT_LAVA_GOUT, 1500);
+                            ++lavaGoutCnt;
+                            events.ScheduleEvent(EVENT_LAVA_GOUT, 1500);
                             break;
                         default:
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
         private:
-            EventMap _events;
-            bool _movementComplete;
-            InstanceScript* _instance;
-            uint8 _lavaGoutCount;
+            EventMap events;
+            //bool movementComplete;
+            InstanceScript * instance;
+            uint8 lavaGoutCnt;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<npc_onyx_flamecallerAI>(creature);
         }

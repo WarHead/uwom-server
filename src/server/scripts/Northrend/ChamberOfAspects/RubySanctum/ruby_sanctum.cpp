@@ -163,7 +163,7 @@ class at_baltharus_plateau : public AreaTriggerScript
 
 enum RubinsanktumTrashNPCs
 {
-    NPC_Onyxflammenrufer                = 39814,
+    //NPC_Onyxflammenrufer                = 39814,
     NPC_Herbeirufer_der_Schmorschuppen  = 40417,
     NPC_Angreifer_der_Schmorschuppen    = 40419,
     NPC_Elite_der_Schmorschuppen        = 40421,
@@ -172,8 +172,8 @@ enum RubinsanktumTrashNPCs
 
 enum RubinsanktumTrashSpells
 {
-#define SPELL_Onyxflammenrufer_Drucknova                        RAID_MODE<uint32>(74392,74393,74392,74393) // AOE - selbst - 20 Meter Reichweite
-#define SPELL_Onyxflammenrufer_Lavatropfen                      RAID_MODE<uint32>(74394,74395,74394,74395) // Rnd - 40 Meter Reichweite
+//#define SPELL_Onyxflammenrufer_Drucknova                        RAID_MODE<uint32>(74392,74393,74392,74393) // AOE - selbst - 20 Meter Reichweite
+//#define SPELL_Onyxflammenrufer_Lavatropfen                      RAID_MODE<uint32>(74394,74395,74394,74395) // Rnd - 40 Meter Reichweite
 #define SPELL_Herbeirufer_der_Schmorschuppen_Versengen          RAID_MODE<uint32>(75412,75419,75412,75419) // Rnd - 30 Meter Reichweite
         SPELL_Herbeirufer_der_Schmorschuppen_Flammenwelle       = 75413, // AOE - selbst - 10 Meter Reichweite
         SPELL_Herbeirufer_der_Schmorschuppen_Zusammenruf        = 75416, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 10 Sek.
@@ -188,9 +188,9 @@ enum RubinsanktumTrashSpells
 
 enum RubinsanktumTrashEvents
 {
-    EVENT_Onyxflammenrufer_Drucknova = 1,
-    EVENT_Onyxflammenrufer_Lavatropfen,
-    EVENT_Herbeirufer_der_Schmorschuppen_Versengen,
+    //EVENT_Onyxflammenrufer_Drucknova = 1,
+    //EVENT_Onyxflammenrufer_Lavatropfen,
+    EVENT_Herbeirufer_der_Schmorschuppen_Versengen = 1,
     EVENT_Herbeirufer_der_Schmorschuppen_Flammenwelle,
     EVENT_Herbeirufer_der_Schmorschuppen_Zusammenruf,
     EVENT_Angreifer_der_Schmorschuppen_Schockwelle,
@@ -222,8 +222,8 @@ public:
             if (!who || !who->isValid())
                 return;
 
-            events.ScheduleEvent(EVENT_Onyxflammenrufer_Drucknova, urand(SEKUNDEN_10, SEKUNDEN_20));
-            events.ScheduleEvent(EVENT_Onyxflammenrufer_Lavatropfen, urand(SEKUNDEN_05, SEKUNDEN_10));
+            //events.ScheduleEvent(EVENT_Onyxflammenrufer_Drucknova, urand(SEKUNDEN_10, SEKUNDEN_20));
+            //events.ScheduleEvent(EVENT_Onyxflammenrufer_Lavatropfen, urand(SEKUNDEN_05, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Versengen, urand(SEKUNDEN_05, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Flammenwelle, urand(SEKUNDEN_10, SEKUNDEN_20));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Zusammenruf, SEKUNDEN_30);
@@ -271,7 +271,7 @@ public:
             {
                 switch(me->GetEntry())
                 {
-                    case NPC_Onyxflammenrufer:
+                    /*case NPC_Onyxflammenrufer:
                         switch(eventId)
                         {
                             case EVENT_Onyxflammenrufer_Drucknova:
@@ -284,7 +284,7 @@ public:
                                 events.RescheduleEvent(EVENT_Onyxflammenrufer_Lavatropfen, urand(SEKUNDEN_05, SEKUNDEN_10));
                                 break;
                         }
-                        break;
+                        break;*/
                     case NPC_Herbeirufer_der_Schmorschuppen:
                         switch(eventId)
                         {
