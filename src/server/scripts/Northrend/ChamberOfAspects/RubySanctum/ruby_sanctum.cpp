@@ -176,12 +176,12 @@ enum RubinsanktumTrashSpells
 #define SPELL_Onyxflammenrufer_Lavatropfen                      RAID_MODE<uint32>(74394,74395,74394,74395) // Rnd - 40 Meter Reichweite
 #define SPELL_Herbeirufer_der_Schmorschuppen_Versengen          RAID_MODE<uint32>(75412,75419,75412,75419) // Rnd - 30 Meter Reichweite
         SPELL_Herbeirufer_der_Schmorschuppen_Flammenwelle       = 75413, // AOE - selbst - 10 Meter Reichweite
-        SPELL_Herbeirufer_der_Schmorschuppen_Zusammenruf        = 75416, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 10 Sek.
+        SPELL_Herbeirufer_der_Schmorschuppen_Zusammenruf        = 75416, // Selbst - Ruft verbÃ¼ndete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hÃ¤lt 10 Sek.
 #define SPELL_Angreifer_der_Schmorschuppen_Schockwelle          RAID_MODE<uint32>(75417,75418,75417,75418) // Victim - 15 Meter Reichweite
         SPELL_Angreifer_der_Schmorschuppen_Spalten              = 15284, // Victim
-        SPELL_Angreifer_der_Schmorschuppen_Zusammenruf          = 75416, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 10 Sek.
+        SPELL_Angreifer_der_Schmorschuppen_Zusammenruf          = 75416, // Selbst - Ruft verbÃ¼ndete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hÃ¤lt 10 Sek.
         SPELL_Elite_der_Schmorschuppen_Schaedelkracher          = 15621, // Victim
-        SPELL_Kommandant_der_Schmorschuppen_Sammelruf           = 75414, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 50 Sek. - Dummy -> Script!
+        SPELL_Kommandant_der_Schmorschuppen_Sammelruf           = 75414, // Selbst - Ruft verbÃ¼ndete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hÃ¤lt 50 Sek. - Dummy -> Script!
         SPELL_Kommandant_der_Schmorschuppen_Sammelruf_Effect    = 75415,
         SPELL_Kommandant_der_Schmorschuppen_Toedlicher_Stoss    = 13737  // Victim
 };
