@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -20,19 +21,19 @@
 
 enum Texts
 {
-    SAY_AGGRO                           = 0, // You will sssuffer for this intrusion! (17528)
-    SAY_CONFLAGRATION                   = 1, // Burn in the master's flame! (17532)
-    EMOTE_ENRAGED                       = 2, // %s becomes enraged!
-    SAY_KILL                            = 3, // Halion will be pleased. (17530) - As it should be.... (17529)
+    SAY_AGGRO,          // You will sssuffer for this intrusion! (17528)
+    SAY_CONFLAGRATION,  // Burn in the master's flame! (17532)
+    EMOTE_ENRAGED,      // %s becomes enraged!
+    SAY_KILL            // Halion will be pleased. (17530) - As it should be.... (17529)
 };
 
 enum Spells
 {
-    SPELL_CONFLAGRATION         = 74452,
-    SPELL_FLAME_BEACON          = 74453,
-    SPELL_CONFLAGRATION_2       = 74454, // Unknown dummy effect
-    SPELL_ENRAGE                = 78722,
-    SPELL_FLAME_BREATH          = 74403,
+    SPELL_CONFLAGRATION     = 74452,
+    SPELL_FLAME_BEACON      = 74453,
+    SPELL_CONFLAGRATION_2   = 74454, // Unknown dummy effect
+    SPELL_ENRAGE            = 78722,
+    SPELL_FLAME_BREATH      = 74403
 };
 
 enum Events
@@ -41,24 +42,23 @@ enum Events
     EVENT_FLIGHT                    = 2,
     EVENT_FLAME_BREATH              = 3,
     EVENT_CONFLAGRATION             = 4,
-
     // Event group
-    EVENT_GROUP_LAND_PHASE          = 1,
+    EVENT_GROUP_LAND_PHASE          = 1
 };
 
 enum MovementPoints
 {
-    POINT_FLIGHT            = 1,
-    POINT_LAND              = 2,
+    POINT_FLIGHT    = 1,
+    POINT_LAND      = 2
 };
 
 enum Misc
 {
-    SOUND_ID_DEATH          = 17531,
+    SOUND_ID_DEATH  = 17531
 };
 
-Position const SavianaRagefireFlyPos  = {3155.51f, 683.844f, 95.20f, 4.69f};
-Position const SavianaRagefireLandPos = {3151.07f, 636.443f, 79.54f, 4.69f};
+const Position SavianaRagefireFlyPos  = {3155.51f, 683.844f, 95.20f, 4.69f};
+const Position SavianaRagefireLandPos = {3151.07f, 636.443f, 79.54f, 4.69f};
 
 class boss_saviana_ragefire : public CreatureScript
 {
@@ -77,17 +77,17 @@ class boss_saviana_ragefire : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
                 events.Reset();
-                events.ScheduleEvent(EVENT_ENRAGE, 20000, EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_FLAME_BREATH, 14000, EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_FLIGHT, 60000);
+                events.ScheduleEvent(EVENT_ENRAGE, SEKUNDEN_20, EVENT_GROUP_LAND_PHASE);
+                events.ScheduleEvent(EVENT_FLAME_BREATH, 14 * IN_MILLISECONDS, EVENT_GROUP_LAND_PHASE);
+                events.ScheduleEvent(EVENT_FLIGHT, SEKUNDEN_30);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit * /*killer*/)
             {
                 _JustDied();
                 me->PlayDirectSound(SOUND_ID_DEATH);
@@ -101,7 +101,7 @@ class boss_saviana_ragefire : public CreatureScript
                 switch (point)
                 {
                     case POINT_FLIGHT:
-                        events.ScheduleEvent(EVENT_CONFLAGRATION, 1000);
+                        events.ScheduleEvent(EVENT_CONFLAGRATION, 1 * IN_MILLISECONDS);
                         Talk(SAY_CONFLAGRATION);
                         break;
                     case POINT_LAND:
@@ -124,7 +124,7 @@ class boss_saviana_ragefire : public CreatureScript
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit * victim)
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
@@ -150,7 +150,7 @@ class boss_saviana_ragefire : public CreatureScript
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SetReactState(REACT_PASSIVE);
                             me->GetMotionMaster()->MovePoint(POINT_FLIGHT, SavianaRagefireFlyPos);
-                            events.ScheduleEvent(EVENT_FLIGHT, 50000);
+                            events.ScheduleEvent(EVENT_FLIGHT, SEKUNDEN_40);
                             events.DelayEvents(12500, EVENT_GROUP_LAND_PHASE);
                             break;
                         }
@@ -160,11 +160,11 @@ class boss_saviana_ragefire : public CreatureScript
                         case EVENT_ENRAGE:
                             DoCast(me, SPELL_ENRAGE);
                             Talk(EMOTE_ENRAGED);
-                            events.ScheduleEvent(EVENT_ENRAGE, urand(15000, 20000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_ENRAGE, urand(SEKUNDEN_15, SEKUNDEN_20), EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_FLAME_BREATH:
                             DoCastVictim(SPELL_FLAME_BREATH);
-                            events.ScheduleEvent(EVENT_FLAME_BREATH, urand(20000, 30000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_FLAME_BREATH, urand(SEKUNDEN_20, SEKUNDEN_30), EVENT_GROUP_LAND_PHASE);
                             break;
                         default:
                             break;
@@ -175,7 +175,7 @@ class boss_saviana_ragefire : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<boss_saviana_ragefireAI>(creature);
         }
@@ -186,7 +186,7 @@ class ConflagrationTargetSelector
     public:
         ConflagrationTargetSelector() { }
 
-        bool operator()(Unit* unit)
+        bool operator()(Unit * unit)
         {
             return unit->GetTypeId() != TYPEID_PLAYER;
         }
@@ -201,7 +201,7 @@ class spell_saviana_conflagration_init : public SpellScriptLoader
         {
             PrepareSpellScript(spell_saviana_conflagration_init_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<Unit *>& unitList)
             {
                 unitList.remove_if (ConflagrationTargetSelector());
                 uint8 maxSize = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 6 : 3);
@@ -223,7 +223,7 @@ class spell_saviana_conflagration_init : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript * GetSpellScript() const
         {
             return new spell_saviana_conflagration_init_SpellScript();
         }
@@ -251,7 +251,7 @@ class spell_saviana_conflagration_throwback : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript * GetSpellScript() const
         {
             return new spell_saviana_conflagration_throwback_SpellScript();
         }
