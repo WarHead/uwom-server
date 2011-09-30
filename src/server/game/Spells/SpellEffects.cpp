@@ -63,6 +63,7 @@
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
 #include "AccountMgr.h"
+#include "InstanceScript.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -2302,7 +2303,7 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
         && effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    Object* target = NULL;
+    WorldObject* target = NULL;
 
     // call events for target if present
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -2323,7 +2324,9 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->Effects[effIndex].MiscValue, m_spellInfo->Id);
 
     if (ZoneScript* zoneScript = m_caster->GetZoneScript())
-        zoneScript->ProcessEvent(unitTarget, m_spellInfo->Effects[effIndex].MiscValue);
+        zoneScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
+    else if (InstanceScript* instanceScript = m_caster->GetInstanceScript())    // needed in case Player is the caster
+        instanceScript->ProcessEvent(target, m_spellInfo->Effects[effIndex].MiscValue);
 
     m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->Effects[effIndex].MiscValue, m_caster, target);
 }
@@ -6491,11 +6494,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (unitTarget->IsNonMeleeSpellCasted(true))
         unitTarget->InterruptNonMeleeSpells(true);
 
-    float ratio = m_caster->GetCombatReach() / std::max(unitTarget->GetCombatReach(), 1.0f);
-    if (ratio < 1.0f)
-        ratio = ratio * ratio * ratio * 0.1f; // volume = length^3
-    else
-        ratio = 0.1f; // dbc value ratio
+    float ratio = 0.1f;
     float speedxy = float(m_spellInfo->Effects[effIndex].MiscValue) * ratio;
     float speedz = float(damage) * ratio;
     if (speedxy < 0.1f && speedz < 0.1f)
