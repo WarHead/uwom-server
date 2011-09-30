@@ -463,6 +463,15 @@ void ScriptedAI::DoTeleportAll(float x, float y, float z, float o)
                 player->TeleportTo(me->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
+std::list<Creature*> ScriptedAI::DoFindFriendlyInRange(float range)
+{
+    std::list<Creature*> list;
+    Trinity::FriendlyInRange u_check(me, range);
+    Trinity::CreatureListSearcher<Trinity::FriendlyInRange> searcher(me, list, u_check);
+    me->VisitNearbyObject(range, searcher);
+    return list;
+}
+
 Unit* ScriptedAI::DoSelectLowestHpFriendly(float range, uint32 minHPDiff)
 {
     Unit* unit = NULL;
