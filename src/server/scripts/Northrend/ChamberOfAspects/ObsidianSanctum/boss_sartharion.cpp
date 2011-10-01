@@ -353,7 +353,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            Sammelruf(); // Falls noch Trash in der Instanz steht -> herbei rufen!
+            if (Sammelruf() && pInstance) // Falls noch Trash in der Instanz steht -> herbei rufen!
+                pInstance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
 
             DoScriptText(SAY_SARTHARION_AGGRO, me);
             DoZoneInCombat();

@@ -123,7 +123,8 @@ class boss_halion : public CreatureScript
 
             void EnterCombat(Unit * /*who*/)
             {
-                Sammelruf(); // Falls noch Trash in der Instanz steht -> herbei rufen!
+                if (Sammelruf()) // Falls noch Trash in der Instanz steht -> herbei rufen!
+                    instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
 
                 _EnterCombat();
                 Talk(SAY_AGGRO);

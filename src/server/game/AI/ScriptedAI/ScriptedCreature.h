@@ -69,7 +69,7 @@ struct ScriptedAI : public CreatureAI
     Player* SelectRandomPlayer(float range = 0.0f);
 
     // Ruft alle freundlichen NPC in range zum Angriff herbei und fügt ihnen die aura hinzu, oder entfernt sie, wenn aura negativ ist
-    void Sammelruf(float range = MAX_VISIBLE_DIST, int32 aura = 0);
+    bool Sammelruf(float range = MAX_VISIBLE_DIST, int32 aura = 0);
 
     // Despawned ein Add
     bool DespawnAdd(uint64 guid = 0);
