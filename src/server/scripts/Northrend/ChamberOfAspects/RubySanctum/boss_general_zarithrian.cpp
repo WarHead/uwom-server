@@ -137,9 +137,6 @@ class boss_general_zarithrian : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (instance->GetBossState(DATA_GENERAL_ZARITHRIAN) != IN_PROGRESS && !me->isInCombat())
-                    me->DespawnOrUnsummon();
-
                 if (!UpdateVictim())
                     return;
 
@@ -253,6 +250,9 @@ class npc_onyx_flamecaller : public CreatureScript
 
             void UpdateEscortAI(uint32 const diff)
             {
+                if (instance->GetBossState(DATA_GENERAL_ZARITHRIAN) != IN_PROGRESS && !me->isInCombat())
+                    me->DespawnOrUnsummon();
+
                 if (!UpdateVictim())
                     return;
 
