@@ -155,8 +155,8 @@ struct ScriptedAI : public CreatureAI
     void DoTeleportPlayer(Unit* unit, float x, float y, float z, float o);
     void DoTeleportAll(float x, float y, float z, float o);
 
-    // Gibt eine Liste Verbündeter NPC in range zurück
-    std::list<Creature*> DoFindFriendlyInRange(float range);
+    // Gibt eine Liste Verbündeter NPC in range zurück, die beim Angriff auf enemy helfen können
+    std::list<Creature*> DoFindFriendlyInRangeToAssist(float range, Unit * enemy);
 
     //Returns friendly unit with the most amount of hp missing from max hp
     Unit* DoSelectLowestHpFriendly(float range, uint32 minHPDiff = 1);
