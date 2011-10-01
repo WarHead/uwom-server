@@ -193,6 +193,7 @@ public:
     {
         mob_rubinsanktum_trashAI(Creature * creature) : ScriptedAI(creature)
         {
+            instance = me->GetInstanceScript();
         }
 
         void Reset()
@@ -280,8 +281,10 @@ public:
                         switch(eventId)
                         {
                             case EVENT_Kommandant_der_Schmorschuppen_Sammelruf:
+                                if (instance)
+                                    instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
                                 me->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, me);
-                                Sammelruf(100.0f, SPELL_Kommandant_der_Schmorschuppen_Sammelruf);
+                                Sammelruf(60.0f, SPELL_Kommandant_der_Schmorschuppen_Sammelruf);
                                 events.RescheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Sammelruf, urand(SEKUNDEN_60, SEKUNDEN_60+SEKUNDEN_30));
                                 break;
                             case EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss:
@@ -296,6 +299,7 @@ public:
         }
 private:
         EventMap events;
+        InstanceScript * instance;
     };
 
     CreatureAI * GetAI(Creature * creature) const
