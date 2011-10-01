@@ -47,98 +47,86 @@ const Position xerestraszaMovePos = { 3151.236f, 379.8733f, 86.31996f, 0.0f };
 
 class npc_xerestrasza : public CreatureScript
 {
-    public:
-        npc_xerestrasza() : CreatureScript("npc_xerestrasza") { }
+public:
+    npc_xerestrasza() : CreatureScript("npc_xerestrasza") { }
 
-        struct npc_xerestraszaAI : public ScriptedAI
+    struct npc_xerestraszaAI : public ScriptedAI
+    {
+        npc_xerestraszaAI(Creature* creature) : ScriptedAI(creature)
         {
-            npc_xerestraszaAI(Creature* creature) : ScriptedAI(creature)
-            {
-                _isIntro = true;
-                _introDone = false;
-            }
-
-            void Reset()
-            {
-                _events.Reset();
-                me->RemoveFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
-            }
-
-            void DoAction(int32 const action)
-            {
-                if (action == ACTION_BALTHARUS_DEATH)
-                {
-                    me->setActive(true);
-                    _isIntro = false;
-
-                    Talk(SAY_XERESTRASZA_EVENT);
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    me->GetMotionMaster()->MovePoint(0, xerestraszaMovePos);
-
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_1, 16000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_2, 25000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_3, 32000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_4, 42000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_5, 51000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_6, 61000);
-                    _events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_7, 69000);
-                }
-                else if (action == ACTION_INTRO_BALTHARUS && !_introDone)
-                {
-                    _introDone = true;
-                    Talk(SAY_XERESTRASZA_INTRO);
-                }
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (_isIntro)
-                    return;
-
-                _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_XERESTRASZA_EVENT_1:
-                            Talk(SAY_XERESTRASZA_EVENT_1);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_2:
-                            Talk(SAY_XERESTRASZA_EVENT_2);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_3:
-                            Talk(SAY_XERESTRASZA_EVENT_3);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_4:
-                            Talk(SAY_XERESTRASZA_EVENT_4);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_5:
-                            Talk(SAY_XERESTRASZA_EVENT_5);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_6:
-                            Talk(SAY_XERESTRASZA_EVENT_6);
-                            break;
-                        case EVENT_XERESTRASZA_EVENT_7:
-                            me->SetFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
-                            Talk(SAY_XERESTRASZA_EVENT_7);
-                            me->setActive(false);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        private:
-            EventMap _events;
-            bool _isIntro;
-            bool _introDone;
-        };
-
-        CreatureAI * GetAI(Creature * creature) const
-        {
-            return GetRubySanctumAI<npc_xerestraszaAI>(creature);
+            isIntro = true;
+            introDone = false;
         }
+
+        void Reset()
+        {
+            events.Reset();
+            me->RemoveFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+        }
+
+        void DoAction(int32 const action)
+        {
+            if (action == ACTION_BALTHARUS_DEATH)
+            {
+                me->setActive(true);
+                isIntro = false;
+
+                Talk(SAY_XERESTRASZA_EVENT);
+                me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                me->GetMotionMaster()->MovePoint(0, xerestraszaMovePos);
+
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_1, 16000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_2, 25000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_3, 32000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_4, 42000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_5, 51000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_6, 61000);
+                events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_7, 69000);
+            }
+            else if (action == ACTION_INTRO_BALTHARUS && !introDone)
+            {
+                introDone = true;
+                Talk(SAY_XERESTRASZA_INTRO);
+            }
+        }
+
+        void UpdateAI(uint32 const diff)
+        {
+            if (isIntro)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_XERESTRASZA_EVENT_1: Talk(SAY_XERESTRASZA_EVENT_1); break;
+                    case EVENT_XERESTRASZA_EVENT_2: Talk(SAY_XERESTRASZA_EVENT_2); break;
+                    case EVENT_XERESTRASZA_EVENT_3: Talk(SAY_XERESTRASZA_EVENT_3); break;
+                    case EVENT_XERESTRASZA_EVENT_4: Talk(SAY_XERESTRASZA_EVENT_4); break;
+                    case EVENT_XERESTRASZA_EVENT_5: Talk(SAY_XERESTRASZA_EVENT_5); break;
+                    case EVENT_XERESTRASZA_EVENT_6: Talk(SAY_XERESTRASZA_EVENT_6); break;
+                    case EVENT_XERESTRASZA_EVENT_7:
+                        me->SetFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+                        Talk(SAY_XERESTRASZA_EVENT_7);
+                        me->setActive(false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+private:
+        EventMap events;
+        bool isIntro;
+        bool introDone;
+    };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return GetRubySanctumAI<npc_xerestraszaAI>(creature);
+    }
 };
 
 class at_baltharus_plateau : public AreaTriggerScript
@@ -163,7 +151,6 @@ class at_baltharus_plateau : public AreaTriggerScript
 
 enum RubinsanktumTrashNPCs
 {
-    //NPC_Onyxflammenrufer                = 39814,
     NPC_Herbeirufer_der_Schmorschuppen  = 40417,
     NPC_Angreifer_der_Schmorschuppen    = 40419,
     NPC_Elite_der_Schmorschuppen        = 40421,
@@ -172,8 +159,6 @@ enum RubinsanktumTrashNPCs
 
 enum RubinsanktumTrashSpells
 {
-//#define SPELL_Onyxflammenrufer_Drucknova                        RAID_MODE<uint32>(74392,74393,74392,74393) // AOE - selbst - 20 Meter Reichweite
-//#define SPELL_Onyxflammenrufer_Lavatropfen                      RAID_MODE<uint32>(74394,74395,74394,74395) // Rnd - 40 Meter Reichweite
 #define SPELL_Herbeirufer_der_Schmorschuppen_Versengen          RAID_MODE<uint32>(75412,75419,75412,75419) // Rnd - 30 Meter Reichweite
         SPELL_Herbeirufer_der_Schmorschuppen_Flammenwelle       = 75413, // AOE - selbst - 10 Meter Reichweite
         SPELL_Herbeirufer_der_Schmorschuppen_Zusammenruf        = 75416, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 10 Sek.
@@ -188,8 +173,6 @@ enum RubinsanktumTrashSpells
 
 enum RubinsanktumTrashEvents
 {
-    //EVENT_Onyxflammenrufer_Drucknova = 1,
-    //EVENT_Onyxflammenrufer_Lavatropfen,
     EVENT_Herbeirufer_der_Schmorschuppen_Versengen = 1,
     EVENT_Herbeirufer_der_Schmorschuppen_Flammenwelle,
     EVENT_Herbeirufer_der_Schmorschuppen_Zusammenruf,
@@ -222,8 +205,6 @@ public:
             if (!who || !who->isValid())
                 return;
 
-            //events.ScheduleEvent(EVENT_Onyxflammenrufer_Drucknova, urand(SEKUNDEN_10, SEKUNDEN_20));
-            //events.ScheduleEvent(EVENT_Onyxflammenrufer_Lavatropfen, urand(SEKUNDEN_05, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Versengen, urand(SEKUNDEN_05, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Flammenwelle, urand(SEKUNDEN_10, SEKUNDEN_20));
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Zusammenruf, SEKUNDEN_30);
@@ -239,21 +220,20 @@ public:
 
         void Sammelruf()
         {
-            std::list<Creature *> FriendList = DoFindFriendlyInRange(100.0f);
-            if (FriendList.empty())
-                return;
-
             if (Unit * target = me->getVictim())
             {
+                std::list<Creature *> FriendList = DoFindFriendlyInRangeToAssist(100.0f, target);
+                if (FriendList.empty())
+                    return;
+
                 for (std::list<Creature *>::const_iterator itr = FriendList.begin(); itr != FriendList.end(); ++itr)
-                    if ((*itr) && (*itr)->isValid() && (*itr)->GetCreatureInfo()->rank < 3)
-                    {
-                        (*itr)->CombatStop(true);
-                        (*itr)->DeleteThreatList();
-                        (*itr)->AI()->AttackStart(target);
-                        (*itr)->AddThreat(target, 1000.0f);
-                        (*itr)->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, (*itr));
-                    }
+                {
+                    (*itr)->CombatStop(true);
+                    (*itr)->DeleteThreatList();
+                    (*itr)->AI()->AttackStart(target);
+                    (*itr)->AddThreat(target, 1000.0f);
+                    (*itr)->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, (*itr));
+                }
             }
         }
 
@@ -271,20 +251,6 @@ public:
             {
                 switch(me->GetEntry())
                 {
-                    /*case NPC_Onyxflammenrufer:
-                        switch(eventId)
-                        {
-                            case EVENT_Onyxflammenrufer_Drucknova:
-                                DoCastAOE(SPELL_Onyxflammenrufer_Drucknova);
-                                events.RescheduleEvent(EVENT_Onyxflammenrufer_Drucknova, urand(SEKUNDEN_10, SEKUNDEN_20));
-                                break;
-                            case EVENT_Onyxflammenrufer_Lavatropfen:
-                                if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                                    DoCast(target, SPELL_Onyxflammenrufer_Lavatropfen);
-                                events.RescheduleEvent(EVENT_Onyxflammenrufer_Lavatropfen, urand(SEKUNDEN_05, SEKUNDEN_10));
-                                break;
-                        }
-                        break;*/
                     case NPC_Herbeirufer_der_Schmorschuppen:
                         switch(eventId)
                         {
@@ -347,7 +313,7 @@ public:
             }
             DoMeleeAttackIfReady();
         }
-    private:
+private:
         EventMap events;
     };
 
