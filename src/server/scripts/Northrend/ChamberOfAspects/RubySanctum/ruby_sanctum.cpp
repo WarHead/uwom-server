@@ -218,25 +218,6 @@ public:
             me->InterruptNonMeleeSpells(true);
         }
 
-        void Sammelruf()
-        {
-            if (Unit * target = me->getVictim())
-            {
-                std::list<Creature *> FriendList = DoFindFriendlyInRangeToAssist(100.0f, target);
-                if (FriendList.empty())
-                    return;
-
-                for (std::list<Creature *>::const_iterator itr = FriendList.begin(); itr != FriendList.end(); ++itr)
-                {
-                    (*itr)->CombatStop(true);
-                    (*itr)->DeleteThreatList();
-                    (*itr)->AI()->AttackStart(target);
-                    (*itr)->AddThreat(target, 1000.0f);
-                    (*itr)->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, (*itr));
-                }
-            }
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
@@ -300,7 +281,7 @@ public:
                         {
                             case EVENT_Kommandant_der_Schmorschuppen_Sammelruf:
                                 me->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, me);
-                                Sammelruf();
+                                Sammelruf(100.0f, SPELL_Kommandant_der_Schmorschuppen_Sammelruf);
                                 events.RescheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Sammelruf, urand(SEKUNDEN_60, SEKUNDEN_60+SEKUNDEN_30));
                                 break;
                             case EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss:

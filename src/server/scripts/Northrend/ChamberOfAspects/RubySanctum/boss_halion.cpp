@@ -22,11 +22,12 @@
 
 enum Texts
 {
-    SAY_INTRO                        = 0, // Meddlesome insects! You are too late. The Ruby Sanctum is lost!
-    SAY_AGGRO                        = 1, // Your world teeters on the brink of annihilation. You will ALL bear witness to the coming of a new age of DESTRUCTION!
-    SAY_METEOR_STRIKE                = 2, // The heavens burn!
-    SAY_PHASE_TWO                    = 3, // You will find only suffering within the realm of twilight! Enter if you dare! (17507)
-    SAY_DEATH                        = 4  // Relish this victory, mortals, for it will be your last! This world will burn with the master's return! (17503)
+    SAY_INTRO,          // Meddlesome insects! You are too late. The Ruby Sanctum is lost!
+    SAY_AGGRO,          // Your world teeters on the brink of annihilation. You will ALL bear witness to the coming of a new age of DESTRUCTION!
+    SAY_METEOR_STRIKE,  // The heavens burn!
+    SAY_PHASE_TWO,      // You will find only suffering within the realm of twilight! Enter if you dare! (17507)
+    SAY_DEATH           // Relish this victory, mortals, for it will be your last! This world will burn with the master's return! (17503)
+
     // Beware the shadow! (17506)
     // I am the light and the darkness! Cower, mortals, before the herald of Deathwing!
     // Not good enough. 17504
@@ -92,10 +93,10 @@ enum Actions
 
 enum Phases
 {
-    PHASE_ALL       = 0,
-    PHASE_ONE       = 1,
-    PHASE_TWO       = 2,
-    PHASE_THREE     = 3,
+    PHASE_ALL   = 0,
+    PHASE_ONE   = 1,
+    PHASE_TWO   = 2,
+    PHASE_THREE = 3,
 
     PHASE_ONE_MASK = 1 << PHASE_ONE,
     PHASE_TWO_MASK = 1 << PHASE_TWO,
@@ -116,12 +117,14 @@ class boss_halion : public CreatureScript
 
         struct boss_halionAI : public BossAI
         {
-            boss_halionAI(Creature* creature) : BossAI(creature, DATA_HALION)
+            boss_halionAI(Creature * creature) : BossAI(creature, DATA_HALION)
             {
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
+                Sammelruf(); // Falls noch Trash in der Instanz steht -> herbei rufen!
+
                 _EnterCombat();
                 Talk(SAY_AGGRO);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
@@ -134,7 +137,7 @@ class boss_halion : public CreatureScript
                 events.ScheduleEvent(EVENT_FIERY_COMBUSTION, urand(15000, 18000));
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit * /*killer*/)
             {
                 _JustDied();
                 Talk(SAY_DEATH);
@@ -147,9 +150,9 @@ class boss_halion : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
             }
 
-            Position const* GetMeteorStrikePosition() const
+            Position const * GetMeteorStrikePosition() const
             {
-                return &_meteorStrikePos;
+                return &meteorStrikePos;
             }
 
             void UpdateAI(uint32 const diff)
@@ -168,7 +171,7 @@ class boss_halion : public CreatureScript
                     {
                         case EVENT_ACTIVATE_FIREWALL:
                             // Firewall is activated 10 seconds after starting encounter, DOOR_TYPE_ROOM is only instant.
-                            if (GameObject* firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
+                            if (GameObject * firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
                                 instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), false, firewall);
                             break;
                         case EVENT_FLAME_BREATH:
@@ -181,10 +184,10 @@ class boss_halion : public CreatureScript
                             break;
                         case EVENT_METEOR_STRIKE:
                         {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                             {
-                                target->GetPosition(&_meteorStrikePos);
-                                me->CastSpell(_meteorStrikePos.GetPositionX(), _meteorStrikePos.GetPositionY(), _meteorStrikePos.GetPositionZ(), SPELL_METEOR_STRIKE, true, NULL, NULL, me->GetGUID());
+                                target->GetPosition(&meteorStrikePos);
+                                me->CastSpell(meteorStrikePos.GetPositionX(), meteorStrikePos.GetPositionY(), meteorStrikePos.GetPositionZ(), SPELL_METEOR_STRIKE, true, NULL, NULL, me->GetGUID());
                                 Talk(SAY_METEOR_STRIKE);
                             }
                             events.ScheduleEvent(EVENT_METEOR_STRIKE, 40000);
@@ -192,7 +195,7 @@ class boss_halion : public CreatureScript
                         }
                         case EVENT_FIERY_COMBUSTION:
                         {
-                            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);
+                            Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true);
                             if (!target)
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                             if (target)
@@ -204,15 +207,14 @@ class boss_halion : public CreatureScript
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
 
         private:
-            Position _meteorStrikePos;
+            Position meteorStrikePos;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<boss_halionAI>(creature);
         }
@@ -227,8 +229,8 @@ class npc_halion_controller : public CreatureScript
 
         struct npc_halion_controllerAI : public ScriptedAI
         {
-            npc_halion_controllerAI(Creature* creature) : ScriptedAI(creature),
-                _instance(creature->GetInstanceScript())
+            npc_halion_controllerAI(Creature * creature) : ScriptedAI(creature),
+                instance(creature->GetInstanceScript())
             {
                 me->SetPhaseMask(me->GetPhaseMask() | 0x20, true);
             }
@@ -243,19 +245,19 @@ class npc_halion_controller : public CreatureScript
                 if (action == ACTION_INTRO_HALION)
                 {
                     me->setActive(true);
-                    _events.Reset();
-                    _events.ScheduleEvent(EVENT_START_INTRO, 2000);
-                    _events.ScheduleEvent(EVENT_INTRO_PROGRESS_1, 6000);
-                    _events.ScheduleEvent(EVENT_INTRO_PROGRESS_2, 10000);
-                    _events.ScheduleEvent(EVENT_INTRO_PROGRESS_3, 14000);
+                    events.Reset();
+                    events.ScheduleEvent(EVENT_START_INTRO, 2000);
+                    events.ScheduleEvent(EVENT_INTRO_PROGRESS_1, 6000);
+                    events.ScheduleEvent(EVENT_INTRO_PROGRESS_2, 10000);
+                    events.ScheduleEvent(EVENT_INTRO_PROGRESS_3, 14000);
                 }
             }
 
             void UpdateAI(uint32 const diff)
             {
-                _events.Update(diff);
+                events.Update(diff);
 
-                while (uint32 eventId = _events.ExecuteEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
@@ -264,17 +266,17 @@ class npc_halion_controller : public CreatureScript
                             break;
                         case EVENT_INTRO_PROGRESS_1:
                             for (uint8 i = 2; i < 4; ++i)
-                                if (GameObject* tree = ObjectAccessor::GetGameObject(*me, _instance->GetData64(DATA_BURNING_TREE_1 + i)))
-                                    _instance->HandleGameObject(_instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
+                                if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
+                                    instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
                             break;
                         case EVENT_INTRO_PROGRESS_2:
                             for (uint8 i = 0; i < 2; ++i)
-                                if (GameObject* tree = ObjectAccessor::GetGameObject(*me, _instance->GetData64(DATA_BURNING_TREE_1 + i)))
-                                    _instance->HandleGameObject(_instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
+                                if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
+                                    instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
                             break;
                         case EVENT_INTRO_PROGRESS_3:
                             DoCast(me, SPELL_FIERY_EXPLOSION);
-                            if (Creature* halion = me->GetMap()->SummonCreature(NPC_HALION, HalionSpawnPos))
+                            if (Creature * halion = me->GetMap()->SummonCreature(NPC_HALION, HalionSpawnPos))
                                 halion->AI()->Talk(SAY_INTRO);
                             me->setActive(false);
                             break;
@@ -285,11 +287,11 @@ class npc_halion_controller : public CreatureScript
             }
 
         private:
-            EventMap _events;
-            InstanceScript* _instance;
+            EventMap events;
+            InstanceScript * instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<npc_halion_controllerAI>(creature);
         }
@@ -302,7 +304,7 @@ class npc_meteor_strike_initial : public CreatureScript
 
         struct npc_meteor_strike_initialAI : public Scripted_NoMovementAI
         {
-            npc_meteor_strike_initialAI(Creature* creature) : Scripted_NoMovementAI(creature)
+            npc_meteor_strike_initialAI(Creature * creature) : Scripted_NoMovementAI(creature)
             {
             }
 
@@ -312,23 +314,23 @@ class npc_meteor_strike_initial : public CreatureScript
                 {
                     DoCast(me, SPELL_METEOR_STRIKE_AOE_DAMAGE, true);
                     DoCast(me, SPELL_METEOR_STRIKE_FIRE_AURA_1, true);
-                    for (std::list<Creature*>::iterator itr = _meteorList.begin(); itr != _meteorList.end(); ++itr)
+                    for (std::list<Creature *>::iterator itr = meteorList.begin(); itr != meteorList.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_METEOR_STRIKE_BURN);
                 }
             }
 
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit * summoner)
             {
-                _owner = summoner->ToCreature();
-                if (!_owner)
+                owner = summoner->ToCreature();
+                if (!owner)
                     return;
 
                 DoCast(me, SPELL_METEOR_STRIKE_COUNTDOWN);
                 DoCast(me, SPELL_BIRTH_NO_VISUAL); // Unknown purpose
 
-                if (HalionAI* halionAI = CAST_AI(HalionAI, _owner->AI()))
+                if (HalionAI* halionAI = CAST_AI(HalionAI, owner->AI()))
                 {
-                    Position const* ownerPos = halionAI->GetMeteorStrikePosition();
+                    Position const * ownerPos = halionAI->GetMeteorStrikePosition();
                     Position newpos;
                     float angle[4];
                     angle[0] = me->GetAngle(ownerPos);
@@ -336,14 +338,14 @@ class npc_meteor_strike_initial : public CreatureScript
                     angle[2] = me->GetAngle(ownerPos) - static_cast<float>(-M_PI/2);
                     angle[3] = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
 
-                    _meteorList.clear();
+                    meteorList.clear();
                     for (uint8 i = 0; i < 4; i++)
                     {
                         MapManager::NormalizeOrientation(angle[i]);
                         me->SetOrientation(angle[i]);
                         me->GetNearPosition(newpos, 10.0f, 0.0f); // Exact distance
-                        if (Creature* meteor = me->SummonCreature(NPC_METEOR_STRIKE_NORTH + i, newpos, TEMPSUMMON_TIMED_DESPAWN, 30000))
-                            _meteorList.push_back(meteor);
+                        if (Creature * meteor = me->SummonCreature(NPC_METEOR_STRIKE_NORTH + i, newpos, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                            meteorList.push_back(meteor);
                     }
                 }
             }
@@ -352,11 +354,11 @@ class npc_meteor_strike_initial : public CreatureScript
             void EnterEvadeMode() {}
 
         private:
-            Creature* _owner;
-            std::list<Creature*> _meteorList;
+            Creature * owner;
+            std::list<Creature *> meteorList;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<npc_meteor_strike_initialAI>(creature);
         }
@@ -369,10 +371,10 @@ class npc_meteor_strike : public CreatureScript
 
         struct npc_meteor_strikeAI : public Scripted_NoMovementAI
         {
-            npc_meteor_strikeAI(Creature* creature) : Scripted_NoMovementAI(creature)
+            npc_meteor_strikeAI(Creature * creature) : Scripted_NoMovementAI(creature)
             {
-                _range = 5.0f;
-                _spawnCount = 0;
+                range = 5.0f;
+                spawnCount = 0;
             }
 
             void DoAction(int32 const action)
@@ -381,39 +383,39 @@ class npc_meteor_strike : public CreatureScript
                 {
                     DoCast(me, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
                     me->setActive(true);
-                    _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 500);
+                    events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 500);
                 }
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (_spawnCount > 5)
+                if (spawnCount > 5)
                     return;
 
-                _events.Update(diff);
+                events.Update(diff);
 
-                if (_events.ExecuteEvent() == EVENT_SPAWN_METEOR_FLAME)
+                if (events.ExecuteEvent() == EVENT_SPAWN_METEOR_FLAME)
                 {
                     Position pos;
-                    me->GetNearPosition(pos, _range, 0.0f);
+                    me->GetNearPosition(pos, range, 0.0f);
 
-                    if (Creature* flame = me->SummonCreature(NPC_METEOR_STRIKE_FLAME, pos, TEMPSUMMON_TIMED_DESPAWN, 25000))
+                    if (Creature * flame = me->SummonCreature(NPC_METEOR_STRIKE_FLAME, pos, TEMPSUMMON_TIMED_DESPAWN, 25000))
                     {
                         flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
-                        _spawnCount++;
+                        spawnCount++;
                     }
-                    _range += 5.0f;
-                    _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 800);
+                    range += 5.0f;
+                    events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 800);
                 }
             }
 
         private:
-            EventMap _events;
-            float _range;
-            uint8 _spawnCount;
+            EventMap events;
+            float range;
+            uint8 spawnCount;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<npc_meteor_strikeAI>(creature);
         }
@@ -426,7 +428,7 @@ class npc_combustion : public CreatureScript
 
         struct npc_combustionAI : public Scripted_NoMovementAI
         {
-            npc_combustionAI(Creature* creature) : Scripted_NoMovementAI(creature)
+            npc_combustionAI(Creature * creature) : Scripted_NoMovementAI(creature)
             {
             }
 
@@ -434,7 +436,7 @@ class npc_combustion : public CreatureScript
             {
                 if (type == TYPE_COMBUSTION_SUMMON)
                 {
-                    //if (Unit* owner = me->GetSummoner())
+                    //if (Unit * owner = me->GetSummoner())
                     int32 damage = 1200 + (data * 1290); // Hardcoded values from guessing. Need some more research.
                     me->CastCustomSpell(SPELL_FIERY_COMBUSTION_EXPLOSION, SPELLVALUE_BASE_POINT0, damage, me, true);
                     // Scaling aura
@@ -446,7 +448,7 @@ class npc_combustion : public CreatureScript
             void UpdateAI(uint32 const /*diff*/) {}
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI * GetAI(Creature * creature) const
         {
             return GetRubySanctumAI<npc_combustionAI>(creature);
         }
@@ -461,13 +463,11 @@ class spell_halion_meteor_strike_marker : public SpellScriptLoader
         {
             PrepareAuraScript(spell_halion_meteor_strike_marker_AuraScript);
 
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                {
-                    if (Creature* creCaster = GetCaster()->ToCreature())
+                    if (Creature * creCaster = GetCaster()->ToCreature())
                         creCaster->AI()->DoAction(ACTION_METEOR_STRIKE_AOE);
-                }
             }
 
             void Register()
@@ -476,7 +476,7 @@ class spell_halion_meteor_strike_marker : public SpellScriptLoader
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript * GetAuraScript() const
         {
             return new spell_halion_meteor_strike_marker_AuraScript();
         }
@@ -491,24 +491,24 @@ class spell_halion_combustion : public SpellScriptLoader
         {
             PrepareAuraScript(spell_halion_combustion_AuraScript);
 
-            bool Validate(SpellEntry const* /*spell*/)
+            bool Validate(SpellEntry const * /*spell*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_COMBUSTION_STACK))
                     return false;
                 return true;
             }
 
-            void HandleExtraEffect(AuraEffect const* /*aurEff*/)
+            void HandleExtraEffect(AuraEffect const * /*aurEff*/)
             {
                 GetTarget()->CastSpell(GetTarget(), SPELL_COMBUSTION_STACK, true);
             }
 
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->CastSpell(GetTarget(), SPELL_COMBUSTION_STACK, true);
             }
 
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outError("spell_halion_combustion: OnRemove");
                 if (GetTarget()->HasAura(SPELL_COMBUSTION_STACK))
@@ -523,7 +523,7 @@ class spell_halion_combustion : public SpellScriptLoader
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript * GetAuraScript() const
         {
             return new spell_halion_combustion_AuraScript();
         }
@@ -538,7 +538,7 @@ class spell_halion_combustion_stack : public SpellScriptLoader
         {
             PrepareAuraScript(spell_halion_combustion_stack_AuraScript);
 
-            bool Validate(SpellEntry const* /*spell*/)
+            bool Validate(SpellEntry const * /*spell*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_FIERY_COMBUSTION_SUMMON))
                     return false;
@@ -547,7 +547,7 @@ class spell_halion_combustion_stack : public SpellScriptLoader
                 return true;
             }
 
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
             {
                 sLog->outError("spell_halion_combustion_stack: OnRemove");
                 GetTarget()->CastCustomSpell(SPELL_FIERY_COMBUSTION_SUMMON, SPELLVALUE_BASE_POINT0, aurEff->GetBase()->GetStackAmount(), GetTarget(), true);
@@ -559,7 +559,7 @@ class spell_halion_combustion_stack : public SpellScriptLoader
             }
         };
 
-        AuraScript* GetAuraScript() const
+        AuraScript * GetAuraScript() const
         {
             return new spell_halion_combustion_stack_AuraScript();
         }
@@ -577,9 +577,9 @@ class spell_combustion_consumption_summon : public SpellScriptLoader
             void HandleSummon(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                Unit* caster = GetCaster();
+                Unit * caster = GetCaster();
                 uint32 entry = uint32(GetSpellInfo()->Effects[effIndex].MiscValue);
-                SummonPropertiesEntry const* properties = sSummonPropertiesStore.LookupEntry(uint32(GetSpellInfo()->Effects[effIndex].MiscValueB));
+                SummonPropertiesEntry const * properties = sSummonPropertiesStore.LookupEntry(uint32(GetSpellInfo()->Effects[effIndex].MiscValueB));
                 uint32 duration = uint32(GetSpellInfo()->GetDuration());
 
                 Position pos;
@@ -594,7 +594,7 @@ class spell_combustion_consumption_summon : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript * GetSpellScript() const
         {
             return new spell_combustion_consumption_summon_SpellScript();
         }
