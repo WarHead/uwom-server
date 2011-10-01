@@ -2872,7 +2872,7 @@ UserPimper.Costs.MiniPets = 1000000
 UserPimper.Costs.Reputation = 500000
 UserPimper.Costs.Profession = 200000
 UserPimper.Costs.Recipes = 50000
-UserPimper.Costs.MaxSkill = 50000
+#UserPimper.Costs.MaxSkill = 50000 -> Ist zur Zeit kostenlos!
 UserPimper.PresentsAllowed = 0
 
 #
