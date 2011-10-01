@@ -720,19 +720,59 @@ namespace Trinity
 
     // Unit checks
 
-    class FriendlyInRange
+    class FriendlyInRangeToAssist
     {
         public:
-            FriendlyInRange(Unit const* obj, float range) : i_obj(obj), i_range(range) {}
-            bool operator()(Unit* u)
+            FriendlyInRangeToAssist(const Unit * obj, float range, const Unit * enemy) : i_obj(obj), i_range(range), i_enemy(enemy) {}
+            bool operator()(Unit * u)
             {
-                if (u->isAlive() && u->isTargetableForAttack() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
-                    !(u->isFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STAT_STUNNED) || u->HasUnitState(UNIT_STAT_CONFUSED)))
-                    return true;
-                return false;
+                if (!u || !u->isValid() || !i_enemy || !i_enemy->isValid())
+                    return false;
+
+                if (!u->isAlive())
+                    return false;
+
+                if (u->IsFriendlyTo(i_enemy))
+                    return false;
+
+                if (i_obj->IsHostileTo(u))
+                    return false;
+
+                if (!u->ToCreature()->HasReactState(REACT_AGGRESSIVE))
+                    return false;
+
+                if (u->ToCreature()->isCivilian())
+                    return false;
+
+                if (!u->ToCreature()->isValid())
+                    return false;
+                
+                if (u->ToCreature()->GetCreatureInfo()->rank >= 3)
+                    return false;
+
+                if (!u->isTargetableForAttack())
+                    return false;
+
+                if (u->GetCharmerOrOwnerGUID())
+                    return false;
+
+                if (u->isFeared())
+                    return false;
+
+                if (u->isFrozen())
+                    return false;
+
+                if (u->HasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_CONFUSED))
+                    return false;
+
+                if (!i_obj->IsWithinDistInMap(u, i_range))
+                    return false;
+
+                return true;
             }
         private:
-            Unit const* i_obj;
+            const Unit * i_obj;
+            const Unit * i_enemy;
             float i_range;
     };
 
