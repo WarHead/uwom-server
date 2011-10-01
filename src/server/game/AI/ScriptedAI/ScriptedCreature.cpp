@@ -243,6 +243,30 @@ Player* ScriptedAI::SelectRandomPlayer(float range)
         return NULL;
 }
 
+void ScriptedAI::Sammelruf(float range, int32 aura)
+{
+    if (Unit * target = me->getVictim())
+    {
+        std::list<Creature *> FriendList = DoFindFriendlyInRangeToAssist(range, target);
+        if (FriendList.empty())
+            return;
+
+        for (std::list<Creature *>::const_iterator itr = FriendList.begin(); itr != FriendList.end(); ++itr)
+        {
+            (*itr)->CombatStop(true);
+            (*itr)->DeleteThreatList();
+            (*itr)->AI()->AttackStart(target);
+            (*itr)->AddThreat(target, 1000.0f);
+            (*itr)->AI()->DoZoneInCombat(me, range);
+
+            if (aura > 0)
+                (*itr)->AddAura(aura, (*itr));
+            else if (aura < 0)
+                (*itr)->RemoveAurasDueToSpell(aura);
+        }
+    }
+}
+
 void ScriptedAI::AttackStartNoMove(Unit * who)
 {
     if (!who)
