@@ -353,6 +353,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            Sammelruf(); // Falls noch Trash in der Instanz steht -> herbei rufen!
+
             DoScriptText(SAY_SARTHARION_AGGRO, me);
             DoZoneInCombat();
 
