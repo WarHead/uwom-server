@@ -51,7 +51,7 @@ enum Events
     EVENT_LAVA_GOUT
 };
 
-uint32 const MAX_PATH_FLAMECALLER_WAYPOINTS = 12;
+uint32 const MAX_PATH_FLAMECALLER_WAYPOINTS = 13;
 
 Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
 {
@@ -68,6 +68,7 @@ Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
     {3038.907f, 464.0790f, 89.20601f, 0.0f},
     {3025.907f, 478.0790f, 89.70601f, 0.0f},
     {3003.832f, 501.2510f, 89.47303f, 0.0f},
+    {3019.404541f, 527.018433f, 89.319817f, 6.242363f},
     // West
     {3062.596f, 636.9980f, 82.50338f, 0.0f},
     {3062.514f, 624.9980f, 83.70634f, 0.0f},
@@ -81,6 +82,7 @@ Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
     {3040.458f, 589.9001f, 88.39581f, 0.0f},
     {3034.458f, 583.1501f, 88.89581f, 0.0f},
     {3014.970f, 561.8073f, 88.83527f, 0.0f},
+    {3019.404541f, 527.018433f, 89.319817f, 6.242363f}
 };
 
 class boss_general_zarithrian : public CreatureScript
@@ -98,7 +100,8 @@ class boss_general_zarithrian : public CreatureScript
             {
                 _Reset();
                 if (instance->GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && instance->GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                instance->SetBossState(DATA_GENERAL_ZARITHRIAN, NOT_STARTED);
             }
 
             void EnterCombat(Unit * /*who*/)
@@ -106,15 +109,14 @@ class boss_general_zarithrian : public CreatureScript
                 _EnterCombat();
                 Talk(SAY_AGGRO);
                 events.Reset();
-                events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_15);
+                events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_10);
                 events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
-                events.ScheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_40);
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_20);
             }
 
             void JustReachedHome()
             {
                 _JustReachedHome();
-                instance->SetBossState(DATA_GENERAL_ZARITHRIAN, FAIL);
             }
 
             // Override to not set adds in combat yet.
@@ -169,7 +171,7 @@ class boss_general_zarithrian : public CreatureScript
                             events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE_ARMOR);
-                            events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_15);
+                            events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_20);
                             break;
                         default:
                             break;
@@ -229,6 +231,11 @@ class npc_onyx_flamecaller : public CreatureScript
             {
                 if (pointId == MAX_PATH_FLAMECALLER_WAYPOINTS || pointId == MAX_PATH_FLAMECALLER_WAYPOINTS*2)
                 {
+                    if (Creature * zarithrian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_GENERAL_ZARITHRIAN)))
+                        if (Unit * target = zarithrian->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (!me->isInCombat())
+                                AttackStart(target);
+
                     DoZoneInCombat();
                     SetEscortPaused(true);
                 }
@@ -237,15 +244,11 @@ class npc_onyx_flamecaller : public CreatureScript
             void AddWaypoints()
             {
                 if (me->GetPositionY() < 500.0f)
-                {
-                    for (uint8 i = 0; i < MAX_PATH_FLAMECALLER_WAYPOINTS; i++)
+                    for (uint8 i = 0; i < MAX_PATH_FLAMECALLER_WAYPOINTS; ++i)
                         AddWaypoint(i, FlamecallerWaypoints[i].GetPositionX(), FlamecallerWaypoints[i].GetPositionY(), FlamecallerWaypoints[i].GetPositionZ());
-                }
                 else
-                {
-                    for (uint8 i = 0, j = MAX_PATH_FLAMECALLER_WAYPOINTS; j < MAX_PATH_FLAMECALLER_WAYPOINTS*2; j++, i++)
+                    for (uint8 i = 0, j = MAX_PATH_FLAMECALLER_WAYPOINTS; j < MAX_PATH_FLAMECALLER_WAYPOINTS*2; ++j, ++i)
                         AddWaypoint(i, FlamecallerWaypoints[j].GetPositionX(), FlamecallerWaypoints[j].GetPositionY(), FlamecallerWaypoints[j].GetPositionZ());
-                }
             }
 
             void UpdateEscortAI(uint32 const diff)
@@ -288,7 +291,6 @@ class npc_onyx_flamecaller : public CreatureScript
             }
         private:
             EventMap events;
-            //bool movementComplete;
             InstanceScript * instance;
             uint8 lavaGoutCnt;
         };

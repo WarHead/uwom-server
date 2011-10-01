@@ -83,7 +83,7 @@ class boss_saviana_ragefire : public CreatureScript
                 Talk(SAY_AGGRO);
                 events.Reset();
                 events.ScheduleEvent(EVENT_ENRAGE, SEKUNDEN_20, EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_FLAME_BREATH, 14 * IN_MILLISECONDS, EVENT_GROUP_LAND_PHASE);
+                events.ScheduleEvent(EVENT_FLAME_BREATH, SEKUNDEN_15, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_FLIGHT, SEKUNDEN_30);
             }
 
@@ -137,7 +137,7 @@ class boss_saviana_ragefire : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING) || me->HasAura(SPELL_ENRAGE) || me->HasAura(SPELL_FLAME_BREATH))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -170,7 +170,6 @@ class boss_saviana_ragefire : public CreatureScript
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
         };
