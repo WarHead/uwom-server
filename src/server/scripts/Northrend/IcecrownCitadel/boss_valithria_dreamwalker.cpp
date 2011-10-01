@@ -228,7 +228,7 @@ class ValithriaDespawner : public BasicEvent
         bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
         {
             Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
-            _creature->VisitNearbyGridObject(333.0f, worker);
+            _creature->VisitNearbyGridObject(MAX_VISIBLE_DIST, worker);
             return true;
         }
 
