@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -723,7 +724,7 @@ namespace Trinity
     class FriendlyInRangeToAssist
     {
         public:
-            FriendlyInRangeToAssist(const Unit * obj, float range, const Unit * enemy) : i_obj(obj), i_range(range), i_enemy(enemy) {}
+            FriendlyInRangeToAssist(const Unit * obj, float range, const Unit * enemy) : i_obj(obj), i_enemy(enemy), i_range(range) {}
             bool operator()(Unit * u)
             {
                 if (!u || !u->isValid() || !i_enemy || !i_enemy->isValid())
@@ -746,7 +747,7 @@ namespace Trinity
 
                 if (!u->ToCreature()->isValid())
                     return false;
-                
+
                 if (u->ToCreature()->GetCreatureInfo()->rank >= 3)
                     return false;
 
@@ -1084,8 +1085,10 @@ namespace Trinity
                     return false;
 
                 if (m_force)
+                {
                     if (!me->IsValidAttackTarget(u))
                         return false;
+                }
                 else
                     if (!me->canStartAttack(u, false))
                         return false;
