@@ -20628,22 +20628,24 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
         {
-            // probably not the proper equip err
-            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+            SendEquipError(EQUIP_ERR_PERSONAL_ARENA_RATING_TOO_LOW, NULL, NULL);
             return false;
         }
     }
 
     uint32 price = 0;
-    if(crItem->IsGoldRequired(pProto))
+    if (crItem->IsGoldRequired(pProto))
     {
-        uint32 maxCount = 0xFFFFFFFF / pProto->BuyPrice; //why price is int32? can be negative?
-        if((uint32)count > maxCount)
+        if (pProto->BuyPrice)
         {
-            sLog->outError("Player %s tried to buy %u item id %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
-            count = (uint8)maxCount;
+            uint32 maxCount = 0xFFFFFFFF / pProto->BuyPrice;
+            if ((uint32)count > maxCount)
+            {
+                sLog->outError("Player %s tried to buy %u item id %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
+                count = (uint8)maxCount;
+            }
         }
-        price = pProto->BuyPrice * count; //it should not exceed 0xFFFFFFFF
+        price = pProto->BuyPrice * count;
 
         // reputation discount
         price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
