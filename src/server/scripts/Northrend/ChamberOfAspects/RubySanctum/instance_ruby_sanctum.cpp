@@ -50,6 +50,9 @@ public:
             memset(ZarithianSpawnStalkerGUID, 0, 2 * sizeof(uint64));
             memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
             phase = 0;
+            health = 0;
+            XerestraszaAllowed = 0;
+            ControllerSpawned = 0;
         }
 
         void UpdateWorldState(bool command, uint32 value)
@@ -86,9 +89,18 @@ public:
             {
                 case NPC_BALTHARUS_THE_WARBORN:
                     BaltharusTheWarbornGUID = creature->GetGUID();
+                    if (!creature->isAlive())
+                        SetData(DATA_XERESTRASZA_ALLOWED, 1);
                     break;
                 case NPC_GENERAL_ZARITHRIAN:
                     GeneralZarithrianGUID = creature->GetGUID();
+                    if (!creature->isAlive())
+                        if (!instance->GetCreature(HalionControllerGUID))
+                        {
+                            if (Creature * halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionSpawnPos))
+                                halionController->AI()->DoAction(ACTION_INTRO_HALION);
+                            SetData(DATA_HALION_CONTROLLER_SPAWNED, 1);
+                        }
                     break;
                 case NPC_SAVIANA_RAGEFIRE:
                     SavianaRagefireGUID = creature->GetGUID();
@@ -209,6 +221,8 @@ public:
                         if (Creature * zarithrian = instance->GetCreature(GeneralZarithrianGUID))
                             zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     }
+                    if (state == DONE)
+                        SetData(DATA_XERESTRASZA_ALLOWED, 1);
                     break;
                 }
                 case DATA_SAVIANA_RAGEFIRE:
@@ -224,7 +238,7 @@ public:
                 case DATA_GENERAL_ZARITHRIAN:
                     if (GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
                         HandleGameObject(FlameWallsGUID, state != IN_PROGRESS);
-                    if (state == DONE)
+                    if (state == DONE && !instance->GetCreature(HalionControllerGUID))
                         if (Creature * halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionSpawnPos))
                             halionController->AI()->DoAction(ACTION_INTRO_HALION);
                     break;
@@ -251,6 +265,17 @@ public:
                 case DATA_PHASE:
                     phase = uiData;
                     break;
+                case DATA_HALION_HEALTH:
+                    health = uiData;
+                    break;
+                case DATA_XERESTRASZA_ALLOWED:
+                    XerestraszaAllowed = uiData;
+                    SaveToDB();
+                    break;
+                case DATA_HALION_CONTROLLER_SPAWNED:
+                    ControllerSpawned = uiData;
+                    SaveToDB();
+                    break;
                 default:
                     break;
             }
@@ -261,6 +286,9 @@ public:
             switch(type)
             {
                 case DATA_PHASE: return phase;
+                case DATA_HALION_HEALTH: return health;
+                case DATA_XERESTRASZA_ALLOWED: return XerestraszaAllowed;
+                case DATA_HALION_CONTROLLER_SPAWNED: return ControllerSpawned;
                 default: break;
             }
             return 0;
@@ -271,7 +299,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "R S " << GetBossSaveData();
+            saveStream << "R S " << ControllerSpawned << ' ' << XerestraszaAllowed << ' ' << GetBossSaveData();
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -288,7 +316,7 @@ public:
 
             char dataHead1, dataHead2;
             std::istringstream loadStream(str);
-            loadStream >> dataHead1 >> dataHead2;
+            loadStream >> dataHead1 >> dataHead2 >> ControllerSpawned >> XerestraszaAllowed;
 
             if (dataHead1 == 'R' && dataHead2 == 'S')
             {
@@ -321,6 +349,9 @@ public:
         uint64 BurningTreeGUID[4];
         uint64 FlameRingGUID;
         uint32 phase;
+        uint32 health;
+        uint32 XerestraszaAllowed;
+        uint32 ControllerSpawned;
     };
 
     InstanceScript * GetInstanceScript(InstanceMap * map) const

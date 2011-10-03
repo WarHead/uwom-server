@@ -54,14 +54,23 @@ public:
     {
         npc_xerestraszaAI(Creature* creature) : ScriptedAI(creature)
         {
-            isIntro = true;
-            introDone = false;
+            instance = me->GetInstanceScript();
         }
 
         void Reset()
         {
             events.Reset();
-            me->RemoveFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+            if (instance && instance->GetData(DATA_XERESTRASZA_ALLOWED))
+            {
+                introDone = true;
+                DoAction(ACTION_BALTHARUS_DEATH);
+            }
+            else
+            {
+                isIntro = true;
+                introDone = false;
+                me->RemoveFlag(UNIT_NPC_FLAGS, GOSSIP_OPTION_QUESTGIVER);
+            }
         }
 
         void DoAction(int32 const action)
@@ -82,6 +91,9 @@ public:
                 events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_5, 51000);
                 events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_6, 61000);
                 events.ScheduleEvent(EVENT_XERESTRASZA_EVENT_7, 69000);
+
+                if (instance)
+                    instance->SetData(DATA_XERESTRASZA_ALLOWED, 1);
             }
             else if (action == ACTION_INTRO_BALTHARUS && !introDone)
             {
@@ -121,6 +133,7 @@ private:
         EventMap events;
         bool isIntro;
         bool introDone;
+        InstanceScript * instance;
     };
 
     CreatureAI * GetAI(Creature * creature) const
