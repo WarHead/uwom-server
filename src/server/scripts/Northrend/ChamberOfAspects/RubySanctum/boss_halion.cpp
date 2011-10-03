@@ -325,7 +325,7 @@ class boss_halion : public CreatureScript
                                 break;
                         }
                     }
-                    // Immer ausführen
+                    // Immer ausfÃ¼hren
                     switch(eventId)
                     {
                         case EVENT_ENRAGE:
