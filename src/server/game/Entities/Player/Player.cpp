@@ -20634,16 +20634,13 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     }
 
     uint32 price = 0;
-    if (crItem->IsGoldRequired(pProto))
+    if (crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0)
     {
-        if (pProto->BuyPrice)
+        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
+        if ((uint32)count > maxCount)
         {
-            uint32 maxCount = 0xFFFFFFFF / pProto->BuyPrice;
-            if ((uint32)count > maxCount)
-            {
-                sLog->outError("Player %s tried to buy %u item id %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
-                count = (uint8)maxCount;
-            }
+            sLog->outError("Player %s tried to buy %u item id %u, causing overflow. Using maxCount instead.", GetName(), (uint32)count, pProto->ItemId);
+            count = (uint8)maxCount;
         }
         price = pProto->BuyPrice * count;
 
