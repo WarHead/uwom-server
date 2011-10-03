@@ -26,7 +26,7 @@
 #define RSScriptName "instance_ruby_sanctum"
 
 const uint32 EncounterCount = 4;
-const Position HalionControllerSpawnPos = { 3156.037f, 533.2656f, 72.97205f, 0.0f };
+const Position HalionSpawnPos = { 3156.67f,  533.8108f, 72.98822f, 3.159046f };
 
 enum DataTypes
 {
@@ -35,6 +35,7 @@ enum DataTypes
     DATA_GENERAL_ZARITHRIAN,
     DATA_SAVIANA_RAGEFIRE,
     DATA_HALION,
+    DATA_HALION_TWILIGHT,
 
     // Etc
     DATA_XERESTRASZA,
@@ -46,7 +47,14 @@ enum DataTypes
     DATA_BURNING_TREE_2,
     DATA_BURNING_TREE_3,
     DATA_BURNING_TREE_4,
-    DATA_FLAME_RING
+    DATA_FLAME_RING,
+    DATA_COUNTER,
+    DATA_PHASE,
+
+    // Orb
+    DATA_ORB_DIRECTION  = 110,
+    DATA_ORB_S          = 111,
+    DATA_ORB_N          = 112
 };
 
 enum SharedActions
