@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -720,6 +721,62 @@ namespace Trinity
 
     // Unit checks
 
+    class FriendlyInRangeToAssist
+    {
+        public:
+            FriendlyInRangeToAssist(const Unit * obj, float range, const Unit * enemy) : i_obj(obj), i_enemy(enemy), i_range(range) {}
+            bool operator()(Unit * u)
+            {
+                if (!u || !u->isValid() || !i_enemy || !i_enemy->isValid())
+                    return false;
+
+                if (!u->isAlive())
+                    return false;
+
+                if (u->IsFriendlyTo(i_enemy))
+                    return false;
+
+                if (i_obj->IsHostileTo(u))
+                    return false;
+
+                if (!u->ToCreature()->HasReactState(REACT_AGGRESSIVE))
+                    return false;
+
+                if (u->ToCreature()->isCivilian())
+                    return false;
+
+                if (!u->ToCreature()->isValid())
+                    return false;
+
+                if (u->ToCreature()->GetCreatureInfo()->rank >= 3)
+                    return false;
+
+                if (!u->isTargetableForAttack())
+                    return false;
+
+                if (u->GetCharmerOrOwnerGUID())
+                    return false;
+
+                if (u->isFeared())
+                    return false;
+
+                if (u->isFrozen())
+                    return false;
+
+                if (u->HasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_CONFUSED))
+                    return false;
+
+                if (!i_obj->IsWithinDistInMap(u, i_range))
+                    return false;
+
+                return true;
+            }
+        private:
+            const Unit * i_obj;
+            const Unit * i_enemy;
+            float i_range;
+    };
+
     class MostHPMissingInRange
     {
         public:
@@ -806,6 +863,9 @@ namespace Trinity
                     return false;
 
                 if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isTotem())
+                    return false;
+
+                if(!u->isTargetableForAttack(false))
                     return false;
 
                 return i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u);
@@ -1030,10 +1090,8 @@ namespace Trinity
                         return false;
                 }
                 else
-                {
                     if (!me->canStartAttack(u, false))
                         return false;
-                }
 
                 m_range = me->GetDistance(u);   // use found unit range as new range limit for next check
                 return true;

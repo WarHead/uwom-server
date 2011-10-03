@@ -463,12 +463,18 @@ void SmartAI::EnterEvadeMode()
 
 void SmartAI::MoveInLineOfSight(Unit* who)
 {
-    if (!who) return;
+    if (!who)
+        return;
+    
     GetScript()->OnMoveInLineOfSight(who);
+    
     if (me->HasReactState(REACT_PASSIVE) || AssistPlayerInCombat(who))
         return;
 
     if (!CanAIAttack(who))
+        return;
+    
+    if (!me->canStartAttack(who, false))
         return;
 
     if (me->IsHostileTo(who))
@@ -488,9 +494,6 @@ void SmartAI::MoveInLineOfSight(Unit* who)
             }
         }
     }
-
-    //if (me->canStartAttack(who, false))
-    //    AttackStart(who);
 }
 
 bool SmartAI::CanAIAttack(const Unit* /*who*/) const

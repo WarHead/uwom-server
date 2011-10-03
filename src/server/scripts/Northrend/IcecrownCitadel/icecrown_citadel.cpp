@@ -2155,7 +2155,7 @@ class npc_crok_scourgebane : public CreatureScript
                         {
                             FrostwingGauntletRespawner respawner;
                             Trinity::CreatureWorker<FrostwingGauntletRespawner> worker(me, respawner);
-                            me->VisitNearbyGridObject(333.0f, worker);
+                            me->VisitNearbyGridObject(MAX_VISIBLE_DIST, worker);
                             Talk(SAY_CROK_DEATH);
                         }
                         return;

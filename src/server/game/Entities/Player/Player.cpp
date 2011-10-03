@@ -5623,6 +5623,10 @@ void Player::RepopAtGraveyard()
 
 bool Player::CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone)
 {
+    // Player can join LFG anywhere
+    if (channel->flags & CHANNEL_DBC_FLAG_LFG)
+        return true;
+
     if (channel->flags & CHANNEL_DBC_FLAG_ZONE_DEP && zone->flags & AREA_FLAG_ARENA_INSTANCE)
         return false;
 
@@ -12179,6 +12183,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         return pItem2;
     }
+    SaveToDB();
 }
 
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
@@ -20631,22 +20636,21 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
         {
-            // probably not the proper equip err
-            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+            SendEquipError(EQUIP_ERR_PERSONAL_ARENA_RATING_TOO_LOW, NULL, NULL);
             return false;
         }
     }
 
     uint32 price = 0;
-    if(crItem->IsGoldRequired(pProto))
+    if (crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0)
     {
-        uint32 maxCount = 0xFFFFFFFF / pProto->BuyPrice; //why price is int32? can be negative?
-        if((uint32)count > maxCount)
+        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
+        if ((uint32)count > maxCount)
         {
-            sLog->outError("Player %s tried to buy %u item id %u, causing overflow", GetName(), (uint32)count, pProto->ItemId);
+            sLog->outError("Player %s tried to buy %u item id %u, causing overflow. Using maxCount instead.", GetName(), (uint32)count, pProto->ItemId);
             count = (uint8)maxCount;
         }
-        price = pProto->BuyPrice * count; //it should not exceed 0xFFFFFFFF
+        price = pProto->BuyPrice * count;
 
         // reputation discount
         price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));

@@ -189,6 +189,9 @@ public:
 
             if (m_pInstance)
             {
+                if (Sammelruf()) // Falls noch Trash in der Instanz steht -> herbei rufen!
+                    m_pInstance->DoSendNotifyToInstance("%s ruft ihre Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
+
                 m_pInstance->SetData(DATA_ONYXIA, IN_PROGRESS);
                 m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
             }

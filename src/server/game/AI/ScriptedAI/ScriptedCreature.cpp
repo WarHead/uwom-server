@@ -243,6 +243,34 @@ Player* ScriptedAI::SelectRandomPlayer(float range)
         return NULL;
 }
 
+bool ScriptedAI::Sammelruf(float range, int32 aura)
+{
+    if (Unit * target = me->getVictim())
+    {
+        std::list<Creature *> FriendList = DoFindFriendlyInRangeToAssist(range, target);
+        if (FriendList.empty())
+            return false;
+
+        for (std::list<Creature *>::const_iterator itr = FriendList.begin(); itr != FriendList.end(); ++itr)
+        {
+            (*itr)->CombatStop(true);
+            (*itr)->DeleteThreatList();
+            (*itr)->AI()->AttackStart(target);
+            (*itr)->AddThreat(target, 1000.0f);
+            (*itr)->AI()->DoZoneInCombat(me, range);
+
+            if (aura > 0)
+                (*itr)->AddAura(aura, (*itr));
+            else if (aura < 0)
+                (*itr)->RemoveAurasDueToSpell(aura);
+        }
+    }
+    else
+        return false;
+
+    return true;
+}
+
 void ScriptedAI::AttackStartNoMove(Unit * who)
 {
     if (!who)
@@ -461,6 +489,15 @@ void ScriptedAI::DoTeleportAll(float x, float y, float z, float o)
         if (Player* player = itr->getSource())
             if (player->isAlive())
                 player->TeleportTo(me->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
+}
+
+std::list<Creature*> ScriptedAI::DoFindFriendlyInRangeToAssist(float range, Unit * enemy)
+{
+    std::list<Creature*> list;
+    Trinity::FriendlyInRangeToAssist u_check(me, range, enemy);
+    Trinity::CreatureListSearcher<Trinity::FriendlyInRangeToAssist> searcher(me, list, u_check);
+    me->VisitNearbyObject(range, searcher);
+    return list;
 }
 
 Unit* ScriptedAI::DoSelectLowestHpFriendly(float range, uint32 minHPDiff)

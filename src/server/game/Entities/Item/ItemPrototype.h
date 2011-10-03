@@ -588,7 +588,7 @@ struct ItemTemplate
     uint32 Flags;
     uint32 Flags2;
     uint32 BuyCount;
-    int32  BuyPrice;
+    uint32 BuyPrice;
     uint32 SellPrice;
     uint32 InventoryType;
     uint32 AllowableClass;

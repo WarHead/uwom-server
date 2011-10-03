@@ -1572,7 +1572,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     if (GetTypeId() == TYPEID_PLAYER)
     {
         float maxArmorPen = 0;
-        if (getLevel() < 60)
+        if (getLevel() < 60 || victim->getLevel() < 60) // Prevent negative maxArmorCap for victim < 60 and attacker >= 60
             maxArmorPen = float(400 + 85 * victim->getLevel());
         else
             maxArmorPen = 400 + 85 * victim->getLevel() + 4.5f * 85 * (victim->getLevel() - 59);
@@ -6814,10 +6814,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Judgement of Light
                 case 20185:
                 {
-                        // 2% of base mana
-                        basepoints0 = int32(victim->CountPctFromMaxHealth(2));
-                        victim->CastCustomSpell(victim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
-                        return true;
+                    if (!victim)
+                        return false;
+                    
+                    // 2% of base mana
+                    basepoints0 = int32(victim->CountPctFromMaxHealth(2));
+                    victim->CastCustomSpell(victim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
+                    return true;
                 }
                 // Judgement of Wisdom
                 case 20186:
@@ -7381,6 +7384,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Frozen Power
             if (dummySpell->SpellIconID == 3780)
             {
+                if (!target)
+                    return false;
                 if (GetDistance(target) < 15.0f)
                     return false;
                 float chance = (float)triggerAmount;
@@ -8060,7 +8065,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 if (procSpell->SpellFamilyFlags[0] & 0x40000000 && procSpell->SpellIconID == 242)
                 {
                     *handled = true;
-                    if (victim->HasAura(53601))
+                    if (victim && victim->HasAura(53601))
                     {
                         int32 bp0 = CalculatePctN(int32(damage / 12), dummySpell->Effects[EFFECT_2]. CalcValue());
                         // Item - Paladin T9 Holy 4P Bonus
@@ -11908,7 +11913,7 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
             }
             // Ebon Plague
             case 1933:
-                if ((*i)->GetMiscValue() & (spellProto ? spellProto->GetSchoolMask() : 0))
+                if ((*i)->GetCasterGUID() == GetGUID() && ((*i)->GetMiscValue() & (spellProto ? spellProto->GetSchoolMask() : 0)))
                     AddPctN(TakenTotalMod, (*i)->GetAmount());
                 break;
         }
@@ -16680,7 +16685,7 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
 
         WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
         data.append(GetPackGUID());
-        data << uint32(0);                                      // Sequence
+        data << uint32(0);                                      // counter
         data << float(vcos);                                    // x direction
         data << float(vsin);                                    // y direction
         data << float(speedXY);                                 // Horizontal speed

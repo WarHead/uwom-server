@@ -1827,13 +1827,16 @@ private:
 #define GOSSIP_USER_PIMPER_04 "Rück sofort alle deine Mini-Pets raus, oder es knallt!"
 #define GOSSIP_USER_PIMPER_05 "Also mein Ruf hier in der Gegend lässt ein wenig zu wünschen übrig."
 #define GOSSIP_USER_PIMPER_06 "Sag mal, hast du auch Rezepte zu den Berufen!?"
-#define GOSSIP_USER_PIMPER_07 "Was kosten mich eure Dienste (Preisliste)!?"
+#define GOSSIP_USER_PIMPER_07 "Ich habe keine Lust zu Leveln! Gib mir den max. Level!"
+#define GOSSIP_USER_PIMPER_08 "Bring mich sofort nach Dalaran!"
+#define GOSSIP_USER_PIMPER_09 "Was kosten mich eure Dienste (Preisliste)!?"
 
-#define COST_STRING_USER_PIMPER_PETS    "'Alle' Minipets lernen: "
-#define COST_STRING_USER_PIMPER_REP     "'Alle' Fraktionen ehrfürchtig: "
+#define COST_STRING_USER_PIMPER_PETS    "Alle Minipets lernen: "
+#define COST_STRING_USER_PIMPER_REP     "Alle Fraktionen ehrfürchtig: "
 #define COST_STRING_USER_PIMPER_PROF    "1 Beruf lernen (inkl. max. Skill): "
 #define COST_STRING_USER_PIMPER_RECIPES "Alle Rezepte für 1 Beruf lernen: "
-#define COST_STRING_USER_PIMPER_SKILL   "'Alle' Fähigkeiten auf max. Skill: "
+#define COST_STRING_USER_PIMPER_SKILL   "Alle Fähigkeiten auf max. Skill: "
+#define COST_STRING_USER_PIMPER_LEVEL   "Charakter auf max. Level setzen: 0"
 
 #define PIMPER_NOT_ENOUGH   "Du hast leider nicht genug %s für diesen Dienst!"
 #define PIMPER_PROF_MAX     "Du musst den Beruf auf Maximum haben!"
@@ -1848,7 +1851,7 @@ struct UserPimper_PriceSetup
     uint32 Costs_Reputation;        // Costs (amount) to max. all factions (Horde/Ally and world factions)
     uint32 Costs_Profession;        // Costs (amount) to learn a profession as grand master and get max. skill for it
     uint32 Costs_AllRecipes;        // Costs (amount) to learn all recipes for one profession
-    uint32 Costs_MaxSkill;          // Costs (amount) to set the max. skill for one profession
+    //uint32 Costs_MaxSkill;          // Costs (amount) to set the max. skill for one profession
 
     bool PresentsAllowed;
 
@@ -1878,7 +1881,7 @@ public:
             ps.Costs_Reputation = ConfigMgr::GetIntDefault("UserPimper.Costs.Reputation", 500000);
             ps.Costs_Profession = ConfigMgr::GetIntDefault("UserPimper.Costs.Profession", 200000);
             ps.Costs_AllRecipes = ConfigMgr::GetIntDefault("UserPimper.Costs.Recipes", 50000);
-            ps.Costs_MaxSkill = ConfigMgr::GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
+            //ps.Costs_MaxSkill = ConfigMgr::GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
 
             ps.PresentsAllowed = ConfigMgr::GetBoolDefault("UserPimper.PresentsAllowed", false);
 
@@ -1897,7 +1900,7 @@ public:
                 ps.Costs_Reputation = ps.Costs_Reputation*GOLD;
                 ps.Costs_Profession = ps.Costs_Profession*GOLD;
                 ps.Costs_AllRecipes = ps.Costs_AllRecipes*GOLD;
-                ps.Costs_MaxSkill = ps.Costs_MaxSkill*GOLD;
+                //ps.Costs_MaxSkill = ps.Costs_MaxSkill*GOLD;
             }
             InitStrings();
             LadePetListe();
@@ -1962,8 +1965,8 @@ public:
                 ps.str_AllRecipes = tmpstr;
                 tmpstr.clear();
 
-                sprintf(tmpchars, "%i", ps.Costs_MaxSkill/GOLD);
-                tmpstr.append(COST_STRING_USER_PIMPER_SKILL).append(tmpchars);
+                //sprintf(tmpchars, "%i", ps.Costs_MaxSkill/GOLD);
+                tmpstr.append(COST_STRING_USER_PIMPER_SKILL).append("0")/*.append(tmpchars)*/;
                 ps.str_MaxSkill = tmpstr;
                 tmpstr.clear();
             }
@@ -1989,8 +1992,8 @@ public:
                 ps.str_AllRecipes = tmpstr;
                 tmpstr.clear();
 
-                sprintf(tmpchars, "%i", ps.Costs_MaxSkill);
-                tmpstr.append(COST_STRING_USER_PIMPER_SKILL).append(tmpchars);
+                //sprintf(tmpchars, "%i", ps.Costs_MaxSkill);
+                tmpstr.append(COST_STRING_USER_PIMPER_SKILL).append("0")/*.append(tmpchars)*/;
                 ps.str_MaxSkill = tmpstr;
                 tmpstr.clear();
             }
@@ -2154,9 +2157,9 @@ public:
         if (pCreature->isAuctioner())   pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_TEXT_AUCTIONHOUSE,   GOSSIP_SENDER_MAIN, GOSSIP_ACTION_AUCTION);
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_USER_PIMPER_01,    GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_USER_PIMPER_07,    GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_USER_PIMPER_09,    GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
 
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->GetPlaytimeString(total_playtime_secs), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->GetPlaytimeString(total_playtime_secs), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 10);
 
         pPlayer->SEND_GOSSIP_MENU(1100000, pCreature->GetGUID());
 
@@ -2197,6 +2200,8 @@ public:
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_USER_PIMPER_04,    GOSSIP_SENDER_SEC_BANK,         GOSSIP_ACTION_INFO_DEF + 4);
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_USER_PIMPER_05,    GOSSIP_SENDER_SEC_PROFTRAIN,    GOSSIP_ACTION_INFO_DEF + 5);
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_USER_PIMPER_06,    GOSSIP_SENDER_MAIN,             GOSSIP_ACTION_INFO_DEF + 6);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_USER_PIMPER_07,    GOSSIP_SENDER_MAIN,             GOSSIP_ACTION_INFO_DEF + 7);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_USER_PIMPER_08,    GOSSIP_SENDER_MAIN,             GOSSIP_ACTION_INFO_DEF + 8);
                 pPlayer->SEND_GOSSIP_MENU(1100001, pCreature->GetGUID());
                 break;
 
@@ -2230,7 +2235,7 @@ public:
 
             // Maxskill
             case GOSSIP_ACTION_INFO_DEF + 3:
-                if (ai->SubstructCurrency(pPlayer, ai->ps.Costs_MaxSkill))
+                //if (ai->SubstructCurrency(pPlayer, ai->ps.Costs_MaxSkill))
                     pPlayer->UpdateSkillsToMaxSkillsForLevel();
                 pPlayer->CLOSE_GOSSIP_MENU();
                 break;
@@ -2250,15 +2255,28 @@ public:
                 pPlayer->SEND_GOSSIP_MENU(1100002, pCreature->GetGUID());
                 break;
 
-            // Preisliste
+            // Maxlevel
             case GOSSIP_ACTION_INFO_DEF + 7:
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_AllMiniPets,  GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 39);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_Reputation,   GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 40);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_Profession,   GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 41);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_AllRecipes,   GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 42);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_MaxSkill,     GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 43);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "",                      GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 44);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_bottom,       GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 45);
+                pPlayer->SetLevel(DEFAULT_MAX_LEVEL);
+                pPlayer->CLOSE_GOSSIP_MENU();
+                break;
+
+            // Nach Dalaran!
+            case GOSSIP_ACTION_INFO_DEF + 8:
+                pPlayer->CastSpell(pPlayer, 71512, true);
+                pPlayer->CLOSE_GOSSIP_MENU();
+                break;
+
+            // Preisliste
+            case GOSSIP_ACTION_INFO_DEF + 9:
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_AllMiniPets,          GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 39);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_Reputation,           GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 40);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_Profession,           GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 41);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_AllRecipes,           GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 42);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_MaxSkill,             GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 43);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, COST_STRING_USER_PIMPER_LEVEL,   GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 44);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "",                              GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 45);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ai->ps.str_bottom,               GOSSIP_SENDER_INFO, GOSSIP_ACTION_INFO_DEF + 46);
 
                 pPlayer->SEND_GOSSIP_MENU(1100003, pCreature->GetGUID());
                 break;
@@ -2322,6 +2340,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 43:
             case GOSSIP_ACTION_INFO_DEF + 44:
             case GOSSIP_ACTION_INFO_DEF + 45:
+            case GOSSIP_ACTION_INFO_DEF + 46:
                 break;
             // -----------------------------------------------------------------------------------
             // -------------------------------------- BERUFE -------------------------------------

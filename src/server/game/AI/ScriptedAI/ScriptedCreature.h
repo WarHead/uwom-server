@@ -68,6 +68,9 @@ struct ScriptedAI : public CreatureAI
     // Gibt einen random Player in range in einer Instanz zurück
     Player* SelectRandomPlayer(float range = 0.0f);
 
+    // Ruft alle freundlichen NPC in range zum Angriff herbei und fügt ihnen die aura hinzu, oder entfernt sie, wenn aura negativ ist
+    bool Sammelruf(float range = MAX_VISIBLE_DIST, int32 aura = 0);
+
     // Despawned ein Add
     bool DespawnAdd(uint64 guid = 0);
 
@@ -154,6 +157,9 @@ struct ScriptedAI : public CreatureAI
     //Teleports a player without dropping threat (only teleports to same map)
     void DoTeleportPlayer(Unit* unit, float x, float y, float z, float o);
     void DoTeleportAll(float x, float y, float z, float o);
+
+    // Gibt eine Liste Verbündeter NPC in range zurück, die beim Angriff auf enemy helfen können
+    std::list<Creature*> DoFindFriendlyInRangeToAssist(float range, Unit * enemy);
 
     //Returns friendly unit with the most amount of hp missing from max hp
     Unit* DoSelectLowestHpFriendly(float range, uint32 minHPDiff = 1);
