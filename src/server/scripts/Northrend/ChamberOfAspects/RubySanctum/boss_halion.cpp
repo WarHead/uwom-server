@@ -774,11 +774,6 @@ class mob_orb_rotation_focus : public CreatureScript
 public:
     mob_orb_rotation_focus() : CreatureScript("mob_orb_rotation_focus") { }
 
-    CreatureAI * GetAI(Creature * creature) const
-    {
-        return new mob_orb_rotation_focusAI(creature);
-    }
-
     struct mob_orb_rotation_focusAI : public ScriptedAI
     {
         mob_orb_rotation_focusAI(Creature * creature) : ScriptedAI(creature)
@@ -863,17 +858,17 @@ public:
                 m_timer -= diff;
         }
     };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new mob_orb_rotation_focusAI(creature);
+    }
 };
 
 class mob_halion_orb : public CreatureScript
 {
 public:
     mob_halion_orb() : CreatureScript("mob_halion_orb") { }
-
-    CreatureAI * GetAI(Creature * creature) const
-    {
-        return new mob_halion_orbAI(creature);
-    }
 
     struct mob_halion_orbAI : public ScriptedAI
     {
@@ -970,17 +965,17 @@ public:
                 StartMovement(1);
         }
     };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new mob_halion_orbAI(creature);
+    }
 };
 
 class mob_orb_carrier : public CreatureScript
 {
 public:
     mob_orb_carrier() : CreatureScript("mob_orb_carrier") { }
-
-    CreatureAI * GetAI(Creature * creature) const
-    {
-        return new mob_orb_carrierAI(creature);
-    }
 
     struct mob_orb_carrierAI : public ScriptedAI
     {
@@ -1052,6 +1047,11 @@ public:
         }
 
     };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new mob_orb_carrierAI(creature);
+    }
 };
 
 typedef boss_halion::boss_halionAI HalionAI;
@@ -1217,11 +1217,6 @@ class mob_soul_consumption : public CreatureScript
 public:
     mob_soul_consumption() : CreatureScript("mob_soul_consumption") { }
 
-    CreatureAI * GetAI(Creature * creature) const
-    {
-        return new mob_soul_consumptionAI(creature);
-    }
-
     struct mob_soul_consumptionAI : public ScriptedAI
     {
         mob_soul_consumptionAI(Creature * creature) : ScriptedAI(creature)
@@ -1279,6 +1274,11 @@ public:
             }
         }
     };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new mob_soul_consumptionAI(creature);
+    }
 };
 
 class go_halion_portal_twilight : public GameObjectScript
@@ -1471,14 +1471,11 @@ void AddSC_boss_halion()
 {
     new boss_halion();
     new boss_halion_twilight();
+
     new npc_halion_controller();
     new npc_meteor_strike_initial();
     new npc_meteor_strike();
     new npc_combustion();
-    new spell_halion_meteor_strike_marker();
-    new spell_halion_combustion();
-    new spell_halion_combustion_stack();
-    new spell_combustion_consumption_summon();
 
     new mob_halion_orb();
     new mob_orb_rotation_focus();
@@ -1488,4 +1485,9 @@ void AddSC_boss_halion()
     new go_halion_portal_twilight();
     new go_halion_portal_real();
     new go_halion_portal_exit();
+
+    new spell_halion_meteor_strike_marker();
+    new spell_halion_combustion();
+    new spell_halion_combustion_stack();
+    new spell_combustion_consumption_summon();
 }
