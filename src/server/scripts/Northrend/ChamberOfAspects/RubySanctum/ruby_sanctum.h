@@ -25,7 +25,7 @@
 
 #define RSScriptName "instance_ruby_sanctum"
 
-const uint32 EncounterCount = 4;
+const uint32 EncounterCount = 5;
 const Position HalionSpawnPos = { 3156.67f,  533.8108f, 72.98822f, 3.159046f };
 
 enum DataTypes
@@ -51,6 +51,7 @@ enum DataTypes
     DATA_BURNING_TREE_3,
     DATA_BURNING_TREE_4,
     DATA_FLAME_RING,
+    DATA_ZWIELICHT_RING,
     DATA_COUNTER,
     DATA_PHASE,
 
@@ -64,7 +65,8 @@ enum SharedActions
 {
     ACTION_INTRO_BALTHARUS  = -3975101,
     ACTION_BALTHARUS_DEATH  = -3975102,
-    ACTION_INTRO_HALION     = -4014601
+    ACTION_INTRO_HALION     = -4014601,
+    ACTION_SPAWN_HALION     = -4014602
 };
 
 enum CreaturesIds
@@ -112,6 +114,7 @@ enum GameObjectsIds
     GO_FIRE_FIELD           = 203005,
     GO_FLAME_WALLS          = 203006,
     GO_FLAME_RING           = 203007,
+    GO_ZWIELICHT_RING       = 203624,
     GO_BURNING_TREE_1       = 203034,
     GO_BURNING_TREE_2       = 203035,
     GO_BURNING_TREE_3       = 203036,
