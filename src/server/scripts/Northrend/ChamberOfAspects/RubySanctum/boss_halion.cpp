@@ -39,63 +39,65 @@ enum Texts
 
 enum Spells
 {
-    // Halion
-    SPELL_FLAME_BREATH              = 74525,
-    SPELL_CLEAVE                    = 74524,
-    SPELL_DARK_BREATH               = 74806, // Inflicts 17,500 to 22,500 Shadow damage to players in front of Halion
-    SPELL_DUSK_SHROUD               = 75476, // Inflicts 3,000 Shadow damage every 2 seconds to everyone in the Twilight Realm
-    SPELL_TAIL_LASH                 = 74531, // A sweeping tail strike hits all enemies behind the caster, inflicting 3063 to 3937 damage and stunning them for 2 sec.
-    SPELL_BERSERK                   = 26662, // Increases the caster's attack and movement speeds by 150% and all damage it deals by 500% for 5 min.  Also grants immunity to Taunt effects.
-    SPELL_SUMMON_TWILIGHT_PORTAL    = 74809, // GO_HALION_PORTAL_1
+        // Halion
+#define SPELL_FLAME_BREATH              RAID_MODE<uint32>(74525,74526,74527,74528)
+        SPELL_SUMMON_TWILIGHT_PORTAL    = 74809, // GO_HALION_PORTAL_1
+        SPELL_TWILIGHT_DIVISION         = 75063, // Phases the caster, allowing him to exist and act simultaneously in both the material and Twilight realms.
 
-    SPELL_METEOR_STRIKE             = 74637,
-    SPELL_METEOR_STRIKE_COUNTDOWN   = 74641,
-    SPELL_METEOR_STRIKE_AOE_DAMAGE  = 74648,
-    SPELL_METEOR_STRIKE_FIRE_AURA_1 = 74713,
-    SPELL_METEOR_STRIKE_FIRE_AURA_2 = 74718,
+        SPELL_METEOR_STRIKE             = 74637,
+        SPELL_METEOR_STRIKE_COUNTDOWN   = 74641,
+#define SPELL_METEOR_STRIKE_AOE_DAMAGE  RAID_MODE<uint32>(74648,75877,75878,75879)
+        SPELL_METEOR_STRIKE_FIRE_AURA_1 = 74713,
+        SPELL_METEOR_STRIKE_FIRE_AURA_2 = 74718,
 
-    SPELL_TWILIGHT_ENTER            = 74807, // Phases the caster into the Twilight realm - phase 32
-    SPELL_TWILIGHT_LEAVE            = 74812,
-    SPELL_TWILIGHT_PRECISION        = 78243, // Increases Halion's chance to hit by 5% and decreases all players' chance to dodge by 20%
-    SPELL_TWILIGHT_DIVISION         = 75063, // Phases the caster, allowing him to exist and act simultaneously in both the material and Twilight realms.
-    SPELL_TWILIGHT_CUTTER           = 74768, // Triggert SPELL_TWILIGHT_CUTTER_02
-    SPELL_TWILIGHT_CUTTER_02        = 74769, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 13875 bis 16125
-    SPELL_TWILIGHT_CUTTER_03        = 77844, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 13875 bis 16125
-    SPELL_TWILIGHT_CUTTER_04        = 77845, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 41625 bis 48375
-    SPELL_TWILIGHT_CUTTER_05        = 77846, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 41625 bis 48375
-    SPELL_TWILIGHT_PULSE_PERIODIC   = 78861, // Triggert 78862 (Twilight Pulse) - Deals 27000 to 33000 Shadow damage to enemies within 5 yards.
+        SPELL_COMBUSTION                = 74562, // Will each tick, apart from the damage, also add a stack to 74567
+        SPELL_COMBUSTION_STACK          = 74567, // If 74562 or 74567 is removed; this will trigger an explosion (74607) based on stackamount.
+        SPELL_COMBUSTION_SCALE_AURA     = 70507, // Aura created in spell_dbc since missing in client dbc. Value based on 74567 stackamount.
+        SPELL_COMBUSTION_DAMAGE_AURA    = 74629,
+        SPELL_COMBUSTION_EXPLOSION      = 74607,
+        SPELL_COMBUSTION_SUMMON         = 74610,
+        // Halion Twilight
+#define SPELL_DARK_BREATH               RAID_MODE<uint32>(74806,75954,75956,75956)
+        SPELL_DUSK_SHROUD               = 75476, // Inflicts 3,000 Shadow damage every 2 seconds to everyone in the Twilight Realm
 
-    SPELL_COMBUSTION                = 74562, // Will each tick, apart from the damage, also add a stack to 74567
-    SPELL_COMBUSTION_STACK          = 74567, // If 74562 or 74567 is removed; this will trigger an explosion (74607) based on stackamount.
-    SPELL_COMBUSTION_SCALE_AURA     = 70507, // Aura created in spell_dbc since missing in client dbc. Value based on 74567 stackamount.
-    SPELL_COMBUSTION_DAMAGE_AURA    = 74629,
-    SPELL_COMBUSTION_EXPLOSION      = 74607,
-    SPELL_COMBUSTION_SUMMON         = 74610,
+        SPELL_CONSUMPTION_EXPLOSION     = 74799,
+        SPELL_CONSUMPTION_SUMMON        = 74800,
+        SPELL_CONSUMPTION               = 74792,
+        SPELL_CONSUMPTION_STACK         = 74795,
+        SPELL_CONSUMPTION_DAMAGE_AURA   = 74803,
 
-    SPELL_CORPOREALITY_EVEN         = 74826, // Deals & receives normal damage
-    SPELL_CORPOREALITY_20I          = 74827, // Damage dealt increased by 10% & Damage taken increased by 15%
-    SPELL_CORPOREALITY_40I          = 74828, // Damage dealt increased by 30% & Damage taken increased by 50%
-    SPELL_CORPOREALITY_60I          = 74829, // Damage dealt increased by 60% & Damage taken increased by 100%
-    SPELL_CORPOREALITY_80I          = 74830, // Damage dealt increased by 100% & Damage taken increased by 200%
-    SPELL_CORPOREALITY_100I         = 74831, // Damage dealt increased by 200% & Damage taken increased by 400%
-    SPELL_CORPOREALITY_20D          = 74832, // Damage dealt reduced by 10% & Damage taken reduced by 15%
-    SPELL_CORPOREALITY_40D          = 74833, // Damage dealt reduced by 30% & Damage taken reduced by 50%
-    SPELL_CORPOREALITY_60D          = 74834, // Damage dealt reduced by 60% & Damage taken reduced by 100%
-    SPELL_CORPOREALITY_80D          = 74835, // Damage dealt reduced by 100% & Damage taken reduced by 200%
-    SPELL_CORPOREALITY_100D         = 74836, // Damage dealt reduced by 200% & Damage taken reduced by 400%
+        SPELL_TWILIGHT_CUTTER           = 74768, // Triggert SPELL_TWILIGHT_CUTTER_02
+        SPELL_TWILIGHT_CUTTER_02        = 74769, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 13875 bis 16125
+        SPELL_TWILIGHT_CUTTER_03        = 77844, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 13875 bis 16125
+        SPELL_TWILIGHT_CUTTER_04        = 77845, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 41625 bis 48375
+        SPELL_TWILIGHT_CUTTER_05        = 77846, // Fires a beam of concentrated twilight energy, dealing massive Shadow damage to any enemies that make contact with it. 41625 bis 48375
+        SPELL_TWILIGHT_PULSE_PERIODIC   = 78861, // Triggert 78862 (Twilight Pulse) - Deals 27000 to 33000 Shadow damage to enemies within 5 yards.
+        // Beide Halions
+        SPELL_CLEAVE                    = 74524,
+        SPELL_TAIL_LASH                 = 74531, // A sweeping tail strike hits all enemies behind the caster, inflicting 3063 to 3937 damage and stunning them for 2 sec.
+        SPELL_BERSERK                   = 26662, // Increases the caster's attack and movement speeds by 150% and all damage it deals by 500% for 5 min.  Also grants immunity to Taunt effects.
+        SPELL_TWILIGHT_PRECISION        = 78243, // Increases Halion's chance to hit by 5% and decreases all players' chance to dodge by 20%
 
-    SPELL_CONSUMPTION_EXPLOSION     = 74799,
-    SPELL_CONSUMPTION_SUMMON        = 74800,
-    SPELL_CONSUMPTION               = 74792,
-    SPELL_CONSUMPTION_STACK         = 74795,
-    SPELL_CONSUMPTION_DAMAGE_AURA   = 74803,
-
-    // Living Inferno
-    SPELL_BLAZING_AURA              = 75885,
-    // Halion Controller
-    SPELL_COSMETIC_FIRE_PILLAR      = 76006,
-    SPELL_FIERY_EXPLOSION           = 76010,
-    SPELL_BIRTH_NO_VISUAL           = 40031
+        SPELL_CORPOREALITY_EVEN         = 74826, // Deals & receives normal damage
+        SPELL_CORPOREALITY_20I          = 74827, // Damage dealt increased by 10% & Damage taken increased by 15%
+        SPELL_CORPOREALITY_40I          = 74828, // Damage dealt increased by 30% & Damage taken increased by 50%
+        SPELL_CORPOREALITY_60I          = 74829, // Damage dealt increased by 60% & Damage taken increased by 100%
+        SPELL_CORPOREALITY_80I          = 74830, // Damage dealt increased by 100% & Damage taken increased by 200%
+        SPELL_CORPOREALITY_100I         = 74831, // Damage dealt increased by 200% & Damage taken increased by 400%
+        SPELL_CORPOREALITY_20D          = 74832, // Damage dealt reduced by 10% & Damage taken reduced by 15%
+        SPELL_CORPOREALITY_40D          = 74833, // Damage dealt reduced by 30% & Damage taken reduced by 50%
+        SPELL_CORPOREALITY_60D          = 74834, // Damage dealt reduced by 60% & Damage taken reduced by 100%
+        SPELL_CORPOREALITY_80D          = 74835, // Damage dealt reduced by 100% & Damage taken reduced by 200%
+        SPELL_CORPOREALITY_100D         = 74836, // Damage dealt reduced by 200% & Damage taken reduced by 400%
+        // Zwielichtportale
+        SPELL_TWILIGHT_ENTER            = 74807, // Phases the caster into the Twilight realm - phase 32
+        SPELL_TWILIGHT_LEAVE            = 74812,
+        // Living Inferno
+        SPELL_BLAZING_AURA              = 75885,
+        // Halion Controller
+        SPELL_COSMETIC_FIRE_PILLAR      = 76006,
+        SPELL_FIERY_EXPLOSION           = 76010,
+        SPELL_BIRTH_NO_VISUAL           = 40031
 };
 
 enum Events
@@ -128,11 +130,14 @@ enum Events
 
 enum Actions
 {
+    // Halion
     ACTION_HALION_VERSCHWINDEN,
     ACTION_HALION_ERSCHEINEN,
+    // Halion Zwielicht
+    ACTION_PREPARE,
+    // Meteor Strike
     ACTION_METEOR_STRIKE_BURN,
-    ACTION_METEOR_STRIKE_AOE,
-    ACTION_PREPARE
+    ACTION_METEOR_STRIKE_AOE
 };
 
 enum Phases
@@ -151,9 +156,9 @@ enum Misc
 
 struct HalionBuffLine
 {
-    float diff;         // Health diff in percent
-    uint32 real;        // Buff pair
-    uint32 twilight;    // Buff pair
+    float diff;         // Boss Health diff in percent
+    uint32 real;        // Buff pair (real world)
+    uint32 twilight;    // Buff pair (twilight world)
 };
 
 static HalionBuffLine Buff[] =
@@ -179,9 +184,7 @@ public:
 
     struct boss_halionAI : public BossAI
     {
-        boss_halionAI(Creature * creature) : BossAI(creature, DATA_HALION)
-        {
-        }
+        boss_halionAI(Creature * creature) : BossAI(creature, DATA_HALION) { }
 
         void Reset()
         {
@@ -205,44 +208,32 @@ public:
         {
             switch(action)
             {
-                case ACTION_HALION_VERSCHWINDEN:
-                    sLog->outError("halion: DoAction()->Verschwinden()");
-                    Verschwinden();
-                    break;
-                case ACTION_HALION_ERSCHEINEN:
-                    sLog->outError("halion: DoAction()->Erscheinen()");
-                    Erscheinen();
-                    break;
-                default:
-                    break;
+                case ACTION_HALION_VERSCHWINDEN:    Verschwinden(); break;
+                case ACTION_HALION_ERSCHEINEN:      Erscheinen();   break;
+                default:                                            break;
             }
         }
 
         void Verschwinden()
         {
+            if (!instance)
+                return;
+
+            sLog->outError("halion: Verschwinden()");
+
             Talk(SAY_PHASE2);
 
             DoCast(me, SPELL_SUMMON_TWILIGHT_PORTAL, true);
 
-            if (instance)
-            {
-                sLog->outError("halion: Verschwinden() - Setze Instanzdaten");
-                instance->SetData(DATA_PHASE, PHASE_TWO);
-                //instance->SetData(DATA_HALION_HEALTH, me->GetHealth());
+            instance->SetData(DATA_PHASE, PHASE_TWO);
 
-                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
-                {
-                    sLog->outError("halion: Verschwinden() - Resete die Threatlist");
-                    me->getThreatManager().resetAllAggro();
-                    me->getThreatManager().doAddThreat(Controller, 0.0f);
-                    //me->SetInCombatState(false, Controller);
-                    //Controller->SetInCombatState(false, me);
-                    me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
-                }
+            if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
+            {
+                me->getThreatManager().resetAllAggro();
+                me->getThreatManager().doAddThreat(Controller, 0.0f);
+                me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
             }
             me->SetVisible(false);
-            //me->setActive(false);
-            //me->CombatStop(true);
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 
@@ -252,23 +243,27 @@ public:
 
         void Erscheinen()
         {
+            if (!instance)
+                return;
+
             sLog->outError("halion: Erscheinen()");
+
             Talk(SAY_PHASE3);
 
             me->SetVisible(true);
-            //me->setActive(true);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-
-            if (instance)
-                me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
-
+            me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
             me->CastSpell(me, SPELL_TWILIGHT_DIVISION, true);
         }
 
         void EnterCombat(Unit * /*who*/)
         {
+            if (!instance)
+                return;
+
             sLog->outError("halion: EnterCombat()");
+
             Talk(SAY_AGGRO);
 
             _EnterCombat();
@@ -276,14 +271,11 @@ public:
             me->AddAura(SPELL_TWILIGHT_PRECISION, me);
 
             if (Sammelruf()) // Falls noch Trash in der Instanz steht -> herbei rufen!
-                instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
+                instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetNameForLocaleIdx(LOCALE_deDE));
 
-            if (instance)
-            {
-                sLog->outError("halion: EnterCombat() - Setze Instanzdaten");
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
-                instance->SetData(DATA_PHASE, PHASE_ONE);
-            }
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            instance->SetData(DATA_PHASE, PHASE_ONE);
+
             events.ScheduleEvent(EVENT_ACTIVATE_FIREWALL, SEKUNDEN_10);
             events.ScheduleEvent(EVENT_CLEAVE, urand(8 * IN_MILLISECONDS, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_FLAME_BREATH, urand(SEKUNDEN_10, SEKUNDEN_15));
@@ -295,20 +287,20 @@ public:
 
         void JustDied(Unit * /*killer*/)
         {
+            if (!instance)
+                return;
+
             sLog->outError("halion: JustDied()");
+
             Talk(SAY_DEATH);
 
             _JustDied();
 
-            if (instance)
-            {
-                sLog->outError("halion: JustDied() - Setze Instanzdaten");
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_ENTER);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_ENTER);
 
-                if (GameObject * firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
-                    instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), true, firewall);
-            }
+            if (GameObject * FlammenRing = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
+                instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), true, FlammenRing);
         }
 
         Position const * GetMeteorStrikePosition() const
@@ -318,7 +310,7 @@ public:
 
         void UpdateAI(uint32 const diff)
         {
-            if (!UpdateVictim())
+            if (!instance || !UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -331,8 +323,8 @@ public:
                 switch(eventId)
                 {
                     case EVENT_ACTIVATE_FIREWALL:
-                        if (GameObject * firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
-                            instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), false, firewall);
+                        if (GameObject * FlammenRing = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
+                            instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), false, FlammenRing);
                         break;
                     case EVENT_FLAME_BREATH:
                         DoCast(me, SPELL_FLAME_BREATH);
@@ -393,7 +385,6 @@ public:
     {
         boss_halion_twilightAI(Creature * creature) : BossAI(creature, DATA_HALION_TWILIGHT)
         {
-            sLog->outError("haliontwilight: gespawned");
             me->SetPhaseMask(me->GetPhaseMask() &~ 0x01, true); // Spawn-PhaseMask (1) entfernen, da er sonst auch in Phase 1 sichtbar ist!
         }
 
@@ -408,15 +399,19 @@ public:
                         sLog->outError("haliontwilight: Reset() - Halion Berserk");
                         halionAI->DoCast(me, SPELL_BERSERK, true);
                     }
-                sLog->outError("haliontwilight: Reset()->DespawnOrUnsummon()");
-                me->DespawnOrUnsummon();
+                sLog->outError("haliontwilight: Reset()->ForcedDespawn()");
+                me->ForcedDespawn();
             }
             _Reset();
         }
 
         void EnterCombat(Unit * /*victim*/)
         {
+            if (!instance)
+                return;
+
             sLog->outError("haliontwilight: EnterCombat()");
+
             _EnterCombat();
 
             events.ScheduleEvent(EVENT_CLEAVE, urand(8 * IN_MILLISECONDS, SEKUNDEN_10));
@@ -441,11 +436,9 @@ public:
 
         void DoAction(const int32 action)
         {
-            sLog->outError("haliontwilight: DoAction()");
             switch(action)
             {
                 case ACTION_PREPARE:
-                    sLog->outError("haliontwilight: DoAction()->Prepare()");
                     Prepare();
                     break;
                 default:
@@ -455,7 +448,11 @@ public:
 
         void Prepare()
         {
+            if (!instance)
+                return;
+
             sLog->outError("haliontwilight: Prepare()");
+
             me->AddAura(SPELL_TWILIGHT_ENTER, me);
             me->AddAura(SPELL_DUSK_SHROUD, me);
             me->AddAura(SPELL_TWILIGHT_PRECISION, me);
@@ -479,7 +476,8 @@ public:
             if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
             {
                 sLog->outError("haliontwilight: UpdateAI()->ForcedDespawn()");
-                me->DespawnOrUnsummon();
+                me->ForcedDespawn();
+                return;
             }
 
             if (!UpdateVictim())
@@ -495,12 +493,10 @@ public:
                 switch(eventId)
                 {
                     case EVENT_DARK_BREATH:
-                        sLog->outError("haliontwilight: EVENT_DARK_BREATH");
                         DoCast(me, SPELL_DARK_BREATH);
                         events.RescheduleEvent(EVENT_DARK_BREATH, SEKUNDEN_20);
                         break;
                     case EVENT_CONSUMTION:
-                        sLog->outError("haliontwilight: EVENT_CONSUMTION");
                         if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             DoCast(target, SPELL_CONSUMPTION);
                         else if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -508,17 +504,14 @@ public:
                         events.RescheduleEvent(EVENT_CONSUMTION, 25 * IN_MILLISECONDS);
                         break;
                     case EVENT_CLEAVE:
-                        sLog->outError("haliontwilight: EVENT_CLEAVE");
                         DoCastVictim(SPELL_CLEAVE);
                         events.RescheduleEvent(EVENT_CLEAVE, urand(8 * IN_MILLISECONDS, SEKUNDEN_10));
                         break;
                     case EVENT_TAIL_LASH:
-                        sLog->outError("haliontwilight: EVENT_TAIL_LASH");
                         DoCastAOE(SPELL_TAIL_LASH);
                         events.RescheduleEvent(EVENT_TAIL_LASH, urand(SEKUNDEN_05, SEKUNDEN_10));
                         break;
                     case EVENT_ENRAGE:
-                        sLog->outError("haliontwilight: EVENT_ENRAGE");
                         DoCast(SPELL_BERSERK);
                         break;
                     default:
@@ -546,7 +539,6 @@ public:
     {
         npc_halion_controllerAI(Creature * creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
         {
-            sLog->outError("halioncontroller: gespawned");
             me->SetPhaseMask(me->GetPhaseMask() | 0x20, true); // 1 + 32
             me->SetReactState(REACT_PASSIVE);
         }
@@ -568,12 +560,11 @@ public:
 
             if (instance)
             {
-                sLog->outError("halioncontroller: Reset() - Setze Instanzdaten");
                 instance->SetBossState(DATA_HALION, NOT_STARTED);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_ENTER);
 
-                if (GameObject * firewall = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
-                    instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), true, firewall);
+                if (GameObject * FlammenRing = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_FLAME_RING)))
+                    instance->HandleGameObject(instance->GetData64(DATA_FLAME_RING), true, FlammenRing);
 
                 if (GameObject * ZwielichtRing = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ZWIELICHT_RING)))
                     instance->HandleGameObject(instance->GetData64(DATA_ZWIELICHT_RING), true, ZwielichtRing);
@@ -582,22 +573,19 @@ public:
 
         void EnterCombat(Unit * /*attacker*/)
         {
+            if (!instance)
+                return;
+
             sLog->outError("halioncontroller: EnterCombat()");
+
             me->setActive(true);
-
             DoZoneInCombat();
-
-            if (instance)
-            {
-                sLog->outError("halioncontroller: EnterCombat()->SetBossState()");
-                instance->SetBossState(DATA_HALION, IN_PROGRESS);
-            }
+            instance->SetBossState(DATA_HALION, IN_PROGRESS);
             events.ScheduleEvent(EVENT_CHECK_ENCOUNTER, SEKUNDEN_60);
         }
 
         void DoAction(const int32 action)
         {
-            sLog->outError("halioncontroller: DoAction()");
             switch(action)
             {
                 case ACTION_INTRO_HALION:
@@ -636,10 +624,7 @@ public:
                     if ((*itr) && (*itr)->getSource())
                         if (Unit * unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
                             if (unit->ToPlayer())
-                            {
-                                sLog->outError("halioncontroller: GegnerVorhanden() -> Spieler gefunden");
                                 return true; // Spieler gefunden - kein Berserk vom Boss nötig. ;)
-                            }
             }
             return false;
         }
@@ -649,7 +634,7 @@ public:
             if (!instance)
                 return;
 
-            if (!me->FindNearestPlayer(65.0f/*MAX_VISIBLE_DIST*/)) // Kein Spieler mehr -> Wipe!
+            if (!me->FindNearestPlayer(65.0f/*MAX_VISIBLE_DIST*/)) // Kein lebender Spieler mehr im Ring -> Wipe!
             {
                 sLog->outError("halioncontroller: CheckEncounter()-> Kein Spieler mehr da!");
                 if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
@@ -660,6 +645,17 @@ public:
                 return;
             }
 
+            if (me->isInCombat() && instance->GetBossState(DATA_HALION) == DONE)
+            {
+                sLog->outError("halioncontroller: UpdateAI()->ForcedDespawn()");
+                me->ForcedDespawn();
+            }
+            else if (me->isInCombat() && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
+            {
+                sLog->outError("halioncontroller: UpdateAI()->EnterEvadeMode()");
+                EnterEvadeMode();
+            }
+
             switch(instance->GetData(DATA_PHASE))
             {
                 case PHASE_ONE:
@@ -668,28 +664,17 @@ public:
                         {
                             sLog->outError("halioncontroller: Wechsel in Phase 2");
                             if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
-                            {
-                                sLog->outError("halioncontroller: CAST_AI(HalionAI) erfolgreich");
                                 halionAI->DoAction(ACTION_HALION_VERSCHWINDEN);
-                            }
 
                             if (Creature * HalionZwielicht = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_TWILIGHT)))
                             {
-                                sLog->outError("halioncontroller: HalionZwielicht gefunden");
                                 if (!HalionZwielicht->isAlive())
-                                {
-                                    sLog->outError("halioncontroller: Respawne HalionZwielicht");
                                     HalionZwielicht->Respawn(true);
-                                }
                             }
                             else if (Creature * HalionZwielicht = me->SummonCreature(NPC_HALION_TWILIGHT, HalionSpawnPos))
                             {
-                                sLog->outError("halioncontroller: Spawne HalionZwielicht");
                                 if (HalionTwilightAI * halionZwielichtAI = CAST_AI(HalionTwilightAI, HalionZwielicht->AI()))
-                                {
-                                    sLog->outError("halioncontroller: CAST_AI(HalionTwilightAI) erfolgreich");
                                     halionZwielichtAI->DoAction(ACTION_PREPARE);
-                                }
                             }
                             // Den Spielern max. 15 Sek. geben, damit sie HalionZwielicht angreifen. Sonst geht Halion in den Berserk!
                             events.ScheduleEvent(EVENT_ZWIELICHT_COMBAT_CHECK, SEKUNDEN_15);
@@ -712,10 +697,8 @@ public:
 
                             if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                                 if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
-                                {
-                                    sLog->outError("halioncontroller: halionAI->DoAction(ACTION_HALION_ERSCHEINEN)");
                                     halionAI->DoAction(ACTION_HALION_ERSCHEINEN);
-                                }
+
                             events.ScheduleEvent(EVENT_CORPOREALITY, SEKUNDEN_10);
                             events.ScheduleEvent(EVENT_REAL_COMBAT_CHECK, SEKUNDEN_10);
                         }
@@ -727,6 +710,9 @@ public:
 
         void Corporeality()
         {
+            if (!instance)
+                return;
+
             if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_HALION)))
                 if (Creature * HalionTwilight = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_HALION_TWILIGHT)))
                 {
@@ -778,25 +764,16 @@ public:
 
         void UpdateAI(uint32 const diff)
         {
-            if (instance)
+            if (!instance)
+                return;
+
+            if (!me->isInCombat() && instance->GetBossState(DATA_HALION) == IN_PROGRESS)
             {
-                if (me->isInCombat() && instance->GetBossState(DATA_HALION) == DONE)
-                {
-                    sLog->outError("halioncontroller: UpdateAI()->ForcedDespawn()");
-                    me->ForcedDespawn();
-                }
-                else if (me->isInCombat() && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
-                {
-                    sLog->outError("halioncontroller: UpdateAI()->EnterEvadeMode()");
-                    EnterEvadeMode();
-                }
-                else if (!me->isInCombat() && instance->GetBossState(DATA_HALION) == IN_PROGRESS)
-                {
-                    sLog->outError("halioncontroller: UpdateAI()->EnterCombat()");
-                    if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
-                        EnterCombat(Halion->getVictim());
-                }
+                sLog->outError("halioncontroller: UpdateAI()->EnterCombat()");
+                if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
+                    EnterCombat(Halion->getVictim());
             }
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -807,16 +784,14 @@ public:
                         DoCast(me, SPELL_COSMETIC_FIRE_PILLAR, true);
                         break;
                     case EVENT_INTRO_PROGRESS_1:
-                        if (instance)
-                            for (uint8 i=2; i<4; ++i)
-                                if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
-                                    instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
+                        for (uint8 i=2; i<4; ++i)
+                            if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
+                                instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
                         break;
                     case EVENT_INTRO_PROGRESS_2:
-                        if (instance)
-                            for (uint8 i=0; i<2; ++i)
-                                if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
-                                    instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
+                        for (uint8 i=0; i<2; ++i)
+                            if (GameObject * tree = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_BURNING_TREE_1 + i)))
+                                instance->HandleGameObject(instance->GetData64(DATA_BURNING_TREE_1 + i), true, tree);
                         break;
                     case EVENT_INTRO_PROGRESS_3:
                         DoCast(me, SPELL_FIERY_EXPLOSION);
@@ -825,36 +800,26 @@ public:
                         me->setActive(false);
                         break;
                     case EVENT_CORPOREALITY:
-                        sLog->outError("halioncontroller: EVENT_CORPOREALITY");
                         if (instance->GetData(DATA_PHASE) == PHASE_THREE)
                             Corporeality();
                         events.RescheduleEvent(EVENT_CORPOREALITY, SEKUNDEN_05);
                         break;
                     case EVENT_CHECK_ENCOUNTER:
-                        sLog->outError("halioncontroller: EVENT_CHECK_ENCOUNTER");
                         CheckEncounter();
                         events.RescheduleEvent(EVENT_CHECK_ENCOUNTER, 2 * IN_MILLISECONDS);
                         break;
                     case EVENT_ZWIELICHT_COMBAT_CHECK:
-                        sLog->outError("halioncontroller: EVENT_ZWIELICHT_COMBAT_CHECK");
                         if (!GegnerVorhanden(false))
                             if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                                 if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
-                                {
-                                    sLog->outError("halioncontroller: EVENT_ZWIELICHT_COMBAT_CHECK -> halion-enrage!");
                                     halionAI->DoCast(me, SPELL_BERSERK, true);
-                                }
                         events.RescheduleEvent(EVENT_ZWIELICHT_COMBAT_CHECK, SEKUNDEN_10);
                         break;
                     case EVENT_REAL_COMBAT_CHECK:
-                        sLog->outError("halioncontroller: EVENT_REAL_COMBAT_CHECK");
                         if (!GegnerVorhanden(true))
                             if (Creature * HalionZwielicht = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_TWILIGHT)))
                                 if (HalionTwilightAI * halionZwielichtAI = CAST_AI(HalionTwilightAI, HalionZwielicht->AI()))
-                                {
-                                    sLog->outError("halioncontroller: EVENT_REAL_COMBAT_CHECK -> haliontwilight-enrage!");
                                     halionZwielichtAI->DoCast(me, SPELL_BERSERK, true);
-                                }
                         events.RescheduleEvent(EVENT_REAL_COMBAT_CHECK, SEKUNDEN_10);
                         break;
                     default:
@@ -1197,8 +1162,15 @@ public:
             {
                 DoCast(me, SPELL_METEOR_STRIKE_AOE_DAMAGE, true);
                 DoCast(me, SPELL_METEOR_STRIKE_FIRE_AURA_1, true);
+
                 for (std::list<Creature *>::iterator itr = meteorList.begin(); itr != meteorList.end(); ++itr)
                     (*itr)->AI()->DoAction(ACTION_METEOR_STRIKE_BURN);
+
+                if (SPELL_METEOR_STRIKE_AOE_DAMAGE == 75879) // Spawnt im 25H NPC_LIVING_INFERNO
+                    if (HalionAI * halionAI = CAST_AI(HalionAI, owner->AI()))
+                        for (uint8 i=0; i<10; ++i)
+                            if (Unit * temp = me->SummonCreature(NPC_LIVING_EMBER, *halionAI->GetMeteorStrikePosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, SEKUNDEN_60)) // Spawnen beim Aufschlag im 25H!
+                                temp->GetMotionMaster()->MoveRandom(10.0f);
             }
         }
 
@@ -1426,18 +1398,18 @@ public:
     }
 };
 
-class go_halion_portal_exit : public GameObjectScript
+/*class go_halion_portal_exit : public GameObjectScript
 {
 public:
     go_halion_portal_exit() : GameObjectScript("go_halion_portal_exit") { }
 
-    bool OnGossipHello(Player * player, GameObject * /*go*/)
+    bool OnGossipHello(Player * player, GameObject * go)
     {
         player->AddAura(SPELL_TWILIGHT_LEAVE, player);
         player->RemoveAurasDueToSpell(SPELL_TWILIGHT_ENTER);
         return true;
     }
-};
+};*/
 
 class spell_halion_meteor_strike_marker : public SpellScriptLoader
 {
@@ -1604,7 +1576,7 @@ void AddSC_boss_halion()
 
     new go_halion_portal_twilight();
     new go_halion_portal_real();
-    new go_halion_portal_exit();
+    //new go_halion_portal_exit();
 
     new spell_halion_meteor_strike_marker();
     new spell_halion_combustion();
