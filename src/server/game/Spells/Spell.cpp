@@ -4822,7 +4822,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     Unit::AuraEffectList const& blockSpells = m_caster->GetAuraEffectsByType(SPELL_AURA_BLOCK_SPELL_FAMILY);
     for (Unit::AuraEffectList::const_iterator blockItr = blockSpells.begin(); blockItr != blockSpells.end(); ++blockItr)
-        if ((*blockItr)->GetMiscValue() == m_spellInfo->SpellFamilyName)
+        if ((*blockItr)->GetMiscValue() == int32(m_spellInfo->SpellFamilyName))
             return SPELL_FAILED_SPELL_UNAVAILABLE;
 
     bool reqCombat = true;
