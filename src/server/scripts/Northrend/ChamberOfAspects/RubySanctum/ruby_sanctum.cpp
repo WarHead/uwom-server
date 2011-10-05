@@ -181,7 +181,10 @@ enum RubinsanktumTrashSpells
         SPELL_Elite_der_Schmorschuppen_Schaedelkracher          = 15621, // Victim
         SPELL_Kommandant_der_Schmorschuppen_Sammelruf           = 75414, // Selbst - Ruft verbündete herbei - jeder macht pro Einheit in 8 Metern 25% mehr Schaden - hält 50 Sek. - Dummy -> Script!
         SPELL_Kommandant_der_Schmorschuppen_Sammelruf_Effect    = 75415,
-        SPELL_Kommandant_der_Schmorschuppen_Toedlicher_Stoss    = 13737  // Victim
+        SPELL_Kommandant_der_Schmorschuppen_Toedlicher_Stoss    = 13737, // Victim
+#define SPELL_Lebender_Funken_Flammen_erwecken                  RAID_MODE<uint32>(75888,75889,75888,75889) // Selbst - Aura
+        SPELL_Lebendiges_Inferno_Lodernde_Aura                  = 75885,
+        SPELL_BERSERK                                           = 26662  // Increases the caster's attack and movement speeds by 150% and all damage it deals by 500% for 5 min.  Also grants immunity to Taunt effects.
 };
 
 enum RubinsanktumTrashEvents
@@ -194,7 +197,8 @@ enum RubinsanktumTrashEvents
     EVENT_Angreifer_der_Schmorschuppen_Zusammenruf,
     EVENT_Elite_der_Schmorschuppen_Schaedelkracher,
     EVENT_Kommandant_der_Schmorschuppen_Sammelruf,
-    EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss
+    EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss,
+    EVENT_BERSERK
 };
 
 class mob_rubinsanktum_trash : public CreatureScript
@@ -212,6 +216,13 @@ public:
         void Reset()
         {
             events.Reset();
+
+            switch(me->GetEntry())
+            {
+                case NPC_LIVING_EMBER:      DoCast(SPELL_Lebender_Funken_Flammen_erwecken); break;
+                case NPC_LIVING_INFERNO:    DoCast(SPELL_Lebendiges_Inferno_Lodernde_Aura); break;
+                default:                                                                    break;
+            }
         }
 
         void EnterCombat(Unit * who)
@@ -228,6 +239,7 @@ public:
             events.ScheduleEvent(EVENT_Elite_der_Schmorschuppen_Schaedelkracher, urand(SEKUNDEN_05, SEKUNDEN_10));
             events.ScheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Sammelruf, SEKUNDEN_20);
             events.ScheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss, urand(SEKUNDEN_05, SEKUNDEN_10));
+            events.ScheduleEvent(EVENT_BERSERK, 2 * SEKUNDEN_60);
 
             me->InterruptNonMeleeSpells(true);
         }
@@ -295,7 +307,7 @@ public:
                         {
                             case EVENT_Kommandant_der_Schmorschuppen_Sammelruf:
                                 if (instance)
-                                    instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetCreatureInfo()->Name.c_str());
+                                    instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetNameForLocaleIdx(LOCALE_deDE));
                                 me->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, me);
                                 Sammelruf(60.0f, SPELL_Kommandant_der_Schmorschuppen_Sammelruf);
                                 events.RescheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Sammelruf, urand(SEKUNDEN_60, SEKUNDEN_60+SEKUNDEN_30));
@@ -303,6 +315,15 @@ public:
                             case EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss:
                                 DoCastVictim(SPELL_Kommandant_der_Schmorschuppen_Toedlicher_Stoss);
                                 events.RescheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Toedlicher_Stoss, urand(SEKUNDEN_10, SEKUNDEN_20));
+                                break;
+                        }
+                        break;
+                    case NPC_LIVING_INFERNO: // Diese beiden gehen nach 2 Minuten in Enrage!
+                    case NPC_LIVING_EMBER:
+                        switch(eventId)
+                        {
+                            case EVENT_BERSERK:
+                                DoCast(SPELL_BERSERK);
                                 break;
                         }
                         break;
