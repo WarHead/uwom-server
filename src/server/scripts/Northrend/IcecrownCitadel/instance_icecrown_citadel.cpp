@@ -286,15 +286,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_THE_LICH_KING:
                         TheLichKingGUID = creature->GetGUID();
                         break;
-                    case NPC_TIRION_ICC:
-                        Tirion = creature->GetGUID();
-                        break;
-                    case NPC_TERENAS_FIGHTER:
-                        TerenasFighter = creature->GetGUID();
-                        break;
-                    case NPC_SPIRIT_WARDEN:
-                        SpiritWarden = creature->GetGUID();
-                        break;
                     default:
                         break;
                 }
@@ -464,43 +455,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DRINK_ME:
                         PutricideTableGUID = go->GetGUID();
                         break;
-                    // Lich King
-                    case GO_LAVAMAN:
-                        lavaman = go->GetGUID();
-                        if (GetBossState(DATA_THE_LICH_KING) == DONE)
-                            go->SetRespawnTime(5*DAY);
-                        break;
-                    case GO_HANGINGMAN:
-                        hangingman = go->GetGUID();
-                        break;
-                    case GO_ICE_SHARD_1:
-                        IceShard1 = go->GetGUID();
-                        go->SetGoState(GetBossState(DATA_THE_LICH_KING) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
-                        break;
-                    case GO_ICE_SHARD_2:
-                        IceShard2 = go->GetGUID();
-                        go->SetGoState(GetBossState(DATA_THE_LICH_KING) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
-                        break;
-                    case GO_ICE_SHARD_3:
-                        IceShard3 = go->GetGUID();
-                        go->SetGoState(GetBossState(DATA_THE_LICH_KING) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
-                        break;
-                    case GO_ICE_SHARD_4:
-                        IceShard4 = go->GetGUID();
-                        go->SetGoState(GetBossState(DATA_THE_LICH_KING) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
-                        break;
-                    case GO_FROSTY_EDGE_OUTER:
-                        FrostyEdgeOuter = go->GetGUID();
-                        go->SetGoState(GO_STATE_ACTIVE);
-                        break;
-                    case GO_FROSTY_EDGE_INNER:
-                        FrostyEdgeInner = go->GetGUID();
-                        go->SetGoState(GO_STATE_READY);
-                        break;
-                    case GO_EDGE_DESTROY_WARNING:
-                        EdgeDestroyWarning = go->GetGUID();
-                        go->SetGoState(GO_STATE_READY);
-                        break;
                     default:
                         break;
                 }
@@ -586,18 +540,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_SPINESTALKER:                 return SpinestalkerGUID;
                     case DATA_RIMEFANG:                     return RimefangGUID;
                     case DATA_THE_LICH_KING:                return TheLichKingGUID;
-                    case GUID_ICE_SHARD_1:                  return IceShard1;
-                    case GUID_ICE_SHARD_2:                  return IceShard2;
-                    case GUID_ICE_SHARD_3:                  return IceShard3;
-                    case GUID_ICE_SHARD_4:                  return IceShard4;
-                    case GUID_FROSTY_EDGE_OUTER:            return FrostyEdgeOuter;
-                    case GUID_FROSTY_EDGE_INNER:            return FrostyEdgeInner;
-                    case GUID_EDGE_DESTROY_WARNING:         return EdgeDestroyWarning;
-                    case GUID_LAVAMAN:                      return lavaman;
-                    case GUID_HANGINGMAN:                   return hangingman;
-                    case GUID_TIRION:                       return Tirion;
-                    case GUID_TERENAS_FIGHTER:              return TerenasFighter;
-                    case GUID_SPIRIT_WARDEN:                return SpiritWarden;
                     default: break;
                 }
                 return 0;
@@ -770,12 +712,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_KILL_CREDIT:
                         GiveKillCredit(data);
                         break;
-                    case DATA_NECK_DEEP_ACHIEVEMENT:
-                        IsNeckDeep = data ? true : false;
-                        break;
-                    case DATA_BEEN_WAITING_ACHIEVEMENT:
-                        IsNecroticStack = data ? true : false;
-                        break;
                     case DATA_BONED_ACHIEVEMENT:
                         IsBonedEligible = data ? true : false;
                         break;
@@ -917,14 +853,6 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (criteria_id)
                 {
-                    case CRITERIA_WAITING_A_LONG_TIME_10N:
-                    case CRITERIA_WAITING_A_LONG_TIME_10H:
-                    case CRITERIA_WAITING_A_LONG_TIME_25N:
-                    case CRITERIA_WAITING_A_LONG_TIME_25H: return IsNecroticStack;
-                    case CRITERIA_NECK_DEEP_IN_VILE_10N:
-                    case CRITERIA_NECK_DEEP_IN_VILE_10H:
-                    case CRITERIA_NECK_DEEP_IN_VILE_25N:
-                    case CRITERIA_NECK_DEEP_IN_VILE_25H: return IsNeckDeep;
                     case CRITERIA_BONED_10N:
                     case CRITERIA_BONED_25N:
                     case CRITERIA_BONED_10H:
