@@ -82,7 +82,7 @@ enum Spells
     SPELL_CORPOREALITY_40D          = 74833, // Damage dealt reduced by 30% & Damage taken reduced by 50%
     SPELL_CORPOREALITY_60D          = 74834, // Damage dealt reduced by 60% & Damage taken reduced by 100%
     SPELL_CORPOREALITY_80D          = 74835, // Damage dealt reduced by 100% & Damage taken reduced by 200%
-    SPELL_CORPOREALITY_100D         = 74836, // Damage dealt reduced by 200% & Damage taken reduced by 400% 
+    SPELL_CORPOREALITY_100D         = 74836, // Damage dealt reduced by 200% & Damage taken reduced by 400%
 
     SPELL_CONSUMPTION_EXPLOSION     = 74799,
     SPELL_CONSUMPTION_SUMMON        = 74800,
@@ -654,7 +654,7 @@ public:
                 sLog->outError("halioncontroller: CheckEncounter()-> Kein Spieler mehr da!");
                 if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                     if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
-                        Halion->AI()->EnterEvadeMode();
+                        halionAI->EnterEvadeMode();
 
                 EnterEvadeMode();
                 return;
@@ -703,7 +703,7 @@ public:
                             if (GameObject * GOPortal = me->SummonGameObject(GO_HALION_PORTAL_EXIT, HalionSpawnPos.m_positionX, HalionSpawnPos.m_positionY, HalionSpawnPos.m_positionZ,
                                 4.47206f, 0, 0, 0.786772f, -0.617243f, 99999999))
                             {
-                                GOPortal->SetPhaseMask(me->GetPhaseMask() | 0x20 &~ 0x01, true); // 32
+                                GOPortal->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
                                 GOPortal->SetRespawnTime(9999999);
                                 GOPortal->SetOwnerGUID(NULL);
                             }
@@ -886,7 +886,7 @@ public:
         {
             sLog->outError("focus: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask(me->GetPhaseMask() | 0x20 &~ 0x01, true); // 32
+            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
         }
 
         InstanceScript * instance;
@@ -992,7 +992,7 @@ public:
         {
             sLog->outError("orb: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask(me->GetPhaseMask() | 0x20 &~ 0x01, true); // 32
+            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
         }
 
         InstanceScript * instance;
@@ -1000,7 +1000,6 @@ public:
         uint32 m_flag;
         uint32 m_flag1;
         bool MovementStarted;
-        Creature * focus;
         uint32 nextPoint;
 
         void Reset()
@@ -1060,7 +1059,7 @@ public:
 
                 if (m_direction > 2.0f * M_PI)
                     m_direction = m_direction - 2.0f * M_PI;
-                if (focus = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
+                if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
                     focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
                 else
                     me->ForcedDespawn();
@@ -1070,7 +1069,7 @@ public:
             me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 /*diff*/)
         {
             if (!instance)
                 return;
@@ -1105,7 +1104,7 @@ public:
         {
             sLog->outError("carrier: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask(me->GetPhaseMask() | 0x20 &~ 0x01, true); // 32
+            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
         }
 
         InstanceScript * instance;
@@ -1116,7 +1115,7 @@ public:
             //me->SetDisplayId(10045);
             //me->SetDisplayId(11686);
             me->SetRespawnDelay(MONTH);
-            SetCombatMovement(false); 
+            SetCombatMovement(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             MovementStarted = false;
             //me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
@@ -1140,7 +1139,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 /*diff*/)
         {
             if (!instance)
                 return;
@@ -1357,7 +1356,7 @@ public:
         void Reset()
         {
             if (!IsHeroic())
-                me->SetPhaseMask(me->GetPhaseMask() | 0x20 &~ 0x01, true); // 32
+                me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
             else
                 me->SetPhaseMask(me->GetPhaseMask() | 0x20, true); // 1 + 32
 
@@ -1407,7 +1406,7 @@ class go_halion_portal_twilight : public GameObjectScript
 public:
     go_halion_portal_twilight() : GameObjectScript("go_halion_portal_twilight") { }
 
-    bool OnGossipHello(Player * player, GameObject * go)
+    bool OnGossipHello(Player * player, GameObject * /*go*/)
     {
         player->AddAura(SPELL_TWILIGHT_ENTER, player);
         return true;
@@ -1419,7 +1418,7 @@ class go_halion_portal_real : public GameObjectScript
 public:
     go_halion_portal_real() : GameObjectScript("go_halion_portal_real") { }
 
-    bool OnGossipHello(Player * player, GameObject * go)
+    bool OnGossipHello(Player * player, GameObject * /*go*/)
     {
         player->AddAura(SPELL_TWILIGHT_LEAVE, player);
         player->RemoveAurasDueToSpell(SPELL_TWILIGHT_ENTER);
@@ -1432,7 +1431,7 @@ class go_halion_portal_exit : public GameObjectScript
 public:
     go_halion_portal_exit() : GameObjectScript("go_halion_portal_exit") { }
 
-    bool OnGossipHello(Player * player, GameObject * go)
+    bool OnGossipHello(Player * player, GameObject * /*go*/)
     {
         player->AddAura(SPELL_TWILIGHT_LEAVE, player);
         player->RemoveAurasDueToSpell(SPELL_TWILIGHT_ENTER);
