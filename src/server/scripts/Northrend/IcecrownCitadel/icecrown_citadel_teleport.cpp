@@ -45,7 +45,10 @@ class icecrown_citadel_teleport : public GameObjectScript
                 // TODO: Gauntlet event before Sindragosa
                 if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Der Hort der Frostkönigin.", GOSSIP_SENDER_ICC_PORT, SINDRAGOSA_S_LAIR_TELEPORT);
-                if (instance->GetBossState(DATA_SINDRAGOSA) == DONE)
+                if (instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE &&
+                    instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE &&
+                    instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE &&
+                    instance->GetBossState(DATA_SINDRAGOSA) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Der Frostthron", GOSSIP_SENDER_ICC_PORT, FROZEN_THRONE_TELEPORT);
             }
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
