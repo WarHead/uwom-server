@@ -3102,7 +3102,7 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
     target->SetControlled(apply, UNIT_STAT_STUNNED);
 }
 
-void AuraEffect::HandleAuraDetectAmore(AuraApplication const* aurApp, uint8 mode, bool apply) const
+void AuraEffect::HandleAuraDetectAmore(AuraApplication const* aurApp, uint8 /*mode*/, bool apply) const
 {
     Unit* target = aurApp->GetTarget();
 
