@@ -1631,6 +1631,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     trans->PAppend("UPDATE `characters` SET name='%s', race='%u', at_login=at_login & ~ %u WHERE guid='%u'", newname.c_str(), race, used_loginFlag, lowGuid);
     trans->PAppend("DELETE FROM character_declinedname WHERE guid ='%u'", lowGuid);
+    // Remove Spirit Wisp at faction change to prevent speedhack-like abuse
+    trans->PAppend("DELETE FROM `character_aura` WHERE `spell`=20584 AND `guid`='%u'", lowGuid);
 
     BattlegroundTeamId team = BG_TEAM_ALLIANCE;
 
