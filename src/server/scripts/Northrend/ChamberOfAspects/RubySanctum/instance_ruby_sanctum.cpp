@@ -50,6 +50,7 @@ public:
             ZwielichtRingGUID = 0;
             memset(ZarithianSpawnStalkerGUID, 0, 2 * sizeof(uint64));
             memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
+            memset(SchattenKugelGUID, 0, 4 * sizeof(uint64));
             phase = 0;
             health = 0;
             XerestraszaAllowed = 0;
@@ -131,6 +132,18 @@ public:
                     else
                         ZarithianSpawnStalkerGUID[1] = creature->GetGUID();
                     break;
+                case NPC_SCHATTENKUGEL_N:
+                    SchattenKugelGUID[0] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_S:
+                    SchattenKugelGUID[1] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_O:
+                    SchattenKugelGUID[2] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_W:
+                    SchattenKugelGUID[3] = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -195,22 +208,26 @@ public:
         {
             switch (type)
             {
-                case DATA_BALTHARUS_THE_WARBORN: return BaltharusTheWarbornGUID;
-                case DATA_CRYSTAL_CHANNEL_TARGET: return CrystalChannelTargetGUID;
-                case DATA_XERESTRASZA: return XerestraszaGUID;
-                case DATA_SAVIANA_RAGEFIRE: return SavianaRagefireGUID;
-                case DATA_GENERAL_ZARITHRIAN: return GeneralZarithrianGUID;
-                case DATA_ZARITHIAN_SPAWN_STALKER_1: return ZarithianSpawnStalkerGUID[0];
-                case DATA_ZARITHIAN_SPAWN_STALKER_2: return ZarithianSpawnStalkerGUID[1];
-                case DATA_HALION: return HalionGUID;
-                case DATA_HALION_TWILIGHT: return HalionTwilightGUID;
-                case DATA_HALION_CONTROLLER: return HalionControllerGUID;
-                case DATA_BURNING_TREE_1: return BurningTreeGUID[0];
-                case DATA_BURNING_TREE_2: return BurningTreeGUID[1];
-                case DATA_BURNING_TREE_3: return BurningTreeGUID[2];
-                case DATA_BURNING_TREE_4: return BurningTreeGUID[3];
-                case DATA_FLAME_RING: return FlameRingGUID;
-                case DATA_ZWIELICHT_RING: return ZwielichtRingGUID;
+                case DATA_BALTHARUS_THE_WARBORN:        return BaltharusTheWarbornGUID;
+                case DATA_CRYSTAL_CHANNEL_TARGET:       return CrystalChannelTargetGUID;
+                case DATA_XERESTRASZA:                  return XerestraszaGUID;
+                case DATA_SAVIANA_RAGEFIRE:             return SavianaRagefireGUID;
+                case DATA_GENERAL_ZARITHRIAN:           return GeneralZarithrianGUID;
+                case DATA_ZARITHIAN_SPAWN_STALKER_1:    return ZarithianSpawnStalkerGUID[0];
+                case DATA_ZARITHIAN_SPAWN_STALKER_2:    return ZarithianSpawnStalkerGUID[1];
+                case DATA_HALION:                       return HalionGUID;
+                case DATA_HALION_TWILIGHT:              return HalionTwilightGUID;
+                case DATA_HALION_CONTROLLER:            return HalionControllerGUID;
+                case DATA_BURNING_TREE_1:               return BurningTreeGUID[0];
+                case DATA_BURNING_TREE_2:               return BurningTreeGUID[1];
+                case DATA_BURNING_TREE_3:               return BurningTreeGUID[2];
+                case DATA_BURNING_TREE_4:               return BurningTreeGUID[3];
+                case DATA_FLAME_RING:                   return FlameRingGUID;
+                case DATA_ZWIELICHT_RING:               return ZwielichtRingGUID;
+                case DATA_SCHATTENKUGEL_N:              return SchattenKugelGUID[0];
+                case DATA_SCHATTENKUGEL_S:              return SchattenKugelGUID[1];
+                case DATA_SCHATTENKUGEL_O:              return SchattenKugelGUID[2];
+                case DATA_SCHATTENKUGEL_W:              return SchattenKugelGUID[3];
                 default: break;
             }
             return 0;
@@ -363,6 +380,7 @@ public:
         uint64 BurningTreeGUID[4];
         uint64 FlameRingGUID;
         uint64 ZwielichtRingGUID;
+        uint64 SchattenKugelGUID[4];
         uint32 phase;
         uint32 health;
         uint32 XerestraszaAllowed;

@@ -188,10 +188,12 @@ public:
 
         void Reset()
         {
+            if (!instance || (instance->GetData(DATA_PHASE) == PHASE_THREE && instance->GetBossState(DATA_HALION_TWILIGHT) == IN_PROGRESS))
+                return;
+
             _Reset();
 
-            if (instance)
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
 
             sLog->outError("halion: Reset()");
         }
@@ -226,14 +228,15 @@ public:
             DoCast(me, SPELL_SUMMON_TWILIGHT_PORTAL, true);
 
             instance->SetData(DATA_PHASE, PHASE_TWO);
+            instance->SetData(DATA_HALION_HEALTH, me->GetHealth());
 
             if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
             {
                 me->getThreatManager().resetAllAggro();
                 me->getThreatManager().doAddThreat(Controller, 0.0f);
-                me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
             }
             me->SetVisible(false);
+            me->setActive(false);
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 
@@ -251,10 +254,19 @@ public:
             Talk(SAY_PHASE3);
 
             me->SetVisible(true);
+            me->setActive(true);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+
+            if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
+            {
+                me->getThreatManager().resetAllAggro();
+                me->getThreatManager().doAddThreat(Controller, 0.0f);
+            }
             me->SetHealth(instance->GetData(DATA_HALION_HEALTH));
-            me->CastSpell(me, SPELL_TWILIGHT_DIVISION, true);
+            // Bring Halion in eine Phase (31?) wo der Spieler ihn nicht sieht.
+            // Zu dieser Phase muss anscheinend das 3. Portal führen.
+            //me->CastSpell(me, SPELL_TWILIGHT_DIVISION, true);
         }
 
         void EnterCombat(Unit * /*who*/)
@@ -390,8 +402,14 @@ public:
 
         void Reset()
         {
+            if (!instance)
+                return;
+
             sLog->outError("haliontwilight: Reset()");
-            if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
+
+            _Reset();
+
+            if (instance->GetBossState(DATA_HALION) != IN_PROGRESS)
             {
                 if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                     if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
@@ -402,7 +420,6 @@ public:
                 sLog->outError("haliontwilight: Reset()->ForcedDespawn()");
                 me->ForcedDespawn();
             }
-            _Reset();
         }
 
         void EnterCombat(Unit * /*victim*/)
@@ -589,7 +606,6 @@ public:
             switch(action)
             {
                 case ACTION_INTRO_HALION:
-                    sLog->outError("halioncontroller: DoAction() - Intro");
                     me->setActive(true);
                     events.ScheduleEvent(EVENT_START_INTRO, 2 * IN_MILLISECONDS);
                     events.ScheduleEvent(EVENT_INTRO_PROGRESS_1, 6 * IN_MILLISECONDS);
@@ -597,7 +613,6 @@ public:
                     events.ScheduleEvent(EVENT_INTRO_PROGRESS_3, 14 * IN_MILLISECONDS);
                     break;
                 case ACTION_SPAWN_HALION:
-                    sLog->outError("halioncontroller: DoAction() - Spawn");
                     me->GetMap()->SummonCreature(NPC_HALION, HalionSpawnPos);
                     break;
                 default:
@@ -639,9 +654,12 @@ public:
                 sLog->outError("halioncontroller: CheckEncounter()-> Kein Spieler mehr da!");
                 if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                     if (HalionAI * halionAI = CAST_AI(HalionAI, Halion->AI()))
-                        halionAI->EnterEvadeMode();
+                        if (Halion->isInCombat())
+                            halionAI->EnterEvadeMode();
 
-                EnterEvadeMode();
+                if (me->isInCombat())
+                    EnterEvadeMode();
+
                 return;
             }
 
@@ -649,11 +667,13 @@ public:
             {
                 sLog->outError("halioncontroller: UpdateAI()->ForcedDespawn()");
                 me->ForcedDespawn();
+                return;
             }
             else if (me->isInCombat() && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
             {
                 sLog->outError("halioncontroller: UpdateAI()->EnterEvadeMode()");
                 EnterEvadeMode();
+                return;
             }
 
             switch(instance->GetData(DATA_PHASE))
@@ -864,9 +884,9 @@ public:
         {
             //me->SetDisplayId(11686);
             //me->SetDisplayId(10045);
-            me->SetRespawnDelay(MONTH);
-            SetCombatMovement(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            //me->SetRespawnDelay(MONTH);
+            //SetCombatMovement(false);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             m_direction = 0.0f;
             m_nextdirection = 0.0f;
             m_timer = SEKUNDEN_30;
@@ -874,22 +894,22 @@ public:
 
             if (instance)
             {
-                Creature * orb1 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SHADOW_ORB_N));
+                Creature * orb1 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SCHATTENKUGEL_N));
                 if (!orb1)
                 {
                     float x,y;
                     me->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                    orb1 = me->SummonCreature(NPC_SHADOW_ORB_N, x, y, me->GetPositionZ(), 0);
+                    orb1 = me->SummonCreature(NPC_SCHATTENKUGEL_N, x, y, me->GetPositionZ(), 0);
                 }
                 else if (!orb1->isAlive())
                     orb1->Respawn();
 
-                Creature * orb2 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SHADOW_ORB_S));
+                Creature * orb2 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SCHATTENKUGEL_S));
                 if (!orb2)
                 {
                     float x,y;
                     me->GetNearPoint2D(x, y, FR_RADIUS, m_direction + M_PI);
-                    orb2 = me->SummonCreature(NPC_SHADOW_ORB_S, x, y, me->GetPositionZ(), 0);
+                    orb2 = me->SummonCreature(NPC_SCHATTENKUGEL_S, x, y, me->GetPositionZ(), 0);
                 }
                 else if (!orb2->isAlive())
                     orb2->Respawn();
@@ -969,17 +989,17 @@ public:
 
         void Reset()
         {
-            me->SetRespawnDelay(MONTH);
+            //me->SetRespawnDelay(MONTH);
             //me->SetDisplayId(11686);
-            SetCombatMovement(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            //SetCombatMovement(false);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 
-            if (me->GetEntry() == NPC_SHADOW_ORB_N)
+            if (me->GetEntry() == NPC_SCHATTENKUGEL_N)
             {
                 m_flag = DATA_ORB_N;
                 m_delta = 0.0f;
             }
-            else if (me->GetEntry() == NPC_SHADOW_ORB_S)
+            else if (me->GetEntry() == NPC_SCHATTENKUGEL_S)
             {
                 m_flag = DATA_ORB_S;
                 m_delta = M_PI;
@@ -1070,21 +1090,23 @@ public:
             sLog->outError("carrier: gespawned");
             instance = creature->GetInstanceScript();
             me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
+            for (uint8 i=0; i<4; ++i)
+                Kugel[i] = NULL;
         }
-
-        InstanceScript * instance;
-        bool MovementStarted;
 
         void Reset()
         {
             //me->SetDisplayId(10045);
             //me->SetDisplayId(11686);
-            me->SetRespawnDelay(MONTH);
-            SetCombatMovement(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            //me->SetRespawnDelay(MONTH);
+            //SetCombatMovement(false);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             MovementStarted = false;
             //me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
             //me->SetSpeed(MOVE_RUN, 6.0f, true);
+            if (instance)
+                for (uint8 i=0; i<4; ++i)
+                    Kugel[i] = ObjectAccessor::GetCreature(*me, instance->GetData64(i+100));
         }
 
         void AttackStart(Unit * /*who*/, float /*dist*/)
@@ -1112,6 +1134,12 @@ public:
             if (instance->GetBossState(DATA_HALION) != IN_PROGRESS)
                 me->ForcedDespawn();
 
+            /* Hier muss ich noch heraus finden, wer welchen Spell auf wen casted...
+            uint8 num = IsHeroic() ? 4 : 2;
+            for (uint8 i=0; i<4; ++i)
+                if (Kugel[i])
+                    DoCast(Kugel[i], SPELL_TWILIGHT_CUTTER);*/
+
             if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 3.0f, true))
                 DoCast(target, SPELL_TWILIGHT_CUTTER);
             else if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 3.0f, true))
@@ -1136,7 +1164,10 @@ public:
             }
 
         }
-
+    private:
+        InstanceScript * instance;
+        bool MovementStarted;
+        Creature * Kugel[4];
     };
 
     CreatureAI * GetAI(Creature * creature) const
@@ -1332,9 +1363,7 @@ public:
             else
                 me->SetPhaseMask(me->GetPhaseMask() | 0x20, true); // 1 + 32
 
-            //SetCombatMovement(false);
             m_uiConsumptTimer = SEKUNDEN_60;
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             DoCast(SPELL_CONSUMPTION_DAMAGE_AURA);
             m_Size0 = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
             m_Size = m_Size0;

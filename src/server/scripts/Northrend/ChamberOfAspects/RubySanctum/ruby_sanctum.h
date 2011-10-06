@@ -36,7 +36,6 @@ enum DataTypes
     DATA_SAVIANA_RAGEFIRE,
     DATA_HALION,
     DATA_HALION_TWILIGHT,
-
     // Etc
     DATA_XERESTRASZA,
     DATA_XERESTRASZA_ALLOWED,
@@ -54,11 +53,19 @@ enum DataTypes
     DATA_ZWIELICHT_RING,
     DATA_COUNTER,
     DATA_PHASE,
+    // Schattenkugeln
+    DATA_SCHATTENKUGEL_N    = 100,
+    DATA_SCHATTENKUGEL_S    = 101,
+    DATA_SCHATTENKUGEL_O    = 102,
+    DATA_SCHATTENKUGEL_W    = 103,
 
-    // Orb
-    DATA_ORB_DIRECTION  = 110,
-    DATA_ORB_S          = 111,
-    DATA_ORB_N          = 112
+    DATA_ORB_DIRECTION      = 110,
+    DATA_ORB_S              = 111,
+    DATA_ORB_N              = 112
+};
+
+enum Kugeln
+{
 };
 
 enum SharedActions
@@ -92,8 +99,12 @@ enum CreaturesIds
     NPC_LIVING_EMBER                = 40683,
     NPC_ORB_CARRIER                 = 40081,
     NPC_ORB_ROTATION_FOCUS          = 40091,
-    NPC_SHADOW_ORB_N                = 40083,
-    NPC_SHADOW_ORB_S                = 40100,
+
+    NPC_SCHATTENKUGEL_N             = 40083,
+    NPC_SCHATTENKUGEL_S             = 40100,
+    NPC_SCHATTENKUGEL_O             = 40469,
+    NPC_SCHATTENKUGEL_W             = 40468,
+
     NPC_METEOR_STRIKE_MARK          = 40029,
     NPC_METEOR_STRIKE_NORTH         = 40041,
     NPC_METEOR_STRIKE_EAST          = 40042,
