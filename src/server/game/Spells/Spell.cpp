@@ -884,6 +884,12 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
                     AddUnitTarget(target, 1 << effIndex, false);
             }
             return;
+        case SPELL_EFFECT_DUMMY:
+            if (m_targets.GetUnitTarget())
+                AddUnitTarget(m_targets.GetUnitTarget(), 1 << effIndex, false);
+            else
+                AddUnitTarget(m_caster, 1 << effIndex, false);
+            return;
         default:
             break;
     }
@@ -4903,7 +4909,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     // those spells may have incorrect target entries or not filled at all (for example 15332)
     // such spells when learned are not targeting anyone using targeting system, they should apply directly to caster instead
     // also, such casts shouldn't be sent to client
-    if (!((m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && (!m_targets.GetUnitTarget() || m_targets.GetUnitTarget() == m_caster)))
+    if (!((m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !m_targets.GetUnitTarget() || m_targets.GetUnitTarget() == m_caster) || m_caster->isSummon())
     {
         // Check explicit target for m_originalCaster - todo: get rid of such workarounds
         SpellCastResult castResult = m_spellInfo->CheckExplicitTarget(m_originalCaster ? m_originalCaster : m_caster, m_targets.GetObjectTarget(), m_targets.GetItemTarget());

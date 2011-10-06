@@ -336,6 +336,24 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         // now client not include swimming flag in case jumping under water
         plMover->SetInWater(!plMover->IsInWater() || plMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
     }
+    
+    // Mind control + walk mode abuse
+    if (opcode == MSG_MOVE_SET_WALK_MODE && plMover && plMover->HasAura(605))
+    {
+        // Kerhong's version here
+        /* not the best fix, but does it's job. client side 'teleports' on place :(
+         * p.s only the actual mover (mind controler) gets this lagg, as surrounding
+         * players get already modified packet with 'proper' flags
+        */
+        /*WorldPacket data(MSG_MOVE_SET_RUN_MODE, recv_data.size());
+        movementInfo.guid = plMover->GetGUID();
+        movementInfo.flags &= ~uint32(MOVEMENTFLAG_WALKING);
+        movementInfo.time = WorldTimer::getMSTime();
+        WriteMovementInfo(&data, &movementInfo);
+        plMover->SendMessageToSet(&data, true);*/
+        recv_data.rfinish();
+        return;
+    }
 
     /*----------------------*/
 

@@ -201,9 +201,9 @@ class boss_lord_marrowgar : public CreatureScript
                         case EVENT_BONE_STORM_MOVE:
                         {
                             events.ScheduleEvent(EVENT_BONE_STORM_MOVE, _boneStormDuration/3);
-                            Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                            Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me));
                             if (!unit)
-                                unit = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                                unit = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
                             if (unit)
                                 me->GetMotionMaster()->MovePoint(POINT_TARGET_BONESTORM_PLAYER, unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
                             break;
@@ -574,12 +574,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
 
             void RecalculateDamage()
             {
-                if (Unit* caster = GetCaster())
-                {
-                    const float distance = GetHitUnit()->GetExactDist2d(caster);
-                    const int32 damage   = GetHitDamage();
-                    SetHitDamage(int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))));
-                }
+                SetHitDamage(int32(GetHitDamage() / std::max(sqrtf(GetHitUnit()->GetExactDist2d(GetCaster())), 1.0f)));
             }
 
             void Register()
