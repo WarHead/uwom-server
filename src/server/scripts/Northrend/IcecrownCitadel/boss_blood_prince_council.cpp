@@ -185,6 +185,7 @@ class boss_blood_council_controller : public CreatureScript
 
             void Reset()
             {
+                _Reset();
                 events.Reset();
                 me->SetReactState(REACT_PASSIVE);
                 _invocationStage = 0;
@@ -195,8 +196,10 @@ class boss_blood_council_controller : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
+                if (me->isInCombat())
                     return;
+
+                _EnterCombat();
 
                 if (!instance->CheckRequiredBosses(DATA_BLOOD_PRINCE_COUNCIL, who->ToPlayer()))
                 {
@@ -205,7 +208,7 @@ class boss_blood_council_controller : public CreatureScript
                     return;
                 }
 
-                instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
+                //instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
 
                 DoCast(me, SPELL_INVOCATION_OF_BLOOD_VALANAR);
 
@@ -307,6 +310,16 @@ class boss_blood_council_controller : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (Creature * valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
+                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
+                        EnterCombat(valanar->getVictim());
+
+                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
                 if (!UpdateVictim())
                     return;
 
@@ -399,12 +412,11 @@ class boss_prince_keleseth_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
+                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -412,13 +424,14 @@ class boss_prince_keleseth_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
                 if (IsHeroic())
                     DoCast(me, SPELL_SHADOW_PRISON);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
+                _EnterCombat();
+
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -551,6 +564,16 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
+                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
+                        EnterCombat(Controller->getVictim());
+
+                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 
@@ -619,12 +642,11 @@ class boss_prince_taldaram_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
+                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -632,13 +654,14 @@ class boss_prince_taldaram_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
                 if (IsHeroic())
                     DoCast(me, SPELL_SHADOW_PRISON);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
+                _EnterCombat();
+
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -765,6 +788,16 @@ class boss_prince_taldaram_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
+                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
+                        EnterCombat(Controller->getVictim());
+
+                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 
@@ -838,12 +871,11 @@ class boss_prince_valanar_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
+                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -851,13 +883,14 @@ class boss_prince_valanar_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(me->GetMaxHealth());
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
                 if (IsHeroic())
                     DoCast(me, SPELL_SHADOW_PRISON);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
+                _EnterCombat();
+
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -998,6 +1031,16 @@ class boss_prince_valanar_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
+                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
+                        EnterCombat(Controller->getVictim());
+
+                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 

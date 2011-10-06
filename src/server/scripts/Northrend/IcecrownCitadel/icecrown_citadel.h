@@ -30,27 +30,34 @@ uint32 const EncounterCount = 13;
 uint32 const WeeklyNPCs = 9;
 uint32 const MaxHeroicAttempts = 50;
 
+// Defined in boss_valithria_dreamwalker.cpp
 extern Position const ValithriaSpawnPos;
 // Defined in boss_sindragosa.cpp
 extern Position const SindragosaSpawnPos;
+// Defined in boss_the_lich_king.cpp
+extern Position const TerenasSpawn;
+extern Position const TerenasSpawnHeroic;
+extern Position const SpiritWardenSpawn;
 
 // Shared spells used by more than one script
 enum SharedSpells
 {
-    SPELL_BERSERK               = 26662,
-    SPELL_BERSERK2              = 47008,
+    SPELL_BERSERK                       = 26662,
+    SPELL_BERSERK2                      = 47008,
 
     // Deathbound Ward
-    SPELL_STONEFORM             = 70733,
+    SPELL_STONEFORM                     = 70733,
 
     // Residue Rendezvous
-    SPELL_ORANGE_BLIGHT_RESIDUE = 72144,
-    SPELL_GREEN_BLIGHT_RESIDUE  = 72145,
+    SPELL_ORANGE_BLIGHT_RESIDUE         = 72144,
+    SPELL_GREEN_BLIGHT_RESIDUE          = 72145,
 
     // Kill Credit 38121 - Soul Feast Kill Credit Bunny - Quest 24547 - A Feast of Souls
     // Must be used by every killable NPC within the ICC
-    SPELL_SOUL_FEAST_1          = 71203,
-    SPELL_SOUL_FEAST_2          = 53677
+    // The Lich King
+    SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
+    SPELL_SOUL_FEAST_1                  = 71203,
+    SPELL_SOUL_FEAST_2                  = 53677
 };
 
 enum TeleporterSpells
@@ -106,22 +113,9 @@ enum DataTypes
     DATA_CAPTAIN_RUPERT,
     DATA_VALITHRIA_TRIGGER,
     DATA_VALITHRIA_LICH_KING,
-
-    // For Lich King script only
-    GUID_TIRION,
-    GUID_TERENAS_FIGHTER,
-    GUID_SPIRIT_WARDEN,
-    GUID_ICE_SHARD_1,
-    GUID_ICE_SHARD_2,
-    GUID_ICE_SHARD_3,
-    GUID_ICE_SHARD_4,
-    GUID_LAVAMAN,
-    GUID_HANGINGMAN,
-    GUID_FROSTY_EDGE_OUTER,
-    GUID_FROSTY_EDGE_INNER,
-    GUID_EDGE_DESTROY_WARNING,
-    DATA_BEEN_WAITING_ACHIEVEMENT,
-    DATA_NECK_DEEP_ACHIEVEMENT,
+    DATA_HIGHLORD_TIRION_FORDRING,
+    DATA_ARTHAS_PLATFORM,
+    DATA_TERENAS_MENETHIL,
 
     DATA_FALLEN_ADDS_SPAWNEN,
     DATA_KILL_CREDIT
@@ -260,7 +254,7 @@ enum CreaturesIds
     NPC_NIGHTMARE_PORTAL_PRE_EFFECT             = 38429,
     NPC_DREAM_PORTAL                            = 37945,
     NPC_NIGHTMARE_PORTAL                        = 38430,
-    NPC_WORLDTRIGGER                            = 22515,
+    NPC_WORLD_TRIGGER                           = 22515,
 
     // Sindragosa
     NPC_SINDRAGOSA                              = 36853,
@@ -274,20 +268,22 @@ enum CreaturesIds
 
     // The Lich King
     NPC_THE_LICH_KING                           = 36597,
-    NPC_TIRION_ICC                              = 38995,
-    NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER      = 22515,
-    NPC_TERENAS_MENETHIL                        = 38579,
-    NPC_FROSTMOURNE_TRIGGER                     = 38584,
-    NPC_TERENAS_FIGHTER                         = 36823, // for frostmourne
+    NPC_HIGHLORD_TIRION_FORDRING_LK             = 38995,
+    NPC_TERENAS_MENETHIL_FROSTMOURNE            = 36823,
     NPC_SPIRIT_WARDEN                           = 36824,
-    NPC_ICE_SPHERE                              = 36633,
-    NPC_DRUDGE_GHOUL                            = 37695,
+    NPC_TERENAS_MENETHIL_FROSTMOURNE_H          = 39217,
     NPC_SHAMBLING_HORROR                        = 37698,
-    NPC_VALKYR                                  = 36609,
-    NPC_DEFILE                                  = 38757,
+    NPC_DRUDGE_GHOUL                            = 37695,
+    NPC_ICE_SPHERE                              = 36633,
     NPC_RAGING_SPIRIT                           = 36701,
-    NPC_TRIGGER                                 = 38667,
-    NPC_VILE_SPIRIT                             = 37799
+    NPC_DEFILE                                  = 38757,
+    NPC_VALKYR_SHADOWGUARD                      = 36609,
+    NPC_VILE_SPIRIT                             = 37799,
+    NPC_WICKED_SPIRIT                           = 39190,
+    NPC_STRANGULATE_VEHICLE                     = 36598,
+    NPC_WORLD_TRIGGER_INFINITE_AOI              = 36171,
+    NPC_SPIRIT_BOMB                             = 39189,
+    NPC_FROSTMOURNE_TRIGGER                     = 38584
 };
 
 enum GameObjectsIds
@@ -371,18 +367,19 @@ enum GameObjectsIds
     GO_ICE_BLOCK                            = 201722,
     GO_SIGIL_OF_THE_FROSTWING               = 202181,
 
-    // Lich King
+    // The Lich King
     GO_ARTHAS_PLATFORM                      = 202161,
-    GO_ICE_SHARD_1                          = 202141,
-    GO_ICE_SHARD_2                          = 202142,
-    GO_ICE_SHARD_3                          = 202143,
-    GO_ICE_SHARD_4                          = 202144,
-    GO_FROSTY_EDGE_OUTER                    = 202188,
-
-    GO_FROSTY_EDGE_INNER                    = 202189,
-    GO_EDGE_DESTROY_WARNING                 = 202190,
-    GO_LAVAMAN                              = 202436,
-    GO_HANGINGMAN                           = 202437
+    GO_ARTHAS_PRECIPICE                     = 202078,
+    GO_DOODAD_ICECROWN_THRONEFROSTYWIND01   = 202188,
+    GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01   = 202189,
+    GO_DOODAD_ICESHARD_STANDING02           = 202141,
+    GO_DOODAD_ICESHARD_STANDING01           = 202142,
+    GO_DOODAD_ICESHARD_STANDING03           = 202143,
+    GO_DOODAD_ICESHARD_STANDING04           = 202144,
+    GO_DOODAD_ICECROWN_SNOWEDGEWARNING01    = 202190,
+    GO_FROZEN_LAVAMAN                       = 202436,
+    GO_LAVAMAN_PILLARS_CHAINED              = 202437,
+    GO_LAVAMAN_PILLARS_UNCHAINED            = 202438
 };
 
 enum AchievementCriteriaIds
@@ -417,24 +414,11 @@ enum AchievementCriteriaIds
     CRITERIA_ONCE_BITTEN_TWICE_SHY_10N  = 12780,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_25N  = 13012,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_10V  = 13011,
-    CRITERIA_ONCE_BITTEN_TWICE_SHY_25V  = 13013,
-
-    // Lich King
-    CRITERIA_WAITING_A_LONG_TIME_25N    = 13244,
-    CRITERIA_WAITING_A_LONG_TIME_25H    = 13245,
-    CRITERIA_WAITING_A_LONG_TIME_10N    = 13246,
-    CRITERIA_WAITING_A_LONG_TIME_10H    = 13247,
-    CRITERIA_NECK_DEEP_IN_VILE_10N      = 12823,
-    CRITERIA_NECK_DEEP_IN_VILE_10H      = 13163,
-    CRITERIA_NECK_DEEP_IN_VILE_25H      = 13164,
-    CRITERIA_NECK_DEEP_IN_VILE_25N      = 13243
+    CRITERIA_ONCE_BITTEN_TWICE_SHY_25V  = 13013
 };
 
 enum SharedActions
 {
-    // Coldflame Traps
-    ACTION_STOP_TRAPS           = -377440,
-
     // Festergut
     ACTION_FESTERGUT_COMBAT     = -366260,
     ACTION_FESTERGUT_GAS        = -366261,
@@ -454,7 +438,11 @@ enum SharedActions
 
     // Sindragosa
     ACTION_START_FROSTWYRM      = -368530,
-    ACTION_TRIGGER_ASPHYXIATION = -368531
+    ACTION_TRIGGER_ASPHYXIATION = -368531,
+
+    // The Lich King
+    ACTION_RESTORE_LIGHT        = -72262,
+    ACTION_FROSTMOURNE_INTRO    = -36823
 };
 
 enum WeekliesICC
@@ -478,6 +466,11 @@ enum WorldStatesICC
     WORLDSTATE_SHOW_ATTEMPTS        = 4940,
     WORLDSTATE_ATTEMPTS_REMAINING   = 4941,
     WORLDSTATE_ATTEMPTS_MAX         = 4942
+};
+
+enum AreaIds
+{
+    AREA_THE_FROZEN_THRONE  = 4859
 };
 
 class spell_trigger_spell_from_caster : public SpellScriptLoader
@@ -530,7 +523,5 @@ CreatureAI* GetIcecrownCitadelAI(Creature* creature)
                 return new AI(creature);
     return NULL;
 }
-
-//void TeleportPlayerToFrozenThrone(Player * player);
 
 #endif // ICECROWN_CITADEL_H_

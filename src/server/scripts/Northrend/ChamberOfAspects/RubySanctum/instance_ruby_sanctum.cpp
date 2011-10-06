@@ -33,7 +33,7 @@ public:
 
     struct instance_ruby_sanctum_InstanceMapScript : public InstanceScript
     {
-        instance_ruby_sanctum_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
+        instance_ruby_sanctum_InstanceMapScript(InstanceMap * map) : InstanceScript(map)
         {
             SetBossNumber(EncounterCount);
             LoadDoorData(doorData);
@@ -47,8 +47,10 @@ public:
             XerestraszaGUID = 0;
             FlameWallsGUID = 0;
             FlameRingGUID = 0;
+            ZwielichtRingGUID = 0;
             memset(ZarithianSpawnStalkerGUID, 0, 2 * sizeof(uint64));
             memset(BurningTreeGUID, 0, 4 * sizeof(uint64));
+            memset(SchattenKugelGUID, 0, 4 * sizeof(uint64));
             phase = 0;
             health = 0;
             XerestraszaAllowed = 0;
@@ -96,11 +98,16 @@ public:
                     GeneralZarithrianGUID = creature->GetGUID();
                     if (!creature->isAlive())
                         if (!instance->GetCreature(HalionControllerGUID))
-                        {
                             if (Creature * halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionSpawnPos))
-                                halionController->AI()->DoAction(ACTION_INTRO_HALION);
-                            SetData(DATA_HALION_CONTROLLER_SPAWNED, 1);
-                        }
+                            {
+                                if (!GetData(DATA_HALION_CONTROLLER_SPAWNED))
+                                {
+                                    halionController->AI()->DoAction(ACTION_INTRO_HALION);
+                                    SetData(DATA_HALION_CONTROLLER_SPAWNED, 1);
+                                }
+                                else if (!instance->GetCreature(HalionGUID))
+                                    halionController->AI()->DoAction(ACTION_SPAWN_HALION);
+                            }
                     break;
                 case NPC_SAVIANA_RAGEFIRE:
                     SavianaRagefireGUID = creature->GetGUID();
@@ -125,12 +132,24 @@ public:
                     else
                         ZarithianSpawnStalkerGUID[1] = creature->GetGUID();
                     break;
+                case NPC_SCHATTENKUGEL_N:
+                    SchattenKugelGUID[0] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_S:
+                    SchattenKugelGUID[1] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_O:
+                    SchattenKugelGUID[2] = creature->GetGUID();
+                    break;
+                case NPC_SCHATTENKUGEL_W:
+                    SchattenKugelGUID[3] = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject * go)
         {
             switch (go->GetEntry())
             {
@@ -144,6 +163,9 @@ public:
                     break;
                 case GO_FLAME_RING:
                     FlameRingGUID = go->GetGUID();
+                    break;
+                case GO_ZWIELICHT_RING:
+                    ZwielichtRingGUID = go->GetGUID();
                     break;
                 case GO_BURNING_TREE_1:
                     BurningTreeGUID[0] = go->GetGUID();
@@ -170,7 +192,7 @@ public:
             }
         }
 
-        void OnGameObjectRemove(GameObject* go)
+        void OnGameObjectRemove(GameObject * go)
         {
             switch (go->GetEntry())
             {
@@ -186,21 +208,26 @@ public:
         {
             switch (type)
             {
-                case DATA_BALTHARUS_THE_WARBORN: return BaltharusTheWarbornGUID;
-                case DATA_CRYSTAL_CHANNEL_TARGET: return CrystalChannelTargetGUID;
-                case DATA_XERESTRASZA: return XerestraszaGUID;
-                case DATA_SAVIANA_RAGEFIRE: return SavianaRagefireGUID;
-                case DATA_GENERAL_ZARITHRIAN: return GeneralZarithrianGUID;
-                case DATA_ZARITHIAN_SPAWN_STALKER_1: return ZarithianSpawnStalkerGUID[0];
-                case DATA_ZARITHIAN_SPAWN_STALKER_2: return ZarithianSpawnStalkerGUID[1];
-                case DATA_HALION: return HalionGUID;
-                case DATA_HALION_TWILIGHT: return HalionTwilightGUID;
-                case DATA_HALION_CONTROLLER: return HalionControllerGUID;
-                case DATA_BURNING_TREE_1: return BurningTreeGUID[0];
-                case DATA_BURNING_TREE_2: return BurningTreeGUID[1];
-                case DATA_BURNING_TREE_3: return BurningTreeGUID[2];
-                case DATA_BURNING_TREE_4: return BurningTreeGUID[3];
-                case DATA_FLAME_RING: return FlameRingGUID;
+                case DATA_BALTHARUS_THE_WARBORN:        return BaltharusTheWarbornGUID;
+                case DATA_CRYSTAL_CHANNEL_TARGET:       return CrystalChannelTargetGUID;
+                case DATA_XERESTRASZA:                  return XerestraszaGUID;
+                case DATA_SAVIANA_RAGEFIRE:             return SavianaRagefireGUID;
+                case DATA_GENERAL_ZARITHRIAN:           return GeneralZarithrianGUID;
+                case DATA_ZARITHIAN_SPAWN_STALKER_1:    return ZarithianSpawnStalkerGUID[0];
+                case DATA_ZARITHIAN_SPAWN_STALKER_2:    return ZarithianSpawnStalkerGUID[1];
+                case DATA_HALION:                       return HalionGUID;
+                case DATA_HALION_TWILIGHT:              return HalionTwilightGUID;
+                case DATA_HALION_CONTROLLER:            return HalionControllerGUID;
+                case DATA_BURNING_TREE_1:               return BurningTreeGUID[0];
+                case DATA_BURNING_TREE_2:               return BurningTreeGUID[1];
+                case DATA_BURNING_TREE_3:               return BurningTreeGUID[2];
+                case DATA_BURNING_TREE_4:               return BurningTreeGUID[3];
+                case DATA_FLAME_RING:                   return FlameRingGUID;
+                case DATA_ZWIELICHT_RING:               return ZwielichtRingGUID;
+                case DATA_SCHATTENKUGEL_N:              return SchattenKugelGUID[0];
+                case DATA_SCHATTENKUGEL_S:              return SchattenKugelGUID[1];
+                case DATA_SCHATTENKUGEL_O:              return SchattenKugelGUID[2];
+                case DATA_SCHATTENKUGEL_W:              return SchattenKugelGUID[3];
                 default: break;
             }
             return 0;
@@ -222,7 +249,8 @@ public:
                             zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     }
                     if (state == DONE)
-                        SetData(DATA_XERESTRASZA_ALLOWED, 1);
+                        if (Creature * Xerestrasza = instance->GetCreature(XerestraszaGUID))
+                            Xerestrasza->AI()->DoAction(ACTION_BALTHARUS_DEATH);
                     break;
                 }
                 case DATA_SAVIANA_RAGEFIRE:
@@ -238,13 +266,16 @@ public:
                 case DATA_GENERAL_ZARITHRIAN:
                     if (GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
                         HandleGameObject(FlameWallsGUID, state != IN_PROGRESS);
-                    if (state == DONE && !instance->GetCreature(HalionControllerGUID))
+                    if (state == DONE && GetBossState(DATA_HALION) != DONE && !instance->GetCreature(HalionControllerGUID))
                         if (Creature * halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionSpawnPos))
                             halionController->AI()->DoAction(ACTION_INTRO_HALION);
                     break;
                 case DATA_HALION:
                     if (state != IN_PROGRESS)
+                    {
                         HandleGameObject(FlameRingGUID, true);
+                        HandleGameObject(ZwielichtRingGUID, true);
+                    }
                     break;
                 default:
                     break;
@@ -252,28 +283,28 @@ public:
             return true;
         }
 
-        void SetData(uint32 uiType, uint32 uiData)
+        void SetData(uint32 type, uint32 data)
         {
-            switch(uiType)
+            switch(type)
             {
                 case DATA_COUNTER:
-                    if (uiData == 0)
+                    if (data == 0)
                         UpdateWorldState(false, 0);
                     else
-                        UpdateWorldState(true, uiData);
+                        UpdateWorldState(true, data);
                     break;
                 case DATA_PHASE:
-                    phase = uiData;
+                    phase = data;
                     break;
                 case DATA_HALION_HEALTH:
-                    health = uiData;
+                    health = data;
                     break;
                 case DATA_XERESTRASZA_ALLOWED:
-                    XerestraszaAllowed = uiData;
+                    XerestraszaAllowed = data;
                     SaveToDB();
                     break;
                 case DATA_HALION_CONTROLLER_SPAWNED:
-                    ControllerSpawned = uiData;
+                    ControllerSpawned = data;
                     SaveToDB();
                     break;
                 default:
@@ -348,6 +379,8 @@ public:
         uint64 ZarithianSpawnStalkerGUID[2];
         uint64 BurningTreeGUID[4];
         uint64 FlameRingGUID;
+        uint64 ZwielichtRingGUID;
+        uint64 SchattenKugelGUID[4];
         uint32 phase;
         uint32 health;
         uint32 XerestraszaAllowed;

@@ -1542,44 +1542,36 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
             armor = floor(AddPctN(armor, -(*j)->GetAmount()));
     }
 
+    // Apply Player CR_ARMOR_PENETRATION rating and buffs from stances\specializations etc.
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        float bonusPct = 0;
         AuraEffectList const& ResIgnoreAuras = GetAuraEffectsByType(SPELL_AURA_MOD_ARMOR_PENETRATION_PCT);
         for (AuraEffectList::const_iterator itr = ResIgnoreAuras.begin(); itr != ResIgnoreAuras.end(); ++itr)
         {
-            // item neutral spell
             if ((*itr)->GetSpellInfo()->EquippedItemClass == -1)
             {
-                armor = floor(AddPctN(armor, -(*itr)->GetAmount()));
-                continue;
+                if (!spellInfo || (*itr)->IsAffectedOnSpell(spellInfo) || (*itr)->GetMiscValue() & spellInfo->GetSchoolMask())
+                    bonusPct += (*itr)->GetAmount();
+                else if (!(*itr)->GetMiscValue() && !(*itr)->HasSpellClassMask())
+                    bonusPct += (*itr)->GetAmount();
             }
-
-            // item dependent spell - check current weapons
-            for (int i = 0; i < MAX_ATTACK; ++i)
+            else
             {
-                Item* weapon = ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true);
-
-                if (weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellInfo()))
-                {
-                    armor = floor(AddPctN(armor, -(*itr)->GetAmount()));
-                    break;
-                }
+               if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*itr)->GetSpellInfo()))
+                    bonusPct += (*itr)->GetAmount();
             }
         }
-    }
 
-    // Apply Player CR_ARMOR_PENETRATION rating
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
         float maxArmorPen = 0;
-        if (getLevel() < 60 || victim->getLevel() < 60) // Prevent negative maxArmorCap for victim < 60 and attacker >= 60
+        if (victim->getLevel() < 60)
             maxArmorPen = float(400 + 85 * victim->getLevel());
         else
             maxArmorPen = 400 + 85 * victim->getLevel() + 4.5f * 85 * (victim->getLevel() - 59);
         // Cap armor penetration to this number
         maxArmorPen = std::min((armor + maxArmorPen) / 3, armor);
         // Figure out how much armor do we ignore
-        float armorPen = CalculatePctF(maxArmorPen, ToPlayer()->GetRatingBonusValue(CR_ARMOR_PENETRATION));
+        float armorPen = CalculatePctF(maxArmorPen, bonusPct + ToPlayer()->GetRatingBonusValue(CR_ARMOR_PENETRATION));
         // Got the value, apply it
         armor -= std::min(armorPen, maxArmorPen);
     }
@@ -9457,11 +9449,84 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
 
 bool Unit::IsHostileTo(Unit const* unit) const
 {
+    if (!unit)
+       return false;
+
+    // always non-hostile to self
+    if (unit == this)
+        return false;
+
+    // always non-hostile to GM in GM mode
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+        return false;
+
+    // always hostile to enemy
+    if (getVictim() == unit || unit->getVictim() == this)
+        return true;
+
+    // test pet/charm masters instead pers/charmeds
+    Unit const* testerOwner = GetCharmerOrOwner();
+    Unit const* targetOwner = unit->GetCharmerOrOwner();
+
+    // always hostile to owner's enemy
+    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
+        return true;
+
+    // always hostile to enemy owner
+    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
+        return true;
+
+    // always hostile to owner of owner's enemy
+    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
+        return true;
+
+    Unit const* tester = testerOwner ? testerOwner : this;
+    Unit const* target = targetOwner ? targetOwner : unit;
+
+    // always non-hostile to target with common owner, or to owner/pet
+    if (tester == target)
+        return false;
+
     return GetReactionTo(unit) <= REP_HOSTILE;
 }
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
+    // always friendly to self
+    if (unit == this)
+        return true;
+
+    // always friendly to GM in GM mode
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+        return true;
+
+    // always non-friendly to enemy
+    if (getVictim() == unit || unit->getVictim() == this)
+        return false;
+
+    // test pet/charm masters instead pers/charmeds
+    Unit const* testerOwner = GetCharmerOrOwner();
+    Unit const* targetOwner = unit->GetCharmerOrOwner();
+
+    // always non-friendly to owner's enemy
+    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
+        return false;
+
+    // always non-friendly to enemy owner
+    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
+        return false;
+
+    // always non-friendly to owner of owner's enemy
+    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
+        return false;
+
+    Unit const* tester = testerOwner ? testerOwner : this;
+    Unit const* target = targetOwner ? targetOwner : unit;
+
+    // always friendly to target with common owner, or to owner/pet
+    if (tester == target)
+       return true;
+
     return GetReactionTo(unit) >= REP_FRIENDLY;
 }
 

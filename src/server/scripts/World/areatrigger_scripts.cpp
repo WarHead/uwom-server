@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -38,6 +39,63 @@ at_sholazar_waygate             q12548
 EndContentData */
 
 #include "ScriptPCH.h"
+
+/*######
+## at_bring_your_orphan_to
+######*/
+
+// Geändert übernommen aus: https://github.com/TrinityCore/TrinityCore/issues/3322
+
+enum ChildrensWeek
+{
+    QUEST_DOWN_AT_THE_DOCKS         = 910,
+    QUEST_GATEWAY_TO_THE_FRONTIER   = 911,
+    QUEST_LORDAERON_THRONE_ROOM     = 1800,
+    QUEST_BOUGHT_OF_ETERNALS        = 1479,
+    QUEST_SPOOKY_LIGHTHOUSE         = 1687,
+    QUEST_STONEWROUGHT_DAM          = 1558,
+    QUEST_DARK_PORTAL_H             = 10951,
+    QUEST_DARK_PORTAL_A             = 10952,
+
+    AT_DOWN_AT_THE_DOCKS            = 3551,
+    AT_GATEWAY_TO_THE_FRONTIER      = 3549,
+    AT_LORDAERON_THRONE_ROOM        = 3547,
+    AT_BOUGHT_OF_ETERNALS           = 3546,
+    AT_SPOOKY_LIGHTHOUSE            = 3552,
+    AT_STONEWROUGHT_DAM             = 3548,
+    AT_DARK_PORTAL                  = 4356,
+
+    AURA_ORPHAN_OUT                 = 58818
+};
+
+class AreaTrigger_at_bring_your_orphan_to : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_bring_your_orphan_to() : AreaTriggerScript("at_bring_your_orphan_to") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        uint32 questId = 0;
+
+        if (player->isDead() || !player->HasAura(AURA_ORPHAN_OUT))
+            return false;
+
+        switch (trigger->id)
+        {
+            case AT_DOWN_AT_THE_DOCKS:          questId = QUEST_DOWN_AT_THE_DOCKS; break;
+            case AT_GATEWAY_TO_THE_FRONTIER:    questId = QUEST_GATEWAY_TO_THE_FRONTIER; break;
+            case AT_LORDAERON_THRONE_ROOM:      questId = QUEST_LORDAERON_THRONE_ROOM; break;
+            case AT_BOUGHT_OF_ETERNALS:         questId = QUEST_BOUGHT_OF_ETERNALS; break;
+            case AT_SPOOKY_LIGHTHOUSE:          questId = QUEST_SPOOKY_LIGHTHOUSE; break;
+            case AT_STONEWROUGHT_DAM:           questId = QUEST_STONEWROUGHT_DAM; break;
+            case AT_DARK_PORTAL:                questId = player->GetTeam() == ALLIANCE ? QUEST_DARK_PORTAL_A : QUEST_DARK_PORTAL_H; break;
+        }
+        if (questId && player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+            player->AreaExploredOrEventHappens(questId);
+
+        return true;
+    }
+};
 
 /*######
 ## AreaTrigger_at_aldurthar_gate
@@ -370,6 +428,7 @@ class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_bring_your_orphan_to();
     new AreaTrigger_at_aldurthar_gate();
     new AreaTrigger_at_coilfang_waterfall();
     new AreaTrigger_at_legion_teleporter();
