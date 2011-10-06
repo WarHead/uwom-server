@@ -56,8 +56,8 @@ enum SharedSpells
     // Must be used by every killable NPC within the ICC
     // The Lich King
     SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
-    SPELL_SOUL_FEAST_1          = 71203,
-    SPELL_SOUL_FEAST_2          = 53677
+    SPELL_SOUL_FEAST_1                  = 71203,
+    SPELL_SOUL_FEAST_2                  = 53677
 };
 
 enum TeleporterSpells
@@ -113,9 +113,9 @@ enum DataTypes
     DATA_CAPTAIN_RUPERT,
     DATA_VALITHRIA_TRIGGER,
     DATA_VALITHRIA_LICH_KING,
-    DATA_HIGHLORD_TIRION_FORDRING   = 37,
-    DATA_ARTHAS_PLATFORM            = 38,
-    DATA_TERENAS_MENETHIL           = 39,
+    DATA_HIGHLORD_TIRION_FORDRING,
+    DATA_ARTHAS_PLATFORM,
+    DATA_TERENAS_MENETHIL,
 
     DATA_FALLEN_ADDS_SPAWNEN,
     DATA_KILL_CREDIT
@@ -254,7 +254,7 @@ enum CreaturesIds
     NPC_NIGHTMARE_PORTAL_PRE_EFFECT             = 38429,
     NPC_DREAM_PORTAL                            = 37945,
     NPC_NIGHTMARE_PORTAL                        = 38430,
-    NPC_WORLDTRIGGER                            = 22515,
+    NPC_WORLD_TRIGGER                           = 22515,
 
     // Sindragosa
     NPC_SINDRAGOSA                              = 36853,
@@ -267,7 +267,7 @@ enum CreaturesIds
     NPC_ICE_TOMB                                = 36980,
 
     // The Lich King
-    NPC_THE_LICH_KING                           = 36597
+    NPC_THE_LICH_KING                           = 36597,
     NPC_HIGHLORD_TIRION_FORDRING_LK             = 38995,
     NPC_TERENAS_MENETHIL_FROSTMOURNE            = 36823,
     NPC_SPIRIT_WARDEN                           = 36824,
@@ -283,7 +283,7 @@ enum CreaturesIds
     NPC_STRANGULATE_VEHICLE                     = 36598,
     NPC_WORLD_TRIGGER_INFINITE_AOI              = 36171,
     NPC_SPIRIT_BOMB                             = 39189,
-    NPC_FROSTMOURNE_TRIGGER                     = 38584,
+    NPC_FROSTMOURNE_TRIGGER                     = 38584
 };
 
 enum GameObjectsIds
@@ -365,7 +365,7 @@ enum GameObjectsIds
     GO_SINDRAGOSA_SHORTCUT_EXIT_DOOR        = 201379,
     GO_ICE_WALL                             = 202396,
     GO_ICE_BLOCK                            = 201722,
-    GO_SIGIL_OF_THE_FROSTWING               = 202181
+    GO_SIGIL_OF_THE_FROSTWING               = 202181,
 
     // The Lich King
     GO_ARTHAS_PLATFORM                      = 202161,
@@ -379,7 +379,7 @@ enum GameObjectsIds
     GO_DOODAD_ICECROWN_SNOWEDGEWARNING01    = 202190,
     GO_FROZEN_LAVAMAN                       = 202436,
     GO_LAVAMAN_PILLARS_CHAINED              = 202437,
-    GO_LAVAMAN_PILLARS_UNCHAINED            = 202438,
+    GO_LAVAMAN_PILLARS_UNCHAINED            = 202438
 };
 
 enum AchievementCriteriaIds
@@ -438,11 +438,11 @@ enum SharedActions
 
     // Sindragosa
     ACTION_START_FROSTWYRM      = -368530,
-    ACTION_TRIGGER_ASPHYXIATION = -368531
+    ACTION_TRIGGER_ASPHYXIATION = -368531,
 
     // The Lich King
     ACTION_RESTORE_LIGHT        = -72262,
-    ACTION_FROSTMOURNE_INTRO    = -36823,
+    ACTION_FROSTMOURNE_INTRO    = -36823
 };
 
 enum WeekliesICC
@@ -470,7 +470,7 @@ enum WorldStatesICC
 
 enum AreaIds
 {
-    AREA_THE_FROZEN_THRONE  = 4859,
+    AREA_THE_FROZEN_THRONE  = 4859
 };
 
 class spell_trigger_spell_from_caster : public SpellScriptLoader

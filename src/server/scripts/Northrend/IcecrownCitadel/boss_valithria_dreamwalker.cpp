@@ -265,7 +265,7 @@ class ValithriaDespawner : public BasicEvent
                     else
                         creature->Respawn(true);
                     break;
-                case NPC_WORLDTRIGGER:
+                case NPC_WORLD_TRIGGER:
                     creature->setDeathState(JUST_DIED);
                     creature->Respawn(true);
                 default:
@@ -292,8 +292,8 @@ class boss_valithria_dreamwalker : public CreatureScript
             {
                 if (_portalCount == 8)
                 {
-                    me->SummonCreature(NPC_WORLDTRIGGER, Trigger25_1_Pos);
-                    me->SummonCreature(NPC_WORLDTRIGGER, Trigger25_2_Pos);
+                    me->SummonCreature(NPC_WORLD_TRIGGER, Trigger25_1_Pos);
+                    me->SummonCreature(NPC_WORLD_TRIGGER, Trigger25_2_Pos);
                 }
             }
 
@@ -1339,7 +1339,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                         return;
 
                 std::list<Creature*> summoners;
-                GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLDTRIGGER, 100.0f);
+                GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
                 summoners.remove_if (Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 Trinity::RandomResizeList(summoners, 2);
                 if (summoners.empty())

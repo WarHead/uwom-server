@@ -28,14 +28,14 @@ enum EventIds
 {
     EVENT_QUAKE                     = 23437,
     EVENT_SECOND_REMORSELESS_WINTER = 23507,
-    EVENT_TELEPORT_TO_FROSMOURNE    = 23617,
+    EVENT_TELEPORT_TO_FROSMOURNE    = 23617
 };
 
 enum TimedEvents
 {
     EVENT_UPDATE_EXECUTION_TIME = 1,
-    EVENT_QUAKE_SHATTER         = 2,
-    EVENT_REBUILD_PLATFORM      = 3,
+    EVENT_QUAKE_SHATTER,
+    EVENT_REBUILD_PLATFORM
 };
 
 DoorData const doorData[] =
@@ -140,13 +140,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 FrozenThroneEdgeGUID = 0;
                 FrozenThroneWindGUID = 0;
                 FrozenThroneWarningGUID = 0;
-                FrostyEdgeInner = 0;
-                FrostyEdgeOuter = 0;
-                EdgeDestroyWarning = 0;
-                lavaman = 0;
-                hangingman = 0;
-                IsNeckDeep = true;
-                IsNecroticStack = true;
                 FrostwyrmCount = 0;
                 SpinestalkerTrashCount = 0;
                 RimefangTrashCount = 0;
@@ -324,9 +317,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_INFILTRATOR_MINCHAR_BQ:
                     case NPC_MINCHAR_BEAM_STALKER:
                     case NPC_VALITHRIA_DREAMWALKER_QUEST:
-                    {
                         for (uint8 questIndex = 0; questIndex < WeeklyNPCs; ++questIndex)
-                        {
                             if (WeeklyQuestData[questIndex].creatureEntry == entry)
                             {
                                 uint8 diffIndex = uint8(instance->GetSpawnMode() & 1);
@@ -334,13 +325,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                                     entry = 0;
                                 break;
                             }
-                        }
                         break;
-                    }
                     default:
                         break;
                 }
-
                 return entry;
             }
 
@@ -585,32 +573,19 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_CAPTAIN_ARNATH:
                     case DATA_CAPTAIN_BRANDON:
                     case DATA_CAPTAIN_GRONDEL:
-                    case DATA_CAPTAIN_RUPERT:
-                        return CrokCaptainGUIDs[type - DATA_CAPTAIN_ARNATH];
-                    case DATA_SISTER_SVALNA:
-                        return SisterSvalnaGUID;
-                    case DATA_VALITHRIA_DREAMWALKER:
-                        return ValithriaDreamwalkerGUID;
-                    case DATA_VALITHRIA_LICH_KING:
-                        return ValithriaLichKingGUID;
-                    case DATA_VALITHRIA_TRIGGER:
-                        return ValithriaTriggerGUID;
-                    case DATA_SINDRAGOSA:
-                        return SindragosaGUID;
-                    case DATA_SPINESTALKER:
-                        return SpinestalkerGUID;
-                    case DATA_RIMEFANG:
-                        return RimefangGUID;
-                    case DATA_THE_LICH_KING:
-                        return TheLichKingGUID;
-                    case DATA_HIGHLORD_TIRION_FORDRING:
-                        return HighlordTirionFordringGUID;
-                    case DATA_ARTHAS_PLATFORM:
-                        return ArthasPlatformGUID;
-                    case DATA_TERENAS_MENETHIL:
-                        return TerenasMenethilGUID;
-                    default:
-                        break;
+                    case DATA_CAPTAIN_RUPERT:               return CrokCaptainGUIDs[type - DATA_CAPTAIN_ARNATH];
+                    case DATA_SISTER_SVALNA:                return SisterSvalnaGUID;
+                    case DATA_VALITHRIA_DREAMWALKER:        return ValithriaDreamwalkerGUID;
+                    case DATA_VALITHRIA_LICH_KING:          return ValithriaLichKingGUID;
+                    case DATA_VALITHRIA_TRIGGER:            return ValithriaTriggerGUID;
+                    case DATA_SINDRAGOSA:                   return SindragosaGUID;
+                    case DATA_SPINESTALKER:                 return SpinestalkerGUID;
+                    case DATA_RIMEFANG:                     return RimefangGUID;
+                    case DATA_THE_LICH_KING:                return TheLichKingGUID;
+                    case DATA_HIGHLORD_TIRION_FORDRING:     return HighlordTirionFordringGUID;
+                    case DATA_ARTHAS_PLATFORM:              return ArthasPlatformGUID;
+                    case DATA_TERENAS_MENETHIL:             return TerenasMenethilGUID;
+                    default: break;
                 }
                 return 0;
             }
@@ -742,7 +717,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                         }
                         break;
                     case DATA_THE_LICH_KING:
-                    {
                         // set the platform as active object to dramatically increase visibility range
                         // note: "active" gameobjects do not block grid unloading
                         if (GameObject* precipice = instance->GetGameObject(ArthasPrecipiceGUID))
@@ -751,7 +725,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                             platform->setActive(state == IN_PROGRESS);
 
                         if (instance->IsHeroic())
-                        {
                             if (state == FAIL && HeroicAttempts)
                             {
                                 --HeroicAttempts;
@@ -760,7 +733,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                                     if (Creature* theLichKing = instance->GetCreature(TheLichKingGUID))
                                         theLichKing->DespawnOrUnsummon();
                             }
-                        }
 
                         if (state == DONE)
                         {
@@ -772,11 +744,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                                 pillars->SetRespawnTime(7 * DAY);
                         }
                         break;
-                    }
                     default:
                         break;
                  }
-
                  return true;
             }
 
@@ -1085,7 +1055,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     default:
                         break;
                 }
-
                 return true;
             }
 
