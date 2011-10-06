@@ -3359,7 +3359,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     uint32 dispel_type = m_spellInfo->Effects[effIndex].MiscValue;
     uint32 dispelMask  = SpellInfo::GetDispelMask(DispelType(dispel_type));
 
-    // we should not be able to dispel diseases if the target is affected by unholy blight
+    // we should not be able to dispel diseases if the target is affected by Unholy Blight
     if (dispelMask & (1 << DISPEL_DISEASE) && unitTarget->HasAura(50536))
         dispelMask &= ~(1 << DISPEL_DISEASE);
 
@@ -3397,6 +3397,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
     if (dispel_list.empty())
         return;
+    
+    // If by any chance, there are less spells to dispel than the maximum number of dispellable spells, limit it.
+    // IE Magic Dispel can dispel 2 spells, but we have only one dispellable buff, so limit the damage to 1.
+    if (damage > dispel_list.size())
+        damage = dispel_list.size();
 
     // Ok if exist some buffs for dispel try dispel it
     uint32 failCount = 0;
