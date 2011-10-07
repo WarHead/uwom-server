@@ -1402,15 +1402,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_damage += CalculatePctF(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                 return;
             }
-            switch (m_spellInfo->Id)
-            {
-                // Bloodthirst
-                case 23881:
-                {
-                    m_caster->CastSpell(unitTarget, 55970, true);
-                    return;
-                }
-            }
             // Item - Warrior T10 Melee 4P Bonus
             if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
                 if (m_caster->GetAura(70847))
@@ -3397,7 +3388,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
     if (dispel_list.empty())
         return;
-    
+
     // If by any chance, there are less spells to dispel than the maximum number of dispellable spells, limit it.
     // IE Magic Dispel can dispel 2 spells, but we have only one dispellable buff, so limit the damage to 1.
     if (damage > dispel_list.size())
