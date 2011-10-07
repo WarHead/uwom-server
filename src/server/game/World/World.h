@@ -567,6 +567,14 @@ struct CliCommandHolder
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 
+struct CharacterNameData
+{
+    std::string m_name;
+    uint8 m_class;
+    uint8 m_race;
+    uint8 m_gender;
+};
+
 /// The World
 class World
 {
@@ -785,6 +793,9 @@ class World
 
         bool isEventKillStart;
 
+        CharacterNameData *GetCharacterNameData(uint32 guid);
+        void ReloadSingleCharacterNameData(uint32 guid);
+
         // Tausendwinter
         void AktualisiereNaechsteTWSchlachtZeit(uint32 timer, uint32 status) { m_TWTimer = timer; m_TWStatus = status; }
         uint32 GetTWTimer() const { return m_TWTimer; }
@@ -881,6 +892,10 @@ class World
         std::string m_CreatureEventAIVersion;
 
         std::list<std::string> m_Autobroadcasts;
+
+        std::map<uint32, CharacterNameData*> m_CharacterNameDataMap;
+        ACE_Thread_Mutex m_CharacterNameDataMapMutex;
+        void LoadCharacterNameData();
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;

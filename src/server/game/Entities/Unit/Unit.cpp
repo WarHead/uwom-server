@@ -3085,8 +3085,8 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
 
-    // if checkInstant then instant spells shouldn't count as being casted
-    if (!skipInstant && m_currentSpells[CURRENT_GENERIC_SPELL] && !m_currentSpells[CURRENT_GENERIC_SPELL]->CalcCastTime())
+    // if skipInstant then instant spells shouldn't count as being casted
+    if (skipInstant && m_currentSpells[CURRENT_GENERIC_SPELL] && !m_currentSpells[CURRENT_GENERIC_SPELL]->CalcCastTime())
         return false;
 
     // generic spells are casted when they are not finished and not delayed
@@ -5090,6 +5090,7 @@ bool Unit::HandleSpellCritChanceAuraProc(Unit* victim, uint32 /*damage*/, AuraEf
     return true;
 }
 
+//victim may be NULL
 bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
@@ -5770,6 +5771,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Glyph of Polymorph
                 case 56375:
                 {
+                    if(!target)
+                        return false;
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
@@ -5827,6 +5830,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Blessing of Ancient Kings (Val'anyr, Hammer of Ancient Kings)
                 case 64411:
                 {
+                    if(!victim)
+                        return false;
                     basepoints0 = int32(CalculatePctN(damage, 15));
                     if (AuraEffect* aurEff = victim->GetAuraEffect(64413, 0, GetGUID()))
                     {
@@ -6142,6 +6147,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Divine Aegis
             if (dummySpell->SpellIconID == 2820)
             {
+                if(!target)
+                    return false;
+
                 // Multiple effects stack, so let's try to find this aura.
                 int32 bonus = 0;
                 if (AuraEffect const* aurEff = target->GetAuraEffect(47753, 0))
@@ -6309,6 +6317,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Glyph of Shred
                 case 54815:
                 {
+                    if(!target)
+                        return false;
+
                     // try to find spell Rip on the target
                     if (AuraEffect const* AurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00800000, 0x0, 0x0, GetGUID()))
                     {
@@ -6624,6 +6635,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // Explosive Shot
                     if (procSpell->SpellFamilyFlags[2] & 0x200)
                     {
+                        if(!victim)
+                            return false;
                         if (AuraEffect const* pEff = victim->GetAuraEffect(SPELL_AURA_PERIODIC_DUMMY, SPELLFAMILY_HUNTER, 0x0, 0x80000000, 0x0, GetGUID()))
                             basepoints0 = pEff->GetSpellInfo()->CalcPowerCost(this, SpellSchoolMask(pEff->GetSpellInfo()->SchoolMask)) * 4/10/3;
                     }
@@ -7323,6 +7336,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Item - Shaman T10 Elemental 4P Bonus
                 case 70817:
                 {
+                    if(!target)
+                        return false;
                     // try to find spell Flame Shock on the target
                     if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0x0, 0x0, GetGUID()))
                     {
