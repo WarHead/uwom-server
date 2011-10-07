@@ -54,18 +54,12 @@ enum DataTypes
     DATA_COUNTER,
     DATA_PHASE,
     // Schattenkugeln
-    DATA_SCHATTENKUGEL_N    = 100,
-    DATA_SCHATTENKUGEL_S    = 101,
-    DATA_SCHATTENKUGEL_O    = 102,
-    DATA_SCHATTENKUGEL_W    = 103,
-
-    DATA_ORB_DIRECTION      = 110,
-    DATA_ORB_S              = 111,
-    DATA_ORB_N              = 112
-};
-
-enum Kugeln
-{
+    DATA_KUGELROTATIONSFOKUS,
+    DATA_SCHATTENKUGEL_N        = 100,
+    DATA_SCHATTENKUGEL_S        = 101,
+    DATA_SCHATTENKUGEL_O        = 102,
+    DATA_SCHATTENKUGEL_W        = 103,
+    DATA_KUGEL_RICHTUNG         = 104
 };
 
 enum SharedActions
@@ -82,29 +76,18 @@ enum CreaturesIds
     NPC_BALTHARUS_THE_WARBORN       = 39751,
     NPC_BALTHARUS_THE_WARBORN_CLONE = 39899,
     NPC_BALTHARUS_TARGET            = 26712,
-
     // General Zarithrian
     NPC_GENERAL_ZARITHRIAN          = 39746,
     NPC_ONYX_FLAMECALLER            = 39814,
     NPC_ZARITHIAN_SPAWN_STALKER     = 39794,
-
     // Saviana Ragefire
     NPC_SAVIANA_RAGEFIRE            = 39747,
-
     // Halion
     NPC_HALION                      = 39863,
     NPC_HALION_TWILIGHT             = 40142,
     NPC_HALION_CONTROLLER           = 40146,
     NPC_LIVING_INFERNO              = 40681,
     NPC_LIVING_EMBER                = 40683,
-    NPC_ORB_CARRIER                 = 40081,
-    NPC_ORB_ROTATION_FOCUS          = 40091,
-
-    NPC_SCHATTENKUGEL_N             = 40083,
-    NPC_SCHATTENKUGEL_S             = 40100,
-    NPC_SCHATTENKUGEL_O             = 40469,
-    NPC_SCHATTENKUGEL_W             = 40468,
-
     NPC_METEOR_STRIKE_MARK          = 40029,
     NPC_METEOR_STRIKE_NORTH         = 40041,
     NPC_METEOR_STRIKE_EAST          = 40042,
@@ -112,7 +95,13 @@ enum CreaturesIds
     NPC_METEOR_STRIKE_SOUTH         = 40044,
     NPC_METEOR_STRIKE_FLAME         = 40055,
     NPC_COMBUSTION                  = 40001,
-
+    // Schnitter
+    NPC_KUGELTRAEGER                = 40081,
+    NPC_KUGELROTATIONSFOKUS         = 40091,
+    NPC_SCHATTENKUGEL_N             = 40083,
+    NPC_SCHATTENKUGEL_S             = 40100,
+    NPC_SCHATTENKUGEL_O             = 40469,
+    NPC_SCHATTENKUGEL_W             = 40468,
     // Xerestrasza
     NPC_XERESTRASZA                 = 40429
 };
