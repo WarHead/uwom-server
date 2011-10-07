@@ -62,6 +62,7 @@ enum SharedSpells
 
 enum TeleporterSpells
 {
+    DALARAN_TELEPORT                = 71512,
     LIGHT_S_HAMMER_TELEPORT         = 70781,
     ORATORY_OF_THE_DAMNED_TELEPORT  = 70856,
     RAMPART_OF_SKULLS_TELEPORT      = 70857,

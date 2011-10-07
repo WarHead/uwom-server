@@ -28,6 +28,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "icecrown_citadel.h"
+#include "ScriptedGossip.h"
 
 enum Texts
 {
@@ -713,10 +714,6 @@ class boss_the_lich_king : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         summon->CastSpell(summon, SPELL_DEFILE_AURA, false);
                         break;
-                    case NPC_VALKYR_SHADOWGUARD:
-                        summon->CastSpell(summon, SPELL_WINGS_OF_THE_DAMNED, true);
-                        summon->CastSpell(summon, SPELL_VALKYR_TARGET_SEARCH, true);
-                        break;
                     case NPC_FROSTMOURNE_TRIGGER:
                     {
                         summons.Summon(summon);
@@ -1176,16 +1173,14 @@ class npc_tirion_fordring_tft : public CreatureScript
 
         struct npc_tirion_fordringAI : public ScriptedAI
         {
-            npc_tirion_fordringAI(Creature* creature) : ScriptedAI(creature),
-                _instance(creature->GetInstanceScript())
+            npc_tirion_fordringAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
             }
 
             void Reset()
             {
                 _events.Reset();
-                if (_instance->GetBossState(DATA_THE_LICH_KING) == DONE)
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void MovementInform(uint32 type, uint32 id)
@@ -1232,9 +1227,12 @@ class npc_tirion_fordring_tft : public CreatureScript
                     SetEquipmentSlots(true);    // remove glow on ashbringer
             }
 
-            void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
+            void sGossipSelect(Player * /*player*/, uint32 sender, uint32 action)
             {
-                if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
+                if (!_instance)
+                    return;
+
+                if (_instance->GetBossState(DATA_THE_LICH_KING) != DONE && me->GetCreatureInfo()->GossipMenuId == sender && !action)
                 {
                     _events.SetPhase(PHASE_INTRO);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1246,15 +1244,21 @@ class npc_tirion_fordring_tft : public CreatureScript
             void JustReachedHome()
             {
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-
-                if (_instance->GetBossState(DATA_THE_LICH_KING) == DONE)
-                    return;
-
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void UpdateAI(uint32 const diff)
             {
+                if (!_instance)
+                    return;
+
+                if (me->HasAura(SPELL_ICE_LOCK) && _instance->GetBossState(DATA_THE_LICH_KING) == DONE)
+                {
+                    me->RemoveAurasDueToSpell(SPELL_ICE_LOCK);
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+                    EnterEvadeMode();
+                }
+
                 if (!UpdateVictim() && !(_events.GetPhaseMask() & (PHASE_MASK_INTRO | PHASE_MASK_OUTRO)))
                     return;
 
@@ -1312,6 +1316,57 @@ class npc_tirion_fordring_tft : public CreatureScript
             EventMap _events;
             InstanceScript* _instance;
         };
+
+        bool OnGossipHello(Player * pl, Creature * cr)
+        {
+            if (InstanceScript * instance = cr->GetInstanceScript())
+                if (instance->GetBossState(DATA_THE_LICH_KING) == DONE)
+                {
+                    pl->PlayerTalkClass->GetGossipMenu().ClearMenu();
+                    pl->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring mich bitte zurück zum Hammer des Lichts!",         GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+100);
+                    pl->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring mich bitte zurück nach Dalaran!",                  GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+101);
+                    pl->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring unseren Raid bitte zurück zum Hammer des Lichts!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+102);
+                    pl->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bring unseren Raid bitte zurück nach Dalaran!",          GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+103);
+                    pl->PlayerTalkClass->SendGossipMenu(14882, cr->GetGUID());
+                    return true;
+                }
+            return false;
+        }
+
+        bool OnGossipSelect(Player * pl, Creature * cr, uint32 /*sender*/, uint32 action)
+        {
+            if (InstanceScript * instance = cr->GetInstanceScript())
+            {
+                const Map::PlayerList & PlayerList = cr->GetMap()->GetPlayers();
+                if (!PlayerList.isEmpty() && instance->GetBossState(DATA_THE_LICH_KING) == DONE)
+                {
+                    switch(action)
+                    {
+                        case GOSSIP_ACTION_INFO_DEF+100:
+                            cr->CastSpell(pl, LIGHT_S_HAMMER_TELEPORT, true);
+                            break;
+                        case GOSSIP_ACTION_INFO_DEF+101:
+                            cr->CastSpell(pl, DALARAN_TELEPORT, true);
+                            break;
+                        case GOSSIP_ACTION_INFO_DEF+102:
+                            for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+                                if (Player * pl = itr->getSource())
+                                    if (pl->isValid())
+                                        cr->CastSpell(pl, LIGHT_S_HAMMER_TELEPORT, true);
+                            break;
+                        case GOSSIP_ACTION_INFO_DEF+103:
+                            for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+                                if (Player * pl = itr->getSource())
+                                    if (pl->isValid())
+                                        cr->CastSpell(pl, DALARAN_TELEPORT, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            return false;
+        }
 
         CreatureAI* GetAI(Creature* creature) const
         {
@@ -1480,6 +1535,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 _events.Reset();
                 me->SetReactState(REACT_PASSIVE);
+                DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
                 me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
             }
 
@@ -1559,7 +1615,6 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
-                _events.Reset();
             }
 
             void UpdateAI(uint32 const diff)
@@ -1577,8 +1632,11 @@ class npc_valkyr_shadowguard : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_GRAB_PLAYER:
-                            DoCastAOE(SPELL_VALKYR_TARGET_SEARCH);
-                            _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2000);
+                            if (!_grabbedPlayer)
+                            {
+                                DoCastAOE(SPELL_VALKYR_TARGET_SEARCH);
+                                _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2000);
+                            }
                             break;
                         case EVENT_MOVE_TO_DROP_POS:
                             me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
@@ -2151,7 +2209,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
 
             void AddMissingStack()
             {
-                if (!_hadAura && GetSpellValue()->EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
+                if (GetHitAura() && !_hadAura && GetSpellValue()->EffectBasePoints[EFFECT_1] != AURA_REMOVE_BY_ENEMY_SPELL)
                     GetHitAura()->ModStackAmount(1);
             }
 

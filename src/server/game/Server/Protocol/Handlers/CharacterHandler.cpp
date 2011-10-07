@@ -883,8 +883,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if (pCurrChar->GetGuildId() != 0)
     {
-        if (Guild* pGuild = sGuildMgr->GetGuildById(pCurrChar->GetGuildId()))
-            pGuild->SendLoginInfo(this);
+        if (Guild* guild = sGuildMgr->GetGuildById(pCurrChar->GetGuildId()))
+            guild->SendLoginInfo(this);
         else
         {
             // remove wrong guild data
@@ -1426,6 +1426,8 @@ void WorldSession::HandleCharCustomize(WorldPacket& recv_data)
     data << uint8(hairColor);
     data << uint8(facialHair);
     SendPacket(&data);
+
+    sWorld->ReloadSingleCharacterNameData(GUID_LOPART(guid));
 }
 
 void WorldSession::HandleEquipmentSetSave(WorldPacket &recv_data)
@@ -1631,6 +1633,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     trans->PAppend("UPDATE `characters` SET name='%s', race='%u', at_login=at_login & ~ %u WHERE guid='%u'", newname.c_str(), race, used_loginFlag, lowGuid);
     trans->PAppend("DELETE FROM character_declinedname WHERE guid ='%u'", lowGuid);
+    // Remove Spirit Wisp at faction change to prevent speedhack-like abuse
+    trans->PAppend("DELETE FROM `character_aura` WHERE `spell`=20584 AND `guid`='%u'", lowGuid);
 
     BattlegroundTeamId team = BG_TEAM_ALLIANCE;
 

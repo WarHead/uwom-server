@@ -1402,15 +1402,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_damage += CalculatePctF(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                 return;
             }
-            switch (m_spellInfo->Id)
-            {
-                // Bloodthirst
-                case 23881:
-                {
-                    m_caster->CastSpell(unitTarget, 55970, true);
-                    return;
-                }
-            }
             // Item - Warrior T10 Melee 4P Bonus
             if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
                 if (m_caster->GetAura(70847))
@@ -3359,7 +3350,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     uint32 dispel_type = m_spellInfo->Effects[effIndex].MiscValue;
     uint32 dispelMask  = SpellInfo::GetDispelMask(DispelType(dispel_type));
 
-    // we should not be able to dispel diseases if the target is affected by unholy blight
+    // we should not be able to dispel diseases if the target is affected by Unholy Blight
     if (dispelMask & (1 << DISPEL_DISEASE) && unitTarget->HasAura(50536))
         dispelMask &= ~(1 << DISPEL_DISEASE);
 
@@ -3397,6 +3388,11 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
 
     if (dispel_list.empty())
         return;
+
+    // If by any chance, there are less spells to dispel than the maximum number of dispellable spells, limit it.
+    // IE Magic Dispel can dispel 2 spells, but we have only one dispellable buff, so limit the damage to 1.
+    if (damage > int32(dispel_list.size()))
+        damage = int32(dispel_list.size());
 
     // Ok if exist some buffs for dispel try dispel it
     uint32 failCount = 0;
@@ -3480,9 +3476,9 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         int32 heal_amount = m_spellInfo->Effects[EFFECT_1].CalcValue();
         m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, NULL, NULL, true);
         // Glyph of Felhunter
-        if (Unit* pOwner = m_caster->GetOwner())
-            if (pOwner->GetAura(56249))
-                pOwner->CastCustomSpell(pOwner, 19658, &heal_amount, NULL, NULL, true);
+        if (Unit* owner = m_caster->GetOwner())
+            if (owner->GetAura(56249))
+                owner->CastCustomSpell(owner, 19658, &heal_amount, NULL, NULL, true);
     }
 }
 
@@ -3519,7 +3515,9 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
 
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
-        // For players just turn them
+        // For players just turn them. If drinking, prevent it
+        if (unitTarget->ToPlayer()->IsSitState())
+            unitTarget->ToPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
         unitTarget->ToPlayer()->SetPosition(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), angle, false);
         unitTarget->ToPlayer()->SendTeleportAckPacket();
     }
@@ -6524,7 +6522,7 @@ void Spell::EffectQuestClear(SpellEffIndex effIndex)
 
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player* pPlayer = unitTarget->ToPlayer();
+    Player* player = unitTarget->ToPlayer();
 
     uint32 quest_id = m_spellInfo->Effects[effIndex].MiscValue;
 
@@ -6534,24 +6532,24 @@ void Spell::EffectQuestClear(SpellEffIndex effIndex)
         return;
 
     // Player has never done this quest
-    if (pPlayer->GetQuestStatus(quest_id) == QUEST_STATUS_NONE)
+    if (player->GetQuestStatus(quest_id) == QUEST_STATUS_NONE)
         return;
 
     // remove all quest entries for 'entry' from quest log
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
     {
-        uint32 quest = pPlayer->GetQuestSlotQuestId(slot);
+        uint32 quest = player->GetQuestSlotQuestId(slot);
         if (quest == quest_id)
         {
-            pPlayer->SetQuestSlot(slot, 0);
+            player->SetQuestSlot(slot, 0);
 
             // we ignore unequippable quest items in this case, its' still be equipped
-            pPlayer->TakeQuestSourceItem(quest, false);
+            player->TakeQuestSourceItem(quest, false);
         }
     }
 
-    pPlayer->RemoveActiveQuest(quest_id);
-    pPlayer->RemoveRewardedQuest(quest_id);
+    player->RemoveActiveQuest(quest_id);
+    player->RemoveRewardedQuest(quest_id);
 }
 
 void Spell::EffectSendTaxi(SpellEffIndex effIndex)

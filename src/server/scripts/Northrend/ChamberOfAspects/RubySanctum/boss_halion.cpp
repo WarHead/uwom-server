@@ -438,17 +438,7 @@ public:
             events.ScheduleEvent(EVENT_DARK_BREATH, urand(SEKUNDEN_10, SEKUNDEN_15));
             events.ScheduleEvent(EVENT_CONSUMTION, urand(SEKUNDEN_15, SEKUNDEN_20));
 
-            if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
-            {
-                sLog->outError("haliontwilight: EnterCombat() - Respawn den Fokus");
-                if (!focus->isAlive())
-                    focus->Respawn();
-            }
-            else
-            {
-                sLog->outError("haliontwilight: EnterCombat() - Spawne den Fokus");
-                me->SummonCreature(NPC_ORB_ROTATION_FOCUS, HalionSpawnPos);
-            }
+            me->SummonCreature(NPC_KUGELROTATIONSFOKUS, HalionSpawnPos);
         }
 
         void DoAction(const int32 action)
@@ -488,11 +478,18 @@ public:
             Talk(urand(SAY_SLAY01, SAY_SLAY02));
         }
 
+        void JustDied(Unit * /*killer*/)
+        {
+            _JustDied();
+            me->RemoveCorpse(false);
+            if (instance)
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_ENTER);
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
             {
-                sLog->outError("haliontwilight: UpdateAI()->ForcedDespawn()");
                 me->ForcedDespawn();
                 return;
             }
@@ -658,8 +655,10 @@ public:
                             halionAI->EnterEvadeMode();
 
                 if (me->isInCombat())
+                {
+                    events.CancelEvent(EVENT_CHECK_ENCOUNTER);
                     EnterEvadeMode();
-
+                }
                 return;
             }
 
@@ -787,12 +786,12 @@ public:
             if (!instance)
                 return;
 
-            if (!me->isInCombat() && instance->GetBossState(DATA_HALION) == IN_PROGRESS)
+            /*if (!me->isInCombat() && instance->GetBossState(DATA_HALION) == IN_PROGRESS)
             {
                 sLog->outError("halioncontroller: UpdateAI()->EnterCombat()");
                 if (Creature * Halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
                     EnterCombat(Halion->getVictim());
-            }
+            }*/
 
             events.Update(diff);
 
@@ -871,22 +870,11 @@ public:
         {
             sLog->outError("focus: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
+            //me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
         }
-
-        InstanceScript * instance;
-        uint32 m_timer;
-        float m_direction;
-        float m_nextdirection;
-        bool m_warning;
 
         void Reset()
         {
-            //me->SetDisplayId(11686);
-            //me->SetDisplayId(10045);
-            //me->SetRespawnDelay(MONTH);
-            //SetCombatMovement(false);
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             m_direction = 0.0f;
             m_nextdirection = 0.0f;
             m_timer = SEKUNDEN_30;
@@ -913,11 +901,30 @@ public:
                 }
                 else if (!orb2->isAlive())
                     orb2->Respawn();
-            }
-        }
 
-        void AttackStart(Unit * /*who*/, float /*dist*/)
-        {
+                if (IsHeroic())
+                {
+                    Creature * orb3 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SCHATTENKUGEL_O));
+                    if (!orb3)
+                    {
+                        float x,y;
+                        me->GetNearPoint2D(x, y, FR_RADIUS, m_direction + (M_PI / 2));
+                        orb3 = me->SummonCreature(NPC_SCHATTENKUGEL_O, x, y, me->GetPositionZ(), 0);
+                    }
+                    else if (!orb3->isAlive())
+                        orb3->Respawn();
+
+                    Creature * orb4 = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SCHATTENKUGEL_W));
+                    if (!orb4)
+                    {
+                        float x,y;
+                        me->GetNearPoint2D(x, y, FR_RADIUS, m_direction - (M_PI / 2));
+                        orb4 = me->SummonCreature(NPC_SCHATTENKUGEL_W, x, y, me->GetPositionZ(), 0);
+                    }
+                    else if (!orb4->isAlive())
+                        orb4->Respawn();
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -925,10 +932,10 @@ public:
             if (!instance)
                 return;
 
-            if (instance->GetBossState(DATA_HALION) != IN_PROGRESS)
-                me->ForcedDespawn();
+            /*if (instance->GetBossState(DATA_HALION) != IN_PROGRESS || instance->GetBossState(DATA_HALION_TWILIGHT) == DONE)
+                me->ForcedDespawn();*/
 
-            if (instance->GetData(DATA_ORB_S) == DONE && instance->GetData(DATA_ORB_N) == DONE)
+            if (instance->GetData(DATA_SCHATTENKUGEL_N) == DONE && instance->GetData(DATA_SCHATTENKUGEL_S) == DONE)
             {
                 m_direction = m_nextdirection;
                 m_nextdirection = (m_direction - M_PI / 64.0f);
@@ -936,28 +943,34 @@ public:
                 if (m_nextdirection < 0.0f )
                     m_nextdirection = m_nextdirection + 2.0f * M_PI;
 
-                instance->SetData(DATA_ORB_DIRECTION, uint32(m_nextdirection*1000));
-                instance->SetData(DATA_ORB_N, SPECIAL);
-                instance->SetData(DATA_ORB_S, SPECIAL);
+                instance->SetData(DATA_KUGEL_RICHTUNG, uint32(m_nextdirection*1000));
+                instance->SetData(DATA_SCHATTENKUGEL_N, SPECIAL);
+                instance->SetData(DATA_SCHATTENKUGEL_S, SPECIAL);
+            }
+
+            if (IsHeroic() && instance->GetData(DATA_SCHATTENKUGEL_O) == DONE && instance->GetData(DATA_SCHATTENKUGEL_W) == DONE)
+            {
+                //instance->SetData(DATA_KUGEL_RICHTUNG, uint32(m_nextdirection*1000));
+                instance->SetData(DATA_SCHATTENKUGEL_O, SPECIAL);
+                instance->SetData(DATA_SCHATTENKUGEL_W, SPECIAL);
             }
 
             if (m_timer - 6000 <= diff && !m_warning)
             {
-                Talk(SAY_SPECIAL02);
+                if (Creature * HalionTwilight = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_HALION_TWILIGHT)))
+                    if (HalionTwilightAI * halionZwielichtAI = CAST_AI(HalionTwilightAI, HalionTwilight->AI()))
+                        halionZwielichtAI->Talk(SAY_SPECIAL02);
                 m_warning = true;
-            }
-
-            if (m_timer <= diff)
-            {
-                float x,y;
-                me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
-                me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0);
-                m_timer = SEKUNDEN_30;
-                m_warning = false;
             }
             else
                 m_timer -= diff;
         }
+    private:
+        InstanceScript * instance;
+        uint32 m_timer;
+        float m_direction;
+        float m_nextdirection;
+        bool m_warning;
     };
 
     CreatureAI * GetAI(Creature * creature) const
@@ -977,40 +990,40 @@ public:
         {
             sLog->outError("orb: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
+            //me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
         }
-
-        InstanceScript * instance;
-        float m_direction,m_delta;
-        uint32 m_flag;
-        uint32 m_flag1;
-        bool MovementStarted;
-        uint32 nextPoint;
 
         void Reset()
         {
-            //me->SetRespawnDelay(MONTH);
-            //me->SetDisplayId(11686);
-            //SetCombatMovement(false);
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-
-            if (me->GetEntry() == NPC_SCHATTENKUGEL_N)
+            switch(me->GetEntry())
             {
-                m_flag = DATA_ORB_N;
-                m_delta = 0.0f;
+                case NPC_SCHATTENKUGEL_N:
+                    m_flag = DATA_SCHATTENKUGEL_N;
+                    m_delta = 0.0f;
+                    break;
+                case NPC_SCHATTENKUGEL_S:
+                    m_flag = DATA_SCHATTENKUGEL_S;
+                    m_delta = M_PI;
+                    break;
+                case NPC_SCHATTENKUGEL_O:
+                    m_flag = DATA_SCHATTENKUGEL_O;
+                    m_delta = M_PI / 2;
+                    break;
+                case NPC_SCHATTENKUGEL_W:
+                    m_flag = DATA_SCHATTENKUGEL_W;
+                    m_delta -= M_PI / 2;
+                    break;
             }
-            else if (me->GetEntry() == NPC_SCHATTENKUGEL_S)
-            {
-                m_flag = DATA_ORB_S;
-                m_delta = M_PI;
-            }
-
-            m_direction = 0.0f;
-            nextPoint = 0;
-            MovementStarted = false;
 
             if (instance)
                 instance->SetData(m_flag, DONE);
+
+            SetCombatMovement(false);
+            m_direction = 0.0f;
+            nextPoint = 0;
+            MovementStarted = false;
+            m_delta = 0.0f;
+            SpawnCastTimer = SEKUNDEN_30;
         }
 
         void AttackStart(Unit * /*who*/, float /*dist*/)
@@ -1040,11 +1053,11 @@ public:
             if (instance)
             {
                 instance->SetData(m_flag, IN_PROGRESS);
-                m_direction = float(instance->GetData(DATA_ORB_DIRECTION) / 1000 + m_delta);
+                m_direction = float(instance->GetData(DATA_KUGEL_RICHTUNG) / 1000 + m_delta);
 
                 if (m_direction > 2.0f * M_PI)
                     m_direction = m_direction - 2.0f * M_PI;
-                if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
+                if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KUGELROTATIONSFOKUS)))
                     focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
                 else
                     me->ForcedDespawn();
@@ -1054,22 +1067,37 @@ public:
             me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(const uint32 diff)
         {
             if (!instance)
                 return;
 
-            if (instance->GetBossState(DATA_HALION) != IN_PROGRESS)
-                me->ForcedDespawn();
+            /*if (instance->GetBossState(DATA_HALION) != IN_PROGRESS || instance->GetBossState(DATA_HALION_TWILIGHT) == DONE)
+                me->ForcedDespawn();*/
 
-            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 3.0f, true))
-                DoCast(target, SPELL_TWILIGHT_CUTTER);
-            else if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 3.0f, true))
-                DoCast(target, SPELL_TWILIGHT_CUTTER);
+            if (SpawnCastTimer <= diff)
+            {
+                if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_KUGELROTATIONSFOKUS)))
+                {
+                    DoCast(focus, SPELL_TWILIGHT_CUTTER);
+                    me->SummonCreature(NPC_KUGELTRAEGER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0);
+                }
+                SpawnCastTimer = SEKUNDEN_30;
+            }
+            else
+                SpawnCastTimer -= diff;
 
             if (!MovementStarted && instance->GetData(m_flag) == SPECIAL)
                 StartMovement(1);
         }
+    private:
+        InstanceScript * instance;
+        float m_direction,m_delta;
+        uint32 m_flag;
+        uint32 m_flag1;
+        bool MovementStarted;
+        uint32 nextPoint;
+        uint32 SpawnCastTimer;
     };
 
     CreatureAI * GetAI(Creature * creature) const
@@ -1089,28 +1117,34 @@ public:
         {
             sLog->outError("carrier: gespawned");
             instance = creature->GetInstanceScript();
-            me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
-            for (uint8 i=0; i<4; ++i)
-                Kugel[i] = NULL;
+            //me->SetPhaseMask((me->GetPhaseMask() | 0x20) &~ 0x01, true); // 32
+            me->SetDisplayId(11686);
         }
 
         void Reset()
         {
-            //me->SetDisplayId(10045);
-            //me->SetDisplayId(11686);
-            //me->SetRespawnDelay(MONTH);
-            //SetCombatMovement(false);
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            Ziel = DATA_KUGELROTATIONSFOKUS;
+            DoCast(SPELL_TWILIGHT_PULSE_PERIODIC);
+            timer = SEKUNDEN_10;
+            MeineKugel = 0;
+            SetCombatMovement(false);
             MovementStarted = false;
-            //me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
-            //me->SetSpeed(MOVE_RUN, 6.0f, true);
-            if (instance)
-                for (uint8 i=0; i<4; ++i)
-                    Kugel[i] = ObjectAccessor::GetCreature(*me, instance->GetData64(i+100));
         }
 
         void AttackStart(Unit * /*who*/, float /*dist*/)
         {
+        }
+
+        void IsSummonedBy(Unit * summoner)
+        {
+            if (summoner && summoner->isValid())
+                switch(summoner->GetEntry())
+                {
+                    case NPC_SCHATTENKUGEL_N: MeineKugel = DATA_SCHATTENKUGEL_N; break;
+                    case NPC_SCHATTENKUGEL_S: MeineKugel = DATA_SCHATTENKUGEL_S; break;
+                    case NPC_SCHATTENKUGEL_O: MeineKugel = DATA_SCHATTENKUGEL_O; break;
+                    case NPC_SCHATTENKUGEL_W: MeineKugel = DATA_SCHATTENKUGEL_W; break;
+                }
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -1118,56 +1152,61 @@ public:
             if (type != POINT_MOTION_TYPE || !MovementStarted)
                 return;
 
-            if (id == 1)
+            switch(id)
             {
-                me->GetMotionMaster()->MovementExpired();
-                MovementStarted = false;
-                me->ForcedDespawn();
+                case DATA_KUGELROTATIONSFOKUS:
+                    Ziel = MeineKugel;
+                    break;
+                case DATA_SCHATTENKUGEL_N:
+                case DATA_SCHATTENKUGEL_S:
+                case DATA_SCHATTENKUGEL_O:
+                case DATA_SCHATTENKUGEL_W:
+                    Ziel = DATA_KUGELROTATIONSFOKUS;
+                    break;
             }
+            MovementStarted = false;
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void LaufKleinesMaedchenLauf()
+        {
+            float x,y;
+            float m_direction = float(instance->GetData(DATA_KUGEL_RICHTUNG) / 1000.0f + M_PI - M_PI / 32.0f);
+
+            if (m_direction > 2.0f * M_PI)
+                m_direction = m_direction - 2.0f * M_PI;
+
+            if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(Ziel)))
+                focus->GetPosition(x, y);
+            else
+                me->ForcedDespawn();
+
+            me->GetMotionMaster()->MovePoint(Ziel, x, y,  me->GetPositionZ());
+
+            MovementStarted = true;
+        }
+
+        void UpdateAI(const uint32 diff)
         {
             if (!instance)
                 return;
 
-            if (instance->GetBossState(DATA_HALION) != IN_PROGRESS)
+            if (timer <= diff)
                 me->ForcedDespawn();
+            else
+                timer -= diff;
 
-            /* Hier muss ich noch heraus finden, wer welchen Spell auf wen casted...
-            uint8 num = IsHeroic() ? 4 : 2;
-            for (uint8 i=0; i<4; ++i)
-                if (Kugel[i])
-                    DoCast(Kugel[i], SPELL_TWILIGHT_CUTTER);*/
-
-            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 1, 3.0f, true))
-                DoCast(target, SPELL_TWILIGHT_CUTTER);
-            else if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 3.0f, true))
-                DoCast(target, SPELL_TWILIGHT_CUTTER);
+            /*if (instance->GetBossState(DATA_HALION) != IN_PROGRESS || instance->GetBossState(DATA_HALION_TWILIGHT) == DONE)
+                me->ForcedDespawn();*/
 
             if (!MovementStarted)
-            {
-                float x,y;
-                float m_direction = float(instance->GetData(DATA_ORB_DIRECTION) / 1000.0f + M_PI - M_PI / 32.0f);
-
-                if (m_direction > 2.0f*M_PI)
-                    m_direction = m_direction - 2.0f*M_PI;
-                if (Creature * focus = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
-                    focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                else
-                    me->ForcedDespawn();
-
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->InitDefault();
-                me->GetMotionMaster()->MovePoint(1, x, y,  me->GetPositionZ());
-                MovementStarted = true;
-            }
-
+                LaufKleinesMaedchenLauf();
         }
     private:
         InstanceScript * instance;
         bool MovementStarted;
-        Creature * Kugel[4];
+        uint32 MeineKugel;
+        uint32 Ziel;
+        uint32 timer;
     };
 
     CreatureAI * GetAI(Creature * creature) const
@@ -1427,18 +1466,18 @@ public:
     }
 };
 
-/*class go_halion_portal_exit : public GameObjectScript
+class go_halion_portal_exit : public GameObjectScript
 {
 public:
     go_halion_portal_exit() : GameObjectScript("go_halion_portal_exit") { }
 
-    bool OnGossipHello(Player * player, GameObject * go)
+    bool OnGossipHello(Player * player, GameObject * /*go*/)
     {
         player->AddAura(SPELL_TWILIGHT_LEAVE, player);
         player->RemoveAurasDueToSpell(SPELL_TWILIGHT_ENTER);
         return true;
     }
-};*/
+};
 
 class spell_halion_meteor_strike_marker : public SpellScriptLoader
 {
@@ -1605,7 +1644,7 @@ void AddSC_boss_halion()
 
     new go_halion_portal_twilight();
     new go_halion_portal_real();
-    //new go_halion_portal_exit();
+    new go_halion_portal_exit();
 
     new spell_halion_meteor_strike_marker();
     new spell_halion_combustion();

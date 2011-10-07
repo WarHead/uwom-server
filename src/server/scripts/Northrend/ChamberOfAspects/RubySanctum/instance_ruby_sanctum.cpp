@@ -55,6 +55,12 @@ public:
             health = 0;
             XerestraszaAllowed = 0;
             ControllerSpawned = 0;
+            Kugelrichtung = 0;
+            KugelstatusN = 0;
+            KugelstatusS = 0;
+            KugelstatusO = 0;
+            KugelstatusW = 0;
+            Kugelrotationsfokus = 0;
         }
 
         void UpdateWorldState(bool command, uint32 value)
@@ -144,6 +150,9 @@ public:
                 case NPC_SCHATTENKUGEL_W:
                     SchattenKugelGUID[3] = creature->GetGUID();
                     break;
+                case NPC_KUGELROTATIONSFOKUS:
+                    Kugelrotationsfokus = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -228,6 +237,7 @@ public:
                 case DATA_SCHATTENKUGEL_S:              return SchattenKugelGUID[1];
                 case DATA_SCHATTENKUGEL_O:              return SchattenKugelGUID[2];
                 case DATA_SCHATTENKUGEL_W:              return SchattenKugelGUID[3];
+                case DATA_KUGELROTATIONSFOKUS:          return Kugelrotationsfokus;
                 default: break;
             }
             return 0;
@@ -287,6 +297,21 @@ public:
         {
             switch(type)
             {
+                case DATA_KUGEL_RICHTUNG:
+                    Kugelrichtung = data;
+                    break;
+                case DATA_SCHATTENKUGEL_N:
+                    KugelstatusN = data;
+                    break;
+                case DATA_SCHATTENKUGEL_S:
+                    KugelstatusS = data;
+                    break;
+                case DATA_SCHATTENKUGEL_O:
+                    KugelstatusO = data;
+                    break;
+                case DATA_SCHATTENKUGEL_W:
+                    KugelstatusW = data;
+                    break;
                 case DATA_COUNTER:
                     if (data == 0)
                         UpdateWorldState(false, 0);
@@ -316,10 +341,15 @@ public:
         {
             switch(type)
             {
-                case DATA_PHASE: return phase;
-                case DATA_HALION_HEALTH: return health;
-                case DATA_XERESTRASZA_ALLOWED: return XerestraszaAllowed;
-                case DATA_HALION_CONTROLLER_SPAWNED: return ControllerSpawned;
+                case DATA_KUGEL_RICHTUNG:               return Kugelrichtung;
+                case DATA_SCHATTENKUGEL_N:              return KugelstatusN;
+                case DATA_SCHATTENKUGEL_S:              return KugelstatusS;
+                case DATA_SCHATTENKUGEL_O:              return KugelstatusO;
+                case DATA_SCHATTENKUGEL_W:              return KugelstatusW;
+                case DATA_PHASE:                        return phase;
+                case DATA_HALION_HEALTH:                return health;
+                case DATA_XERESTRASZA_ALLOWED:          return XerestraszaAllowed;
+                case DATA_HALION_CONTROLLER_SPAWNED:    return ControllerSpawned;
                 default: break;
             }
             return 0;
@@ -381,10 +411,16 @@ public:
         uint64 FlameRingGUID;
         uint64 ZwielichtRingGUID;
         uint64 SchattenKugelGUID[4];
+        uint64 Kugelrotationsfokus;
         uint32 phase;
         uint32 health;
         uint32 XerestraszaAllowed;
         uint32 ControllerSpawned;
+        uint32 Kugelrichtung;
+        uint32 KugelstatusN;
+        uint32 KugelstatusS;
+        uint32 KugelstatusO;
+        uint32 KugelstatusW;
     };
 
     InstanceScript * GetInstanceScript(InstanceMap * map) const
