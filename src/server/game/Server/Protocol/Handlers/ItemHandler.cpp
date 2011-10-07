@@ -1154,9 +1154,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_SOCKET_GEMS");
 
-    if (_player()->InArena())
+    if (_player->InArena())
         return;
-    
+
     uint64 item_guid;
     uint64 gem_guids[MAX_GEM_SOCKETS];
 
