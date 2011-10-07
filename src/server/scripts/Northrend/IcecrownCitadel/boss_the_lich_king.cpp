@@ -1337,7 +1337,7 @@ class npc_tirion_fordring_tft : public CreatureScript
             return false;
         }
 
-        bool OnGossipSelect(Player * pl, Creature * cr, uint32 sender, uint32 action)
+        bool OnGossipSelect(Player * pl, Creature * cr, uint32 /*sender*/, uint32 action)
         {
             if (InstanceScript * instance = cr->GetInstanceScript())
             {
