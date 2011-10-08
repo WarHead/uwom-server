@@ -35,7 +35,6 @@
 #include "OutdoorPvPMgr.h"
 #include "OutdoorPvPTW.h"
 
-
 union u_map_magic
 {
     char asChar[4];
@@ -1608,7 +1607,6 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
                 return vmapHeight;
             else
                 return mapHeight;                           // better use .map surface height
-
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)
@@ -2675,7 +2673,6 @@ void BattlegroundMap::RemoveAllPlayers()
             if (Player* plr = itr->getSource())
                 if (!plr->IsBeingTeleportedFar())
                     plr->TeleportTo(plr->GetBattlegroundEntryPoint());
-
 }
 
 Creature*
