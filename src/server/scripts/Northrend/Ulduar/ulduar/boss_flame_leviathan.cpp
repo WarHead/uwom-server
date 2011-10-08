@@ -1673,9 +1673,11 @@ class spell_pursue : public SpellScriptLoader
 
             void FilterTargetsSubsequently(std::list<Unit*>& targets)
             {
-                ASSERT(_target);
-                targets.clear();
-                targets.push_back(_target);
+                if (_target)
+                {
+                    targets.clear();
+                    targets.push_back(_target);
+                }
             }
 
             void HandleScript(SpellEffIndex /*eff*/)
