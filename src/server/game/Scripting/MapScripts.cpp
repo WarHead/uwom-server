@@ -553,7 +553,7 @@ void Map::ScriptsProcess()
                 else
                 {
                     pTarget = source->ToPlayer();
-                    if (pTarget)
+                    if (target)
                     {
                         if (target->GetTypeId() != TYPEID_UNIT && target->GetTypeId() != TYPEID_GAMEOBJECT && target->GetTypeId() != TYPEID_PLAYER)
                         {
