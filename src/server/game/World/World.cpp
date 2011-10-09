@@ -1166,6 +1166,15 @@ void World::LoadConfigSettings(bool reload)
     // Gildenportal
     m_int_configs[CONFIG_GILDEN_ID] = ConfigMgr::GetIntDefault("GuildPortal.GuildID", 0);
 
+    // User Pimper
+    m_bool_configs[CONFIG_USER_PIMPER_PRESENTS_ALLOWED] = ConfigMgr::GetBoolDefault("UserPimper.PresentsAllowed", false);
+    m_int_configs[CONFIG_USER_PIMPER_CURRENCY]          = ConfigMgr::GetIntDefault("UserPimper.Costs.Type", 1);
+    m_int_configs[CONFIG_USER_PIMPER_CURRENCY_ITEM]     = ConfigMgr::GetIntDefault("UserPimper.Costs.Item", 0);
+    m_int_configs[CONFIG_USER_PIMPER_COSTS_MINIPETS]    = ConfigMgr::GetIntDefault("UserPimper.Costs.MiniPets", 1000000);
+    m_int_configs[CONFIG_USER_PIMPER_COSTS_REPUTATION]  = ConfigMgr::GetIntDefault("UserPimper.Costs.Reputation", 500000);
+    m_int_configs[CONFIG_USER_PIMPER_COSTS_PROFFESSION] = ConfigMgr::GetIntDefault("UserPimper.Costs.Profession", 200000);
+    m_int_configs[CONFIG_USER_PIMPER_COSTS_RECIPES]     = ConfigMgr::GetIntDefault("UserPimper.Costs.Recipes", 50000);
+    m_int_configs[CONFIG_USER_PIMPER_COSTS_MAXSKILL]    = ConfigMgr::GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
 
     // chat logging
     m_bool_configs[CONFIG_CHATLOG_CHANNEL] = ConfigMgr::GetBoolDefault("ChatLogs.Channel", false);
