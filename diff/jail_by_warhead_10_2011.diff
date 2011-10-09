@@ -165,7 +165,7 @@ index 65ba160..7fc9f80 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Mails
    ${CMAKE_CURRENT_SOURCE_DIR}/Maps
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 8e75ca4..97384e6 100755
+index e3a9cc1..7a966f9 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -1,4 +1,5 @@
@@ -294,7 +294,7 @@ index 8e75ca4..97384e6 100755
              trans->PAppend("DELETE FROM character_achievement WHERE guid = '%u' "   // NOTE: These achievements have flags & 256 in DBC.
                                          "AND achievement NOT BETWEEN '456' AND '467' "          // Realm First Level 80
                                          "AND achievement NOT BETWEEN '1400' AND '1427' "        // Realm First Raid Achievements
-@@ -17115,6 +17192,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -17109,6 +17186,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
      _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
  
@@ -304,7 +304,7 @@ index 8e75ca4..97384e6 100755
      return true;
  }
  
-@@ -18480,7 +18560,13 @@ void Player::SaveToDB()
+@@ -18474,7 +18554,13 @@ void Player::SaveToDB()
      // check if stats should only be saved on logout
      // save stats can be out of transaction
      if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
@@ -319,7 +319,7 @@ index 8e75ca4..97384e6 100755
      CharacterDatabase.CommitTransaction(trans);
  
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 6574604..dd5ba42 100755
+index f4d1b30..1d5603d 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1,4 +1,5 @@
@@ -1377,7 +1377,7 @@ index 0000000..ba652c1
 +
 +#endif
 diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
-index ce6d66c..303970b 100755
+index ffdf013..aea38db 100755
 --- a/src/server/game/Miscellaneous/Language.h
 +++ b/src/server/game/Miscellaneous/Language.h
 @@ -1,4 +1,5 @@
@@ -1386,7 +1386,7 @@ index ce6d66c..303970b 100755
   * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
   * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
   *
-@@ -1056,9 +1057,61 @@ enum TrinityStrings
+@@ -1058,9 +1059,61 @@ enum TrinityStrings
      LANG_AUTO_BROADCAST                 = 11000,
      LANG_INVALID_REALMID                = 11001,
  
@@ -1451,7 +1451,7 @@ index ce6d66c..303970b 100755
  
 +#endif
 diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
-index 64c9247..ae53897 100755
+index 26d7034..7995ff2 100755
 --- a/src/server/game/Scripting/ScriptLoader.cpp
 +++ b/src/server/game/Scripting/ScriptLoader.cpp
 @@ -1,4 +1,5 @@
@@ -1468,7 +1468,7 @@ index 64c9247..ae53897 100755
  void AddSC_learn_commandscript();
  void AddSC_misc_commandscript();
  void AddSC_modify_commandscript();
-@@ -488,17 +490,17 @@ void AddSC_boss_baltharus_the_warborn();
+@@ -489,17 +491,17 @@ void AddSC_boss_baltharus_the_warborn();
  void AddSC_boss_saviana_ragefire();
  void AddSC_boss_general_zarithrian();
  
@@ -1489,7 +1489,7 @@ index 64c9247..ae53897 100755
  
  //outland
  void AddSC_boss_exarch_maladaar();           //Auchindoun Auchenai Crypts
-@@ -652,6 +654,7 @@ void AddCommandScripts()
+@@ -653,6 +655,7 @@ void AddCommandScripts()
      AddSC_go_commandscript();
      AddSC_gobject_commandscript();
      AddSC_honor_commandscript();
@@ -1498,7 +1498,7 @@ index 64c9247..ae53897 100755
      AddSC_misc_commandscript();
      AddSC_modify_commandscript();
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 9f1d99c..41493b1 100755
+index 390c5de..7b90000 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1,4 +1,5 @@
@@ -1515,7 +1515,7 @@ index 9f1d99c..41493b1 100755
  #include "DBCStores.h"
  #include "LootMgr.h"
  #include "ItemEnchantmentMgr.h"
-@@ -1650,6 +1652,9 @@ void World::SetInitialWorldSettings()
+@@ -1654,6 +1656,9 @@ void World::SetInitialWorldSettings()
  
      m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
      m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
@@ -1525,9 +1525,9 @@ index 9f1d99c..41493b1 100755
      m_timers[WUPDATE_UPTIME].SetInterval(m_int_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
                                                              //Update "uptime" table based on configuration entry in minutes.
      m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
-@@ -1723,6 +1728,20 @@ void World::SetInitialWorldSettings()
-     sLog->outString("Calculate random battleground reset time..." );
-     InitRandomBGResetTime();
+@@ -1729,6 +1734,20 @@ void World::SetInitialWorldSettings()
+ 
+     LoadCharacterNameData();
  
 +    // Jail von WarHead
 +    sLog->outString();
@@ -1546,7 +1546,7 @@ index 9f1d99c..41493b1 100755
      // possibly enable db logging; avoid massive startup spam by doing it here.
      if (sLog->GetLogDBLater())
      {
-@@ -1903,6 +1922,13 @@ void World::Update(uint32 diff)
+@@ -1909,6 +1928,13 @@ void World::Update(uint32 diff)
          sAuctionMgr->Update();
      }
  
@@ -1561,7 +1561,7 @@ index 9f1d99c..41493b1 100755
      RecordTimeDiff(NULL);
      UpdateSessions(diff);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index 75a3f67..9bbe238 100755
+index e8d9622..6b821cd 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -1,4 +1,5 @@
@@ -1675,7 +1675,7 @@ index 0000000..0fc3008
 +    new jail_commandscript();
 +}
 diff --git a/src/server/shared/Utilities/Util.cpp b/src/server/shared/Utilities/Util.cpp
-index 7d3a6f7..80fd611 100755
+index 187258e..e38774a 100755
 --- a/src/server/shared/Utilities/Util.cpp
 +++ b/src/server/shared/Utilities/Util.cpp
 @@ -208,7 +208,7 @@ uint32 TimeStringToSecs(const std::string& timestring)
@@ -1706,7 +1706,7 @@ index 7d3a6f7..80fd611 100755
  }
  
 diff --git a/src/server/shared/Utilities/Util.h b/src/server/shared/Utilities/Util.h
-index a91bfe3..4f341be 100755
+index 8ded45a..c2c33db 100755
 --- a/src/server/shared/Utilities/Util.h
 +++ b/src/server/shared/Utilities/Util.h
 @@ -44,9 +44,16 @@ struct Tokens: public std::vector<char*>

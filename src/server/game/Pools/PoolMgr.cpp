@@ -840,8 +840,8 @@ void PoolMgr::LoadFromDB()
                 uint32 entry   = fields[0].GetUInt32();
                 uint32 pool_id = fields[1].GetUInt32();
 
-                Quest const* pQuest = sObjectMgr->GetQuestTemplate(entry);
-                if (!pQuest)
+                Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
+                if (!quest)
                 {
                     sLog->outErrorDb("`pool_quest` has a non existing quest template (Entry: %u) defined for pool id (%u), skipped.", entry, pool_id);
                     continue;
@@ -853,16 +853,16 @@ void PoolMgr::LoadFromDB()
                     continue;
                 }
 
-                if (!pQuest->IsDailyOrWeekly())
+                if (!quest->IsDailyOrWeekly())
                 {
                     sLog->outErrorDb("`pool_quest` has an quest (%u) which is not daily or weekly in pool id (%u), use ExclusiveGroup instead, skipped.", entry, pool_id);
                     continue;
                 }
 
                 if (poolTypeMap[pool_id] == QUEST_NONE)
-                    poolTypeMap[pool_id] = pQuest->IsDaily() ? QUEST_DAILY : QUEST_WEEKLY;
+                    poolTypeMap[pool_id] = quest->IsDaily() ? QUEST_DAILY : QUEST_WEEKLY;
 
-                int32 currType = pQuest->IsDaily() ? QUEST_DAILY : QUEST_WEEKLY;
+                int32 currType = quest->IsDaily() ? QUEST_DAILY : QUEST_WEEKLY;
 
                 if (poolTypeMap[pool_id] != currType)
                 {
@@ -982,9 +982,9 @@ void PoolMgr::ChangeDailyQuests()
 {
     for (PoolGroupQuestMap::iterator itr = mPoolQuestGroups.begin(); itr != mPoolQuestGroups.end(); ++itr)
     {
-        if (Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->GetFirstEqualChancedObjectId()))
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(itr->GetFirstEqualChancedObjectId()))
         {
-            if (pQuest->IsWeekly())
+            if (quest->IsWeekly())
                 continue;
 
             UpdatePool<Quest>(itr->GetPoolId(), 1);    // anything non-zero means don't load from db
@@ -998,9 +998,9 @@ void PoolMgr::ChangeWeeklyQuests()
 {
     for (PoolGroupQuestMap::iterator itr = mPoolQuestGroups.begin(); itr != mPoolQuestGroups.end(); ++itr)
     {
-        if (Quest const* pQuest = sObjectMgr->GetQuestTemplate(itr->GetFirstEqualChancedObjectId()))
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(itr->GetFirstEqualChancedObjectId()))
         {
-            if (pQuest->IsDaily())
+            if (quest->IsDaily())
                 continue;
 
             UpdatePool<Quest>(itr->GetPoolId(), 1);
