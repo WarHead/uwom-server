@@ -2257,7 +2257,12 @@ public:
 
             // Maxlevel
             case GOSSIP_ACTION_INFO_DEF + 7:
-                pPlayer->SetLevel(DEFAULT_MAX_LEVEL);
+                if (pPlayer->getLevel() < DEFAULT_MAX_LEVEL)
+                {
+                    pPlayer->SetLevel(DEFAULT_MAX_LEVEL);
+                    pPlayer->ModifyMoney(100000000); // 10k Gold geben.
+                    pPlayer->AddItem(51809, 4); // 4 * Tragbares Loch geben.
+                }
                 pPlayer->CLOSE_GOSSIP_MENU();
                 break;
 
