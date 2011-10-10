@@ -786,6 +786,7 @@ enum ePriestSpells
     SPELL_DISPEL            = 65546,
     SPELL_PSYCHIC_SCREAM    = 65543,
     SPELL_MANA_BURN         = 66100,
+    SPELL_PENANCE           = 66098,
 };
 
 class mob_toc_priest : public CreatureScript
@@ -826,24 +827,41 @@ public:
 
             if (m_uiCommonTimer <= uiDiff)
             {
-                switch (urand(0, 5))
+                switch (urand(0, 6))
                 {
                     case 0:
-                        DoCast(me, SPELL_RENEW);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_RENEW);
+                        else
+                            DoCast(me, SPELL_RENEW);
                         break;
                     case 1:
-                        DoCast(me, SPELL_SHIELD);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_SHIELD);
+                        else
+                            DoCast(me, SPELL_SHIELD);
                         break;
                     case 2: case 3:
-                        DoCast(me, SPELL_FLASH_HEAL);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_FLASH_HEAL);
+                        else
+                            DoCast(me, SPELL_FLASH_HEAL);
                         break;
                     case 4:
                         if (Unit* target = urand(0, 1) ? SelectTarget(SELECT_TARGET_RANDOM, 0) : DoSelectLowestHpFriendly(40.0f))
                             DoCast(target, SPELL_DISPEL);
+                        else
+                            DoCast(me, SPELL_DISPEL);
                         break;
                     case 5:
-                        DoCast(me, SPELL_MANA_BURN);
+                        if (Unit* target = SelectEnemyCaster(false))
+                            DoCast(target, SPELL_MANA_BURN);
                         break;
+                    case 6:
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_PENANCE);
+                        else
+                            DoCast(me, SPELL_PENANCE);
                 }
                 m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
@@ -933,7 +951,7 @@ public:
 
             if (m_uiMindBlastTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_MIND_BLAST);
                 m_uiMindBlastTimer = urand(3*IN_MILLISECONDS, 8*IN_MILLISECONDS);
             } else m_uiMindBlastTimer -= uiDiff;
@@ -943,20 +961,22 @@ public:
                 switch (urand(0, 4))
                 {
                     case 0: case 1:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_MIND_FLAY);
                         break;
                     case 2:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_VAMPIRIC_TOUCH);
                         break;
                    case 3:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_SW_PAIN);
                         break;
                    case 4:
                         if (Unit* target = urand(0, 1) ? SelectTarget(SELECT_TARGET_RANDOM, 0) : DoSelectLowestHpFriendly(40.0f))
                             DoCast(target, SPELL_DISPEL);
+                        else
+                            DoCast(me, SPELL_DISPEL);
                         break;
                 }
                 m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
@@ -1023,7 +1043,7 @@ public:
 
             if (m_uiFearTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_FEAR);
                 m_uiFearTimer = urand(4*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFearTimer -= uiDiff;
@@ -1037,7 +1057,7 @@ public:
 
             if (m_uiUnstableAfflictionTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_UNSTABLE_AFFLICTION);
                 m_uiUnstableAfflictionTimer = urand(2*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             } else m_uiUnstableAfflictionTimer -= uiDiff;
@@ -1058,13 +1078,15 @@ public:
                         DoCastVictim(SPELL_SEARING_PAIN);
                         break;
                     case 3:
-                        DoCastVictim(SPELL_CORRUPTION);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                            DoCast(target, SPELL_CORRUPTION);
                         break;
                     case 4:
-                        DoCastVictim(SPELL_CURSE_OF_AGONY);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                            DoCast(target, SPELL_CURSE_OF_AGONY);
                         break;
                     case 5:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_CURSE_OF_EXHAUSTION);
                         break;
                 }
