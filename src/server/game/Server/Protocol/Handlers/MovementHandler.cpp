@@ -380,7 +380,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
         uint32 underMapValue = -500.0f;
-        switch (plMover->GetMap())
+        switch (plMover->GetMapId())
         {
             case 617: underMapValue = 3.0f;  break; // Dalaran Sewers
             case 618: underMapValue = 25.0f; break; // Ring of Valor
