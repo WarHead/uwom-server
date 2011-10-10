@@ -1874,16 +1874,14 @@ public:
     {
         npc_uwom_user_pimperAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            ps.Cost_Type = ConfigMgr::GetIntDefault("UserPimper.Costs.Type", 1);
-            ps.Costs_Item = ConfigMgr::GetIntDefault("UserPimper.Costs.Item", 0);
-
-            ps.Costs_AllMiniPets = ConfigMgr::GetIntDefault("UserPimper.Costs.MiniPets", 1000000);
-            ps.Costs_Reputation = ConfigMgr::GetIntDefault("UserPimper.Costs.Reputation", 500000);
-            ps.Costs_Profession = ConfigMgr::GetIntDefault("UserPimper.Costs.Profession", 200000);
-            ps.Costs_AllRecipes = ConfigMgr::GetIntDefault("UserPimper.Costs.Recipes", 50000);
-            //ps.Costs_MaxSkill = ConfigMgr::GetIntDefault("UserPimper.Costs.MaxSkill", 50000);
-
-            ps.PresentsAllowed = ConfigMgr::GetBoolDefault("UserPimper.PresentsAllowed", false);
+            ps.PresentsAllowed      = sWorld->getBoolConfig(CONFIG_USER_PIMPER_PRESENTS_ALLOWED);
+            ps.Cost_Type            = sWorld->getIntConfig(CONFIG_USER_PIMPER_CURRENCY);
+            ps.Costs_Item           = sWorld->getIntConfig(CONFIG_USER_PIMPER_CURRENCY_ITEM);
+            ps.Costs_AllMiniPets    = sWorld->getIntConfig(CONFIG_USER_PIMPER_COSTS_MINIPETS);
+            ps.Costs_Reputation     = sWorld->getIntConfig(CONFIG_USER_PIMPER_COSTS_REPUTATION);
+            ps.Costs_Profession     = sWorld->getIntConfig(CONFIG_USER_PIMPER_COSTS_PROFFESSION);
+            ps.Costs_AllRecipes     = sWorld->getIntConfig(CONFIG_USER_PIMPER_COSTS_RECIPES);
+            //ps.Costs_MaxSkill       = sWorld->getIntConfig(CONFIG_USER_PIMPER_COSTS_MAXSKILL);
 
             if (ps.Cost_Type == 3)
             {
@@ -2257,7 +2255,12 @@ public:
 
             // Maxlevel
             case GOSSIP_ACTION_INFO_DEF + 7:
-                pPlayer->SetLevel(DEFAULT_MAX_LEVEL);
+                if (pPlayer->getLevel() < DEFAULT_MAX_LEVEL)
+                {
+                    pPlayer->SetLevel(DEFAULT_MAX_LEVEL);
+                    pPlayer->ModifyMoney(100000000); // 10k Gold geben.
+                    pPlayer->AddItem(51809, 4); // 4 * Tragbares Loch geben.
+                }
                 pPlayer->CLOSE_GOSSIP_MENU();
                 break;
 
