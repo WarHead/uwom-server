@@ -1877,14 +1877,14 @@ void Battleground::CheckArenaWinConditions()
     if (!GetAlivePlayersCountByTeam(ALLIANCE) && GetPlayersCountByTeam(HORDE))
     {
         if (isArena())
-            ScheduleArenaEnd(3000);
+            ScheduleArenaEnd(1500);
         else
             EndBattleground(HORDE);
     }
     else if (GetPlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
     {
         if (isArena())
-            ScheduleArenaEnd(3000);
+            ScheduleArenaEnd(1500);
         else
             EndBattleground(ALLIANCE);
     }
