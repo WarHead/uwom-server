@@ -273,8 +273,7 @@ void Battleground::Update(uint32 diff)
                     return;
                 }
 
-                if ((GetAlivePlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
-                    || (GetAlivePlayersCountByTeam(HORDE) && !GetAlivePlayersCountByTeam(ALLIANCE))
+                if ((GetAlivePlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE)) || (GetAlivePlayersCountByTeam(HORDE) && !GetAlivePlayersCountByTeam(ALLIANCE)))
                 {
                     // No player is alive, decrease the time
                     m_arenaEndTimer -= diff;
