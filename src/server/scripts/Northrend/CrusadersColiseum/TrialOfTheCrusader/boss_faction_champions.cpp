@@ -23,6 +23,10 @@ SDComment: Scripts by Selector, modified by /dev/rsa
 SDCategory: Crusader Coliseum
 EndScriptData */
 
+// The Healer Champions will now check for a friendly unit (Fellow NPC) within the max range of the spell they are casting
+// If there is no LOW HP friendly within that range the spell will be cast on themselves
+// Fixed a few of the damage dealer champions casting on themselves
+
 // Known bugs:
 // All - untested
 // Pets aren't being summoned by their masters
@@ -520,16 +524,28 @@ public:
                 switch (urand(0, 4))
                 {
                     case 0:
-                        DoCast(me, SPELL_LIFEBLOOM);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_LIFEBLOOM);
+                        else
+                            DoCast(me, SPELL_LIFEBLOOM);
                         break;
                     case 1:
-                        DoCast(me, SPELL_NOURISH);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_NOURISH);
+                        else
+                            DoCast(me, SPELL_NOURISH);
                         break;
                     case 2:
-                        DoCast(me, SPELL_REGROWTH);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_REGROWTH);
+                        else
+                            DoCast(me, SPELL_REGROWTH);
                         break;
                     case 3:
-                        DoCast(me, SPELL_REJUVENATION);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_REJUVENATION);
+                        else
+                            DoCast(me, SPELL_REJUVENATION);
                         break;
                     case 4:
                         if (Creature* target = SelectRandomFriendlyMissingBuff(SPELL_THORNS))
@@ -605,7 +621,7 @@ public:
 
             if (m_uiHexTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_HEX);
                 m_uiHexTimer = urand(10*IN_MILLISECONDS, 40*IN_MILLISECONDS);
             } else m_uiHexTimer -= uiDiff;
@@ -615,13 +631,20 @@ public:
                 switch (urand(0, 5))
                 {
                     case 0: case 1:
-                        DoCast(me, SPELL_HEALING_WAVE);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_HEALING_WAVE);
+                        else
+                            DoCast(me, SPELL_HEALING_WAVE);
                         break;
                     case 2:
-                        DoCast(me, SPELL_RIPTIDE);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_RIPTIDE);
+                        else
+                            DoCast(me, SPELL_RIPTIDE);
                         break;
                     case 3:
-                        DoCast(me, SPELL_EARTH_SHOCK);
+                        if (Unit* target = SelectEnemyCaster(false))
+                            DoCast(target, SPELL_EARTH_SHOCK);
                         break;
                     case 4:
                         DoCast(me, SPELL_SPIRIT_CLEANSE);
@@ -629,7 +652,7 @@ public:
                     case 5:
                         if (Unit* target = SelectRandomFriendlyMissingBuff(SPELL_EARTH_SHIELD))
                             DoCast(target, SPELL_EARTH_SHIELD);
-                        break;
+                            break;
                 }
                 m_uiCommonTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
@@ -707,7 +730,7 @@ public:
 
             if (m_uiHolyShockTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_HOLY_SHOCK);
                 m_uiHolyShockTimer = urand(6*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiHolyShockTimer -= uiDiff;
@@ -721,7 +744,7 @@ public:
 
             if (m_uiHammerOfJusticeTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     DoCast(target, SPELL_HAMMER_OF_JUSTICE);
                 m_uiHammerOfJusticeTimer = urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiHammerOfJusticeTimer -= uiDiff;
@@ -731,10 +754,16 @@ public:
                 switch (urand(0, 4))
                 {
                     case 0: case 1:
-                        DoCast(me, SPELL_FLASH_OF_LIGHT);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_FLASH_OF_LIGHT);
+                        else
+                            DoCast(me, SPELL_FLASH_OF_LIGHT);
                         break;
                     case 2: case 3:
-                        DoCast(me, SPELL_HOLY_LIGHT);
+                        if (Unit* target = DoSelectLowestHpFriendly(40.0f))
+                            DoCast(target, SPELL_HOLY_LIGHT);
+                        else
+                            DoCast(me, SPELL_HOLY_LIGHT);
                         break;
                     case 4:
                         DoCast(me, SPELL_CLEANSE);
