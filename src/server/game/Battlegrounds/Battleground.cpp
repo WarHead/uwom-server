@@ -259,9 +259,7 @@ void Battleground::Update(uint32 diff)
     {
         case STATUS_WAIT_JOIN:
             if (GetPlayersSize())
-            {
                 _ProcessJoin(diff);
-            }
             break;
         case STATUS_IN_PROGRESS:
             _ProcessOfflineQueue();
@@ -273,6 +271,20 @@ void Battleground::Update(uint32 diff)
                     UpdateArenaWorldState();
                     CheckArenaAfterTimerConditions();
                     return;
+                }
+
+                if ((GetAlivePlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE)) || (GetAlivePlayersCountByTeam(HORDE) && !GetAlivePlayersCountByTeam(ALLIANCE)))
+                {
+                    // No player is alive, decrease the time
+                    m_arenaEndTimer -= diff;
+                    // Determine winner team
+                    if (m_arenaEndTimer < 100)
+                    {
+                        if (!GetAlivePlayersCountByTeam(HORDE))
+                            EndBattleground(HORDE);
+                        else
+                            EndBattleground(ALLIANCE);
+                    }
                 }
             }
             else
@@ -1458,7 +1470,7 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.go_state       = 1;
 */
     // Add to world, so it can be later looked up from HashMapHolder
-    map->Add(go);
+    map->AddToMap(go);
     m_BgObjects[type] = go->GetGUID();
     return true;
 }
@@ -1525,7 +1537,7 @@ void Battleground::SpawnBGObject(uint32 type, uint32 respawntime)
                     // Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
                     obj->SetLootState(GO_READY);
             obj->SetRespawnTime(respawntime);
-            map->Add(obj);
+            map->AddToMap(obj);
         }
 }
 
@@ -1561,7 +1573,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     creature->SetSpeed(MOVE_WALK,  cinfo->speed_walk);
     creature->SetSpeed(MOVE_RUN,   cinfo->speed_run);
 
-    map->Add(creature);
+    map->AddToMap(creature);
     m_BgCreatures[type] = creature->GetGUID();
 
     if (respawntime)
@@ -1862,9 +1874,24 @@ void Battleground::CheckArenaAfterTimerConditions()
 void Battleground::CheckArenaWinConditions()
 {
     if (!GetAlivePlayersCountByTeam(ALLIANCE) && GetPlayersCountByTeam(HORDE))
-        EndBattleground(HORDE);
+    {
+        if (isArena())
+            ScheduleArenaEnd(1500);
+        else
+            EndBattleground(HORDE);
+    }
     else if (GetPlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
-        EndBattleground(ALLIANCE);
+    {
+        if (isArena())
+            ScheduleArenaEnd(1500);
+        else
+            EndBattleground(ALLIANCE);
+    }
+}
+
+void Battleground::ScheduleArenaEnd(uint32 time)
+{
+    m_arenaEndTimer = time;
 }
 
 void Battleground::UpdateArenaWorldState()

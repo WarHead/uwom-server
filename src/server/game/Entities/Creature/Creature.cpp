@@ -140,7 +140,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-Creature::Creature(): Unit(), lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0), m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0),
+Creature::Creature(): Unit(), MapCreature(), lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0), m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0),
 m_corpseRemoveTime(0), m_respawnTime(0), m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE), m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0),
 m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_creatureInfo(NULL), m_creatureData(NULL),
 m_isCaster(false),                              // Ist dieser NPC ein Caster?
@@ -1433,7 +1433,7 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
         return false;
-        
+
     // Do not attack non-combat pets
     if (who->GetTypeId() == TYPEID_UNIT && who->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
         return false;
@@ -2440,21 +2440,28 @@ const char* Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
     return GetName();
 }
 
+//Do not if this works or not, moving creature to another map is very dangerous
 void Creature::FarTeleportTo(Map* map, float X, float Y, float Z, float O)
 {
-    InterruptNonMeleeSpells(true);
-    CombatStop();
-    ClearComboPointHolders();
-    DeleteThreatList();
-    GetMotionMaster()->Clear(false);
-    DestroyForNearbyPlayers();
-
-    RemoveFromWorld();
-    ResetMap();
+    CleanupBeforeRemoveFromMap(false);
+    GetMap()->RemoveFromMap(this, false);
+    Relocate(X, Y, Z, O);
     SetMap(map);
-    AddToWorld();
+    GetMap()->AddToMap(this);
+}
 
-    SetPosition(X, Y, Z, O, true);
+void Creature::SetPosition(float x, float y, float z, float o)
+{
+    // prevent crash when a bad coord is sent by the client
+    if (!Trinity::IsValidMapCoord(x, y, z, o))
+    {
+        sLog->outDebug(LOG_FILTER_UNITS, "Creature::SetPosition(%f, %f, %f) .. bad coordinates!", x, y, z);
+        return;
+    }
+
+    GetMap()->CreatureRelocation(ToCreature(), x, y, z, o);
+    if (IsVehicle())
+        GetVehicleKit()->RelocatePassengers(x, y, z, o);
 }
 
 bool Creature::IsDungeonBoss() const
