@@ -354,18 +354,9 @@ public:
             if (GameObject * pGO = GetClosestGameObjectWithEntry(me, TW_GO_TELEPORTER_FUER_FAHRZEUGE, float(TW_FAHRZEUG_TELEPORTER_RADIUS)))
             {
                 if (pGO->GetPositionY() < float(TW_FAHRZEUG_TELEPORTERGRENZE_Y))
-                {
-                    me->ToUnit()->SetPosition(FahrzeugTeleportKoords[FTeleOst][FTeleX], FahrzeugTeleportKoords[FTeleOst][FTeleY], FahrzeugTeleportKoords[FTeleOst][FTeleZ], 0, true);
-                    me->ToUnit()->Relocate(FahrzeugTeleportKoords[FTeleOst][FTeleX], FahrzeugTeleportKoords[FTeleOst][FTeleY], FahrzeugTeleportKoords[FTeleOst][FTeleZ]);
-                    me->ToUnit()->SendMonsterMove(FahrzeugTeleportKoords[FTeleOst][FTeleX], FahrzeugTeleportKoords[FTeleOst][FTeleY], FahrzeugTeleportKoords[FTeleOst][FTeleZ], 0);
-                }
+                    me->ToCreature()->SetPosition(FahrzeugTeleportKoords[FTeleOst][FTeleX], FahrzeugTeleportKoords[FTeleOst][FTeleY], FahrzeugTeleportKoords[FTeleOst][FTeleZ], 0);
                 else
-                {
-                    me->ToUnit()->SetPosition(FahrzeugTeleportKoords[FTeleWest][FTeleX], FahrzeugTeleportKoords[FTeleWest][FTeleY], FahrzeugTeleportKoords[FTeleWest][FTeleZ], 0, true);
-                    me->ToUnit()->Relocate(FahrzeugTeleportKoords[FTeleWest][FTeleX], FahrzeugTeleportKoords[FTeleWest][FTeleY], FahrzeugTeleportKoords[FTeleWest][FTeleZ]);
-                    me->ToUnit()->SendMonsterMove(FahrzeugTeleportKoords[FTeleWest][FTeleX], FahrzeugTeleportKoords[FTeleWest][FTeleY], FahrzeugTeleportKoords[FTeleWest][FTeleZ], 0);
-                }
-                me->UpdateObjectVisibility();
+                    me->ToCreature()->SetPosition(FahrzeugTeleportKoords[FTeleWest][FTeleX], FahrzeugTeleportKoords[FTeleWest][FTeleY], FahrzeugTeleportKoords[FTeleWest][FTeleZ], 0);
             }
         }
 

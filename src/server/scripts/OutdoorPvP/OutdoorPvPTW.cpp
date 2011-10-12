@@ -2278,7 +2278,7 @@ void Tausendwinter::SpawnGO(uint32 GUID, GameObjectData const * GOData)
                 delete pGO;
             else
                 if (pGO->isSpawnedByDefault())
-                    map->Add(pGO);
+                    map->AddToMap(pGO);
         }
     }
 }
@@ -2307,7 +2307,7 @@ void Tausendwinter::SpawnNPC(uint32 GUID, CreatureData const * NPCData)
                 delete pCr;
             else
             {
-                map->Add(pCr);
+                map->AddToMap(pCr);
 
                 if (!pCr->isAlive())
                     pCr->Respawn(true);
