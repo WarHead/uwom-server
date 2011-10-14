@@ -165,7 +165,7 @@ index 65ba160..7fc9f80 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Mails
    ${CMAKE_CURRENT_SOURCE_DIR}/Maps
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index e3a9cc1..7a966f9 100755
+index 8d799e4..0d801aa 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -1,4 +1,5 @@
@@ -286,7 +286,7 @@ index e3a9cc1..7a966f9 100755
  
      if (m_nextSave > 0)
      {
-@@ -4928,6 +5004,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
+@@ -4925,6 +5001,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
              trans->PAppend("DELETE FROM mail_items WHERE receiver = '%u'", guid);
              trans->PAppend("DELETE FROM character_pet WHERE owner = '%u'", guid);
              trans->PAppend("DELETE FROM character_pet_declinedname WHERE owner = '%u'", guid);
@@ -294,7 +294,7 @@ index e3a9cc1..7a966f9 100755
              trans->PAppend("DELETE FROM character_achievement WHERE guid = '%u' "   // NOTE: These achievements have flags & 256 in DBC.
                                          "AND achievement NOT BETWEEN '456' AND '467' "          // Realm First Level 80
                                          "AND achievement NOT BETWEEN '1400' AND '1427' "        // Realm First Raid Achievements
-@@ -17109,6 +17186,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
+@@ -17104,6 +17181,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
  
      _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
  
@@ -304,7 +304,7 @@ index e3a9cc1..7a966f9 100755
      return true;
  }
  
-@@ -18474,7 +18554,13 @@ void Player::SaveToDB()
+@@ -18469,7 +18549,13 @@ void Player::SaveToDB()
      // check if stats should only be saved on logout
      // save stats can be out of transaction
      if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
@@ -319,7 +319,7 @@ index e3a9cc1..7a966f9 100755
      CharacterDatabase.CommitTransaction(trans);
  
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index f4d1b30..1d5603d 100755
+index a5067a6..3071103 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1,4 +1,5 @@
@@ -354,7 +354,7 @@ index f4d1b30..1d5603d 100755
          time_t m_Last_tick;
 diff --git a/src/server/game/Jail/Jail.cpp b/src/server/game/Jail/Jail.cpp
 new file mode 100644
-index 0000000..324532d
+index 0000000..ab1cb08
 --- /dev/null
 +++ b/src/server/game/Jail/Jail.cpp
 @@ -0,0 +1,908 @@
@@ -1100,7 +1100,7 @@ index 0000000..324532d
 +    time_t localtime = time(NULL);
 +    uint32 release = uint32(localtime + (jailtime * HOUR));
 +
-+    if (!chr || !chr->isValid())
++    if (!chr || !chr->IsInWorld())
 +        return false;
 +
 +    chr->SaveToDB();
@@ -1498,7 +1498,7 @@ index 26d7034..7995ff2 100755
      AddSC_misc_commandscript();
      AddSC_modify_commandscript();
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 390c5de..7b90000 100755
+index 28657fa..9a935fe 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1,4 +1,5 @@
@@ -1561,7 +1561,7 @@ index 390c5de..7b90000 100755
      RecordTimeDiff(NULL);
      UpdateSessions(diff);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index e8d9622..6b821cd 100755
+index 06dc006..fd8e1cf 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -1,4 +1,5 @@
