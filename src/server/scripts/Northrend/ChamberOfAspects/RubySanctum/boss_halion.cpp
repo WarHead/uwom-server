@@ -1137,7 +1137,7 @@ public:
 
         void IsSummonedBy(Unit * summoner)
         {
-            if (summoner && summoner->isValid())
+            if (summoner && summoner->IsInWorld())
                 switch(summoner->GetEntry())
                 {
                     case NPC_SCHATTENKUGEL_N: MeineKugel = DATA_SCHATTENKUGEL_N; break;

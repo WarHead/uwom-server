@@ -112,7 +112,7 @@ enum BossSpells
 
 bool SpielerAmLeben(Unit * source)
 {
-    if (!source || !source->isAlive() || !source->isValid())
+    if (!source || !source->isAlive() || !source->IsInWorld())
         return false;
 
     Map::PlayerList const &PlayerList = source->GetMap()->GetPlayers();
@@ -121,7 +121,7 @@ bool SpielerAmLeben(Unit * source)
         return false;
 
     for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-        if (itr->getSource() && itr->getSource()->isValid() && itr->getSource()->isAlive())
+        if (itr->getSource() && itr->getSource()->IsInWorld() && itr->getSource()->isAlive())
             return true;
 
     return false;
@@ -301,7 +301,7 @@ public:
 
         void EnterCombat(Unit * who)
         {
-            if (!who || !who->isValid() || !who->ToPlayer())
+            if (!who || !who->IsInWorld() || !who->ToPlayer())
                 return;
 
             Player * pl = who->ToPlayer();

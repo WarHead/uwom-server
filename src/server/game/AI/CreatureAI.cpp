@@ -45,7 +45,7 @@ void CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
 
 void CreatureAI::DoZoneInCombat(Creature * creature, float range)
 {
-    if (!creature || creature->isValid())
+    if (!creature || creature->IsInWorld())
         creature = me;
 
     if (!creature->CanHaveThreatList())
@@ -83,7 +83,7 @@ void CreatureAI::DoZoneInCombat(Creature * creature, float range)
 
     for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
         if (Player * pl = itr->getSource())
-            if (pl->isAlive() && pl->isValid())
+            if (pl->isAlive() && pl->IsInWorld())
             {
                 if (pl->isGameMaster())
                     continue;

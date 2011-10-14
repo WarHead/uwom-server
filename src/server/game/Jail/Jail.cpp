@@ -742,7 +742,7 @@ bool Jail::Inhaftierung(ChatHandler * handler, Player * chr, std::string cname, 
     time_t localtime = time(NULL);
     uint32 release = uint32(localtime + (jailtime * HOUR));
 
-    if (!chr || !chr->isValid())
+    if (!chr || !chr->IsInWorld())
         return false;
 
     chr->SaveToDB();
@@ -885,7 +885,7 @@ void Jail::GildenhausWache(Player * chr)
     if (!m_JailKonf.Enabled)
         return;
 
-    if (!chr || !chr->isValid() || !AccountMgr::IsPlayerAccount(chr->GetSession()->GetSecurity()))
+    if (!chr || !chr->IsInWorld() || !AccountMgr::IsPlayerAccount(chr->GetSession()->GetSecurity()))
         return;
 
     if (chr->GetMapId() != 1)

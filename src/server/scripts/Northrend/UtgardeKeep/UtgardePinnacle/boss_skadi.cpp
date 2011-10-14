@@ -515,7 +515,7 @@ public:
 
     bool OnGossipHello(Player * player, GameObject * /*pGO*/)
     {
-        if (!player || !player->isValid())
+        if (!player || !player->IsInWorld())
             return false;
 
         player->CastSpell(player, SPELL_HARPUNE_ERSCHAFFEN, true);

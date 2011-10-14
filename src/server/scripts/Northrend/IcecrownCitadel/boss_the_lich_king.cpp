@@ -1351,13 +1351,13 @@ class npc_tirion_fordring_tft : public CreatureScript
                         case GOSSIP_ACTION_INFO_DEF+102:
                             for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                                 if (Player * pl = itr->getSource())
-                                    if (pl->isValid())
+                                    if (pl->IsInWorld())
                                         cr->CastSpell(pl, LIGHT_S_HAMMER_TELEPORT, true);
                             break;
                         case GOSSIP_ACTION_INFO_DEF+103:
                             for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                                 if (Player * pl = itr->getSource())
-                                    if (pl->isValid())
+                                    if (pl->IsInWorld())
                                         cr->CastSpell(pl, DALARAN_TELEPORT, true);
                             break;
                         default:

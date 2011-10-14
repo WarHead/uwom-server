@@ -727,7 +727,7 @@ namespace Trinity
             FriendlyInRangeToAssist(const Unit * obj, float range, const Unit * enemy) : i_obj(obj), i_enemy(enemy), i_range(range) {}
             bool operator()(Unit * u)
             {
-                if (!u || !u->isValid() || !i_enemy || !i_enemy->isValid())
+                if (!u || !u->IsInWorld() || !i_enemy || !i_enemy->IsInWorld())
                     return false;
 
                 if (!u->isAlive())
@@ -743,9 +743,6 @@ namespace Trinity
                     return false;
 
                 if (u->ToCreature()->isCivilian())
-                    return false;
-
-                if (!u->ToCreature()->isValid())
                     return false;
 
                 if (u->ToCreature()->GetCreatureInfo()->rank >= 3)
