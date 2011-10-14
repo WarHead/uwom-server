@@ -740,7 +740,7 @@ bool Jail::Inhaftierung(ChatHandler * handler, Player * chr, std::string cname, 
     time_t localtime = time(NULL);
     uint32 release = uint32(localtime + (jailtime * HOUR));
 
-    if (!chr || !chr->isValid())
+    if (!chr || !chr->IsInWorld())
         return false;
 
     chr->SaveToDB();
