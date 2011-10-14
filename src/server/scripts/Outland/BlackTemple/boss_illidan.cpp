@@ -1412,7 +1412,8 @@ public:
                     instance->HandleGameObject(GateGUID, false);
 
                     for (uint8 i = 0; i < 2; ++i)
-                        instance->HandleGameObject(DoorGUID[i], false);
+
+                        Instance->HandleGameObject(DoorGUID[i], false);
                     // JustCreated = false;
                 }else
                 { // open all doors, raid wiped
