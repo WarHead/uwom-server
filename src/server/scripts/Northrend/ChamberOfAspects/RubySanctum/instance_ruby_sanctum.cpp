@@ -71,7 +71,7 @@ public:
             {
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     if (Player * pl = itr->getSource())
-                        if (pl->isAlive())
+                        if (pl->IsInWorld() && pl->isAlive())
                         {
                             pl->SendUpdateWorldState(WORLDSTATE_CORPOREALITY_TOGGLE, 0);
 

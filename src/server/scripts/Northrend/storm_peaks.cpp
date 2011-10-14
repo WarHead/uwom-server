@@ -263,7 +263,7 @@ public:
 
             for (uint8 i=0; i<4; ++i)
                 if (Unit * passenger = me->GetVehicleKit()->GetPassenger(i))
-                    if (passenger->ToPlayer() && passenger->ToPlayer()->isValid())
+                    if (passenger->ToPlayer() && passenger->ToPlayer()->IsInWorld())
                         return true;
 
             return false;
@@ -271,18 +271,18 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!rider || !rider->isValid())
+            if (!rider || !rider->IsInWorld())
             {
                 for (uint8 i=0; i<4; ++i)
                     if (Unit * passenger = me->GetVehicleKit()->GetPassenger(i))
-                        if (passenger->ToPlayer() && passenger->ToPlayer()->isValid())
+                        if (passenger->ToPlayer() && passenger->ToPlayer()->IsInWorld())
                         {
                             rider = passenger->ToPlayer();
                             rider->CastSpell(rider, Spell_Befreiter_Protodrache_reiten, true);
                             check_timer = SEKUNDEN_10;
                         }
 
-                if (!rider || !rider->isValid())
+                if (!rider || !rider->IsInWorld())
                     rider = NULL;
             }
 

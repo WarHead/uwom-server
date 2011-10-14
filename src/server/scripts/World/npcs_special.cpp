@@ -261,11 +261,11 @@ public:
 
         void MoveInLineOfSight(Unit * who)
         {
-            if (!who || !who->isValid() || who->GetTypeId() != TYPEID_PLAYER)
+            if (!who || !who->IsInWorld() || who->GetTypeId() != TYPEID_PLAYER)
                 return;
 
             Player * chr = who->ToPlayer();
-            if (!chr || !chr->isValid())
+            if (!chr || !chr->IsInWorld())
                 return;
 
             if (SpielerGUIDSet.find(chr->GetGUID()) == SpielerGUIDSet.end())
@@ -418,7 +418,7 @@ public:
                         itr = SpielerGUIDSet.begin();
 
                 Player * chr = sObjectAccessor->FindPlayer(*itr);
-                if (!chr || !chr->isValid())
+                if (!chr || !chr->IsInWorld())
                 {
                     SpielerGUIDSet.erase(itr);
                     continue;
@@ -431,7 +431,7 @@ public:
 
         bool BeschenkeZiel(Player * chr, uint8 num)
         {
-            if (!chr || !chr->isValid() || !AccountMgr::IsPlayerAccount(chr->GetSession()->GetSecurity()))
+            if (!chr || !chr->IsInWorld() || !AccountMgr::IsPlayerAccount(chr->GetSession()->GetSecurity()))
                 return false;
 
             if (BereitsVergeben() >= MAX_GESCHENKE || SemaVorhanden(num))

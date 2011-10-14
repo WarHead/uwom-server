@@ -227,7 +227,7 @@ public:
 
         void EnterCombat(Unit * who)
         {
-            if (!who || !who->isValid())
+            if (!who || !who->IsInWorld())
                 return;
 
             events.ScheduleEvent(EVENT_Herbeirufer_der_Schmorschuppen_Versengen, urand(SEKUNDEN_05, SEKUNDEN_10));

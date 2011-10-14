@@ -211,7 +211,7 @@ public:
                 return true;
 
             if (Unit * passenger = me->GetVehicleKit()->GetPassenger(0))
-                if (passenger->ToPlayer() && passenger->ToPlayer()->isValid())
+                if (passenger->ToPlayer() && passenger->ToPlayer()->IsInWorld())
                     return true;
 
             return false;
