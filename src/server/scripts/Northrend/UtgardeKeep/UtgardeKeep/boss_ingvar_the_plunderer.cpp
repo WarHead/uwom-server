@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -173,7 +174,14 @@ public:
             DoScriptText(YELL_DEAD_2, me);
 
             if (instance)
+            {
                 instance->SetData(DATA_INGVAR_EVENT, DONE);
+                Map::PlayerList const & PlList = instance->instance->GetPlayers();
+                if (!PlList.isEmpty())
+                    for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                        if (Player * pl = itr->getSource())
+                            pl->KilledMonsterCredit(MOB_INGVAR_HUMAN, 0);
+            }
         }
 
         void KilledUnit(Unit* /*victim*/)
