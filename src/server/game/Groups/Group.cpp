@@ -1261,12 +1261,11 @@ void Group::UpdatePlayerOutOfRange(Player* player)
     WorldPacket data;
     player->GetSession()->BuildPartyMemberStatsChangedPacket(player, &data);
 
-    Player* member;
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        member = itr->getSource();
-        if (member && !member->IsWithinDist(player, member->GetSightRange(), false))
-            member->GetSession()->SendPacket(&data);
+        player = itr->getSource();
+        if (player && !player->IsWithinDist(player, player->GetSightRange(), false))
+            player->GetSession()->SendPacket(&data);
     }
 }
 
@@ -1274,12 +1273,12 @@ void Group::BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int
 {
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* plr = itr->getSource();
-        if (!plr || (ignore != 0 && plr->GetGUID() == ignore) || (ignorePlayersInBGRaid && plr->GetGroup() != this))
+        Player* pl = itr->getSource();
+        if (!pl || (ignore != 0 && pl->GetGUID() == ignore) || (ignorePlayersInBGRaid && pl->GetGroup() != this))
             continue;
 
-        if (plr->GetSession() && (group == -1 || itr->getSubGroup() == group))
-            plr->GetSession()->SendPacket(packet);
+        if (pl->GetSession() && (group == -1 || itr->getSubGroup() == group))
+            pl->GetSession()->SendPacket(packet);
     }
 }
 
@@ -1287,10 +1286,10 @@ void Group::BroadcastReadyCheck(WorldPacket* packet)
 {
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* plr = itr->getSource();
-        if (plr && plr->GetSession())
-            if (IsLeader(plr->GetGUID()) || IsAssistant(plr->GetGUID()))
-                plr->GetSession()->SendPacket(packet);
+        Player* pl = itr->getSource();
+        if (pl && pl->GetSession())
+            if (IsLeader(pl->GetGUID()) || IsAssistant(pl->GetGUID()))
+                pl->GetSession()->SendPacket(packet);
     }
 }
 
@@ -1298,8 +1297,8 @@ void Group::OfflineReadyCheck()
 {
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
-        Player* plr = ObjectAccessor::FindPlayer(citr->guid);
-        if (!plr || !plr->GetSession())
+        Player* pl = ObjectAccessor::FindPlayer(citr->guid);
+        if (!pl || !pl->GetSession())
         {
             WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
             data << uint64(citr->guid);
@@ -1329,7 +1328,6 @@ bool Group::SameSubGroup(Player const* member1, Player const* member2) const
 {
     if (!member1 || !member2)
         return false;
-
     if (member1->GetGroup() != this || member2->GetGroup() != this)
         return false;
     else
@@ -1366,8 +1364,10 @@ void Group::ChangeMembersGroup(uint64 guid, uint8 group)
     if (!isBGGroup())
         CharacterDatabase.PExecute("UPDATE group_member SET subgroup='%u' WHERE memberGuid='%u'", group, GUID_LOPART(guid));
 
+    Player* player = ObjectAccessor::FindPlayer(guid);
+
     // In case the moved player is online, update the player object with the new sub group references
-    if (Player* player = ObjectAccessor::FindPlayer(guid))
+    if (player)
     {
         if (player->GetGroup() == this)
             player->GetGroupRef().setSubGroup(group);
