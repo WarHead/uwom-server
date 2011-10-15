@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -63,6 +64,8 @@ enum CombatPhases
     COMBAT,
     OUTRO
 };
+
+#define MalGanisKillCredit 31006
 
 class boss_mal_ganis : public CreatureScript
 {
@@ -221,12 +224,21 @@ public:
                                 uiOutroTimer = 500;
                                 break;
                             case 5:
+                                if (instance)
+                                {
+                                    Map::PlayerList const & PlList = instance->instance->GetPlayers();
+                                    if (!PlList.isEmpty())
+                                        for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                                            if (Player * pl = itr->getSource())
+                                                pl->KilledMonsterCredit(MalGanisKillCredit, 0);
+                                }
                                 me->SetVisible(false);
                                 me->Kill(me);
                                 break;
-
                         }
-                    } else uiOutroTimer -= diff;
+                    }
+                    else
+                        uiOutroTimer -= diff;
                     break;
             }
         }
