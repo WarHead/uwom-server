@@ -489,7 +489,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
                         case EVENT_P1_SUMMON_WAVE:
                             SummonWaveP1();
-                            events.ScheduleEvent(EVENT_P1_SUMMON_WAVE, IsHeroic() ? 45000 : 60000, 0, PHASE_ONE);
+                            events.ScheduleEvent(EVENT_P1_SUMMON_WAVE, IsHeroic() ? 45 * IN_MILLISECONDS : SEKUNDEN_60, 0, PHASE_ONE);
                             break;
                         case EVENT_P1_SHADOW_BOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
