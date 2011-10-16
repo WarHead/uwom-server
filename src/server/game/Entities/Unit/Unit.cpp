@@ -1610,7 +1610,7 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
         float ignoredResistance = float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
         if (Player* player = ToPlayer())
             ignoredResistance += float(player->GetSpellPenetrationItemMod());
-        float victimResistance = baseVictimResistance + ignoredResistance;
+        float victimResistance = baseVictimResistance - ignoredResistance;
 
         static const uint32 BOSS_LEVEL = 83;
         static const float BOSS_RESISTANCE_CONSTANT = 510.0;
@@ -5769,7 +5769,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
-                // Glyph of Polymorph
+                // Glyph of Polymorph + Glyph of Seduction
+                case 56250:
                 case 56375:
                 {
                     if(!target)
@@ -7837,6 +7838,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Guard Dog
                 case 201:
                 {
+                    if (!victim)
+                        return false;
+
                     triggered_spell_id = 54445;
                     target = this;
                     float addThreat = float(CalculatePctN(procSpell->Effects[0].CalcValue(this), triggerAmount));
@@ -12514,6 +12518,7 @@ bool Unit::_IsValidAssistTarget(Unit const* target, SpellInfo const* bySpell) co
     return true;
 }
 
+// returns negative amount on health reduction
 int32 Unit::ModifyHealth(int32 dVal)
 {
     int32 gain = 0;
@@ -12544,6 +12549,15 @@ int32 Unit::ModifyHealth(int32 dVal)
     }
 
     return gain;
+}
+
+// returns negative amount on health reduction
+int32 Unit::ModifyHealthPct(float pct, bool apply)
+{
+    float amount = (float)GetMaxHealth();
+    ApplyPercentModFloatVar(amount, pct, apply);
+
+    return ModifyHealth((int32)amount - (int32)GetMaxHealth());
 }
 
 int32 Unit::GetHealthGain(int32 dVal)
