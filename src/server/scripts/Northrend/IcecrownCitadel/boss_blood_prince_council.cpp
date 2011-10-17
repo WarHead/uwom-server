@@ -196,6 +196,9 @@ class boss_blood_council_controller : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+                if (!who)
+                    return;
+
                 if (me->isInCombat())
                     return;
 
@@ -267,6 +270,9 @@ class boss_blood_council_controller : public CreatureScript
 
             void JustDied(Unit* killer)
             {
+                if (!killer)
+                    return;
+
                 if (InstanceScript* pInstance = me->GetInstanceScript())
                     pInstance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
 
@@ -1109,6 +1115,9 @@ class npc_blood_queen_lana_thel : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
+                if (!who)
+                    return;
+
                 if (_introDone)
                     return;
 
@@ -1347,6 +1356,9 @@ class npc_dark_nucleus : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+                if (!who)
+                    return;
+
                 _targetAuraCheck = 1000;
                 if (me->GetDistance(who) >= 15.0f)
                 {
@@ -1360,6 +1372,9 @@ class npc_dark_nucleus : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
+                if (!who)
+                    return;
+
                 if (me->GetDistance(who) >= 15.0f)
                     return;
 
@@ -1368,6 +1383,9 @@ class npc_dark_nucleus : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& /*damage*/)
             {
+                if (!attacker)
+                    return;
+
                 if (attacker == me)
                     return;
 
