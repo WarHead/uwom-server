@@ -598,7 +598,7 @@ WorldObject* Spell::FindCorpseUsing()
     // non-standard target selection
     float max_range = m_spellInfo->GetMaxRange(false);
 
-    CellPair p(Trinity::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+    CellCoord p(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
     Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
@@ -5639,7 +5639,16 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (!strict && m_casttime == 0)
         return SPELL_CAST_OK;
 
-    uint32 range_type = m_spellInfo->RangeEntry ? m_spellInfo->RangeEntry->type : 0;
+    uint32 range_type = 0;
+
+    if (m_spellInfo->RangeEntry)
+    {
+        // self cast is used for triggered spells, no range checking needed
+        if (m_spellInfo->RangeEntry->ID == 1)
+            return SPELL_CAST_OK;
+
+        range_type = m_spellInfo->RangeEntry->type;
+    }
 
     Unit* target = m_targets.GetUnitTarget();
     float max_range = m_caster->GetSpellMaxRangeForTarget(target, m_spellInfo);
@@ -5820,7 +5829,7 @@ SpellCastResult Spell::CheckItems()
     // check spell focus object
     if (m_spellInfo->RequiresSpellFocus)
     {
-        CellPair p(Trinity::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+        CellCoord p(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
