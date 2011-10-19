@@ -17,7 +17,6 @@
  */
 
 #include "Util.h"
-
 #include "utf8.h"
 #ifdef USE_SFMT_FOR_RNG
 #include "SFMT.h"

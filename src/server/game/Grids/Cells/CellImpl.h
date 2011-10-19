@@ -25,8 +25,19 @@
 #include "Map.h"
 #include "Object.h"
 
-inline Cell::Cell(CellPair const& p)
+inline Cell::Cell(CellCoord const& p)
 {
+    data.Part.grid_x = p.x_coord / MAX_NUMBER_OF_CELLS;
+    data.Part.grid_y = p.y_coord / MAX_NUMBER_OF_CELLS;
+    data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
+    data.Part.cell_y = p.y_coord % MAX_NUMBER_OF_CELLS;
+    data.Part.nocreate = 0;
+    data.Part.reserved = 0;
+}
+
+inline Cell::Cell(float x, float y)
+{
+    CellCoord p = Trinity::ComputeCellCoord(x, y);
     data.Part.grid_x = p.x_coord / MAX_NUMBER_OF_CELLS;
     data.Part.grid_y = p.y_coord / MAX_NUMBER_OF_CELLS;
     data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
@@ -37,9 +48,9 @@ inline Cell::Cell(CellPair const& p)
 
 template<class T, class CONTAINER>
 inline void
-Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
+Cell::Visit(const CellCoord& standing_cell, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
 {
-    if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    if (!standing_cell.IsCoordValid())
         return;
 
     uint16 district = (District)this->data.Part.reserved;
@@ -50,62 +61,61 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
     }
 
     // set up the cell range based on the district
-    // the overloaded operators handle range checking
-    CellPair begin_cell = standing_cell;
-    CellPair end_cell = standing_cell;
+    CellCoord begin_cell = standing_cell;
+    CellCoord end_cell = standing_cell;
 
     switch (district)
     {
         case ALL_DISTRICT:
         {
-            begin_cell << 1; begin_cell -= 1;               // upper left
-            end_cell >> 1; end_cell += 1;                   // lower right
+            begin_cell.dec_x(1); begin_cell.dec_y(1);       // upper left
+            end_cell.inc_x(1); end_cell.inc_y(1);           // lower right
             break;
         }
         case UPPER_LEFT_DISTRICT:
         {
-            begin_cell << 1; begin_cell -= 1;               // upper left
+            begin_cell.dec_x(1); begin_cell.dec_y(1);       // upper left
             break;
         }
         case UPPER_RIGHT_DISTRICT:
         {
-            begin_cell -= 1;                                // up
-            end_cell >> 1;                                  // right
+            begin_cell.dec_y(1);                            // up
+            end_cell.inc_x(1);                              // right
             break;
         }
         case LOWER_LEFT_DISTRICT:
         {
-            begin_cell << 1;                                // left
-            end_cell += 1;                                  // down
+            begin_cell.dec_x(1);                            // left
+            end_cell.inc_y(1);                              // down
             break;
         }
         case LOWER_RIGHT_DISTRICT:
         {
-            end_cell >> 1; end_cell += 1;                   // lower right
+            end_cell.inc_x(1); end_cell.inc_y(1);           // lower right
             break;
         }
         case LEFT_DISTRICT:
         {
-            begin_cell -= 1;                                // up
-            end_cell >> 1; end_cell += 1;                   // lower right
+            begin_cell.dec_y(1);                            // up
+            end_cell.inc_x(1); end_cell.inc_y(1);           // lower right
             break;
         }
         case RIGHT_DISTRICT:
         {
-            begin_cell << 1; begin_cell -= 1;               // upper left
-            end_cell += 1;                                  // down
+            begin_cell.dec_x(1); begin_cell.dec_y(1);       // upper left
+            end_cell.inc_y(1);                              // down
             break;
         }
         case UPPER_DISTRICT:
         {
-            begin_cell << 1; begin_cell -= 1;               // upper left
-            end_cell >> 1;                                  // right
+            begin_cell.dec_x(1); begin_cell.dec_y(1);       // upper left
+            end_cell.inc_x(1);                              // right
             break;
         }
         case LOWER_DISTRICT:
         {
-            begin_cell << 1;                                // left
-            end_cell >> 1; end_cell += 1;                   // lower right
+            begin_cell.dec_x(1);                            // left
+            end_cell.inc_x(1); end_cell.inc_y(1);           // lower right
             break;
         }
         default:
@@ -120,8 +130,8 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
     {
         for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; y++)
         {
-            CellPair cell_pair(x, y);
-            Cell r_zone(cell_pair);
+            CellCoord cellCoord(x, y);
+            Cell r_zone(cellCoord);
             r_zone.data.Part.nocreate = this->data.Part.nocreate;
             m.Visit(r_zone, visitor);
         }
@@ -169,9 +179,9 @@ inline CellArea Cell::CalculateCellArea(float x, float y, float radius)
 
 template<class T, class CONTAINER>
 inline void
-Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, float radius, float x_off, float y_off) const
+Cell::Visit(const CellCoord& standing_cell, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, float radius, float x_off, float y_off) const
 {
-    if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    if (!standing_cell.IsCoordValid())
         return;
 
     //no jokes here... Actually placing ASSERT() here was good idea, but
@@ -195,8 +205,8 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
         return;
     }
 
-    CellPair begin_cell = standing_cell;
-    CellPair end_cell = standing_cell;
+    CellCoord begin_cell = standing_cell;
+    CellCoord end_cell = standing_cell;
 
     area.ResizeBorders(begin_cell, end_cell);
     //visit all cells, found in CalculateCellArea()
@@ -218,11 +228,11 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
     {
         for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
         {
-            CellPair cell_pair(x, y);
+            CellCoord cellCoord(x, y);
             //lets skip standing cell since we already visited it
-            if (cell_pair != standing_cell)
+            if (cellCoord != standing_cell)
             {
-                Cell r_zone(cell_pair);
+                Cell r_zone(cellCoord);
                 r_zone.data.Part.nocreate = this->data.Part.nocreate;
                 m.Visit(r_zone, visitor);
             }
@@ -232,7 +242,7 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
 
 template<class T, class CONTAINER>
 inline void
-Cell::Visit(const CellPair& l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const WorldObject &obj, float radius) const
+Cell::Visit(const CellCoord& l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const WorldObject &obj, float radius) const
 {
     //we should increase search radius by object's radius, otherwise
     //we could have problems with huge creatures, which won't attack nearest players etc
@@ -241,7 +251,7 @@ Cell::Visit(const CellPair& l, TypeContainerVisitor<T, CONTAINER> &visitor, Map 
 
 template<class T, class CONTAINER>
 inline void
-Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const CellPair& begin_cell, const CellPair& end_cell) const
+Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const CellCoord& begin_cell, const CellCoord& end_cell) const
 {
     //here is an algorithm for 'filling' circum-squared octagon
     uint32 x_shift = (uint32)ceilf((end_cell.x_coord - begin_cell.x_coord) * 0.3f - 0.5f);
@@ -254,8 +264,8 @@ Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const Cel
     {
         for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
         {
-            CellPair cell_pair(x, y);
-            Cell r_zone(cell_pair);
+            CellCoord cellCoord(x, y);
+            Cell r_zone(cellCoord);
             r_zone.data.Part.nocreate = this->data.Part.nocreate;
             m.Visit(r_zone, visitor);
         }
@@ -278,14 +288,14 @@ Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const Cel
         {
             //we visit cells symmetrically from both sides, heading from center to sides and from up to bottom
             //e.g. filling 2 trapezoids after filling central cell strip...
-            CellPair cell_pair_left(x_start - step, y);
-            Cell r_zone_left(cell_pair_left);
+            CellCoord cellCoord_left(x_start - step, y);
+            Cell r_zone_left(cellCoord_left);
             r_zone_left.data.Part.nocreate = this->data.Part.nocreate;
             m.Visit(r_zone_left, visitor);
 
             //right trapezoid cell visit
-            CellPair cell_pair_right(x_end + step, y);
-            Cell r_zone_right(cell_pair_right);
+            CellCoord cellCoord_right(x_end + step, y);
+            Cell r_zone_right(cellCoord_right);
             r_zone_right.data.Part.nocreate = this->data.Part.nocreate;
             m.Visit(r_zone_right, visitor);
         }
