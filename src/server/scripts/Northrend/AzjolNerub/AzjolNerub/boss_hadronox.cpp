@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -66,6 +65,7 @@ public:
         uint32 uiPierceTimer;
         uint32 uiGrabTimer;
         uint32 uiDoorsTimer;
+        uint32 uiCheckDistanceTimer;
 
         bool bFirstTime;
 
@@ -81,6 +81,7 @@ public:
             uiPierceTimer = urand(1*IN_MILLISECONDS, 3*IN_MILLISECONDS);
             uiGrabTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             uiDoorsTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+            uiCheckDistanceTimer = 2*IN_MILLISECONDS;
 
             if (instance && (instance->GetData(DATA_HADRONOX_EVENT) != DONE && !bFirstTime))
                 instance->SetData(DATA_HADRONOX_EVENT, FAIL);
@@ -108,28 +109,34 @@ public:
         {
             if (instance)
                 instance->SetData(DATA_HADRONOX_EVENT, IN_PROGRESS);
-
             me->SetInCombatWithZone();
         }
 
-        // Sicher stellen, dass Hadronox nicht von NPCs getötet wird!
-        void DamageTaken(Unit* pDone_by, uint32& uiDamage)
+        void CheckDistance(float dist, const uint32 uiDiff)
         {
-            if (pDone_by && HealthBelowPct(75) && pDone_by->GetTypeId() != TYPEID_PLAYER)
+            if (!me->isInCombat())
+                return;
+
+            float x=0.0f, y=0.0f, z=0.0f;
+            me->GetRespawnPosition(x, y, z);
+
+            if (uiCheckDistanceTimer <= uiDiff)
+                uiCheckDistanceTimer = 5*IN_MILLISECONDS;
+            else
             {
-                uiDamage = 0;
+                uiCheckDistanceTimer -= uiDiff;
                 return;
             }
+            if (me->IsInEvadeMode() || !me->getVictim())
+                return;
+            if (me->GetDistance(x, y, z) > dist)
+                EnterEvadeMode();
         }
 
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
-            if (!UpdateVictim())
-                return;
-
-            if (me->HasUnitState(UNIT_STAT_CASTING))
-                return;
+            if (!UpdateVictim()) return;
 
             // Without he comes up through the air to players on the bridge after krikthir if players crossing this bridge!
             CheckDistance(fMaxDistance, diff);
@@ -141,9 +148,6 @@ public:
             }
             else if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
-
-            if (me->HasUnitState(UNIT_STAT_CASTING))
-                return;
 
             if (uiPierceTimer <= diff)
             {
@@ -176,8 +180,9 @@ public:
             } else uiGrabTimer -= diff;
 
             if (uiDoorsTimer <= diff)
+            {
                 uiDoorsTimer = urand(30*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            else uiDoorsTimer -= diff;
+            } else uiDoorsTimer -= diff;
 
             DoMeleeAttackIfReady();
         }

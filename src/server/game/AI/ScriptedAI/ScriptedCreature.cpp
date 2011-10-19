@@ -145,7 +145,7 @@ void ScriptedAI::CheckDistance(float dist, const uint32 uiDiff)
         return;
 
     float x=0.0f, y=0.0f, z=0.0f;
-    me->GetRespawnCoord(x,y,z);
+    me->GetRespawnPosition(x,y,z);
 
     if (CheckDistanceTimer < uiDiff)
         CheckDistanceTimer = 5000;
@@ -525,7 +525,7 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
 {
     Player* player = NULL;
 
-    CellPair pair(Trinity::ComputeCellPair(me->GetPositionX(), me->GetPositionY()));
+    CellCoord pair(Trinity::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
     Cell cell(pair);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
