@@ -2269,7 +2269,7 @@ void Tausendwinter::SpawnGO(uint32 GUID, GameObjectData const * GOData)
 
     if (Map * map = const_cast<Map*>(sMapMgr->CreateBaseMap(GOData->mapid)))
     {
-        if (!map->IsLoaded(GOData->posX, GOData->posY))
+        if (!map->IsGridLoaded(GOData->posX, GOData->posY))
             return;
 
         if (GameObject * pGO = new GameObject)
@@ -2298,7 +2298,7 @@ void Tausendwinter::SpawnNPC(uint32 GUID, CreatureData const * NPCData)
 
     if (Map * map = const_cast<Map*>(sMapMgr->CreateBaseMap(TW_KARTE)))
     {
-        if (!map->IsLoaded(NPCData->posX, NPCData->posY))
+        if (!map->IsGridLoaded(NPCData->posX, NPCData->posY))
             map->LoadGrid(NPCData->posX, NPCData->posY);
 
         if (Creature * pCr = new Creature)
