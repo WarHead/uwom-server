@@ -5830,7 +5830,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 
                         CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
                         Cell cell(p);
-                        cell.data.Part.reserved = ALL_DISTRICT;
 
                         Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(target, radius);
                         Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(target, targets, u_check);
