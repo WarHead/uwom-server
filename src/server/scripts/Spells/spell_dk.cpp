@@ -375,6 +375,11 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+			
+        private:
+            float m_multip;
+        public:
+            spell_dk_scourge_strike_SpellScript() : m_multip(0.0f) { }
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
@@ -388,14 +393,47 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 if (Unit* unitTarget = GetHitUnit())
                 {
-                    int32 bp = CalculatePctN(GetHitDamage(), GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()));
-                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
+                    m_multip = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()))/* / 100.0f*/; // default with diseases
+                    // black ice bonus dmg
+                    if (caster->HasAura(49664))
+                        m_multip *= 1.1;
+                    else if (caster->HasAura(49663))
+                        m_multip *= 1.08;
+                    else if (caster->HasAura(49662))
+                        m_multip *= 1.06;
+                    else if (caster->HasAura(49661))
+                        m_multip *= 1.04;
+                    else if (caster->HasAura(49140))
+                        m_multip *= 1.02;
+                    // rage of rivendare bonus dmg
+                    if (caster->HasAura(50121))
+                        m_multip *= 1.1;
+                    else if (caster->HasAura(50120))
+                        m_multip *= 1.08;
+                    else if (caster->HasAura(50119))
+                        m_multip *= 1.06;
+                    else if (caster->HasAura(50118))
+                        m_multip *= 1.04;
+                    else if (caster->HasAura(50117))
+                        m_multip *= 1.02;
+                    m_multip = m_multip / 100.0f;
                 }
+        }
+
+        void HandleAfterHit()
+        {
+            Unit* caster = GetCaster();
+            if (Unit* unitTarget = GetHitUnit())
+            {
+                int32 bp = GetTrueDamage() * m_multip;
+                caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
             }
+        }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
         };
 

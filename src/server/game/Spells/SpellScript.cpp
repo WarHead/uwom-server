@@ -521,6 +521,16 @@ SpellValue const* SpellScript::GetSpellValue()
     return m_spell->m_spellValue;
 }
 
+int32 SpellScript::GetTrueDamage()
+{
+    if (!IsInAfterHitPhase())
+    {
+        sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetHitHeal was called while spell not in after-hit phase!", m_scriptName, m_scriptSpellId);
+        return NULL;
+    }
+    return m_spell->m_true_damage;
+}
+
 bool AuraScript::_Validate(SpellInfo const* entry)
 {
     for (std::list<CheckAreaTargetHandler>::iterator itr = DoCheckAreaTarget.begin(); itr != DoCheckAreaTarget.end();  ++itr)
