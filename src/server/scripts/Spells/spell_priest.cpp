@@ -284,7 +284,7 @@ class spell_pri_shadowfiend : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_shadowfiend_SpellScript);
 
-            bool Validate(SpellInfo const* spellEntry)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 return sSpellMgr->GetSpellInfo(PRIEST_SPELL_SHADOWFIEND) && sSpellMgr->GetSpellInfo(PRIEST_SPELL_SHADOWFIEND_TRIGGERED);
             }
