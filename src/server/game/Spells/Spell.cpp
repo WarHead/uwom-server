@@ -602,7 +602,6 @@ WorldObject* Spell::FindCorpseUsing()
 
     CellCoord p(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
     Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     WorldObject* result = NULL;
@@ -718,97 +717,6 @@ void Spell::SelectSpellTargets()
         if (targetB)
             processedTargets |= SelectEffectTargets(i, m_spellInfo->Effects[i].TargetB);
 
-        if (!targetA && !targetB && m_spellInfo->Effects[i].GetImplicitTargetType() == EFFECT_IMPLICIT_TARGET_NONE)
-        {
-            if (!m_spellInfo->GetMaxRange(true))
-            {
-                AddUnitTarget(m_caster, 1 << i, false);
-                continue;
-            }
-
-            // add here custom effects that need default target.
-            // FOR EVERY TARGET TYPE THERE IS A DIFFERENT FILL!!
-            switch (m_spellInfo->Effects[i].Effect)
-            {
-                case SPELL_EFFECT_DUMMY:
-                {
-                    if (m_targets.GetUnitTarget())
-                        AddUnitTarget(m_targets.GetUnitTarget(), 1 << i, false);
-                    else
-                        AddUnitTarget(m_caster, 1 << i, false);
-                    break;
-                }
-                case SPELL_EFFECT_BIND:
-                case SPELL_EFFECT_RESURRECT:
-                case SPELL_EFFECT_CREATE_ITEM:
-                case SPELL_EFFECT_TRIGGER_SPELL:
-                case SPELL_EFFECT_SKILL_STEP:
-                case SPELL_EFFECT_PROFICIENCY:
-                case SPELL_EFFECT_SUMMON_OBJECT_WILD:
-                case SPELL_EFFECT_SELF_RESURRECT:
-                case SPELL_EFFECT_REPUTATION:
-                case SPELL_EFFECT_LEARN_SPELL:
-                case SPELL_EFFECT_SEND_TAXI:
-                    if (m_targets.GetUnitTarget())
-                        AddUnitTarget(m_targets.GetUnitTarget(), 1 << i, false);
-                    // Triggered spells have additional spell targets - cast them even if no explicit unit target is given (required for spell 50516 for example)
-                    else if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_TRIGGER_SPELL)
-                        AddUnitTarget(m_caster, 1 << i, false);
-                    break;
-                case SPELL_EFFECT_SUMMON_RAF_FRIEND:
-                case SPELL_EFFECT_SUMMON_PLAYER:
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetSelection())
-                    {
-                        Player* target = ObjectAccessor::FindPlayer(m_caster->ToPlayer()->GetSelection());
-                        if (target)
-                            AddUnitTarget(target, 1 << i, false);
-                    }
-                    break;
-                case SPELL_EFFECT_SKIN_PLAYER_CORPSE:
-                case SPELL_EFFECT_RESURRECT_NEW:
-                    if (WorldObject* target = m_targets.GetObjectTarget())
-                    {
-                        if (Unit* unitTarget = target->ToUnit())
-                            AddUnitTarget(unitTarget, 1 << i, false);
-                        else if (Corpse* corpseTarget = target->ToCorpse())
-                        {
-                            Player* owner = ObjectAccessor::FindPlayer(corpseTarget->GetOwnerGUID());
-                            if (owner)
-                                AddUnitTarget(owner, 1 << i, false);
-                        }
-                    }
-                    break;
-                case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
-                case SPELL_EFFECT_ADD_FARSIGHT:
-                case SPELL_EFFECT_APPLY_GLYPH:
-                case SPELL_EFFECT_STUCK:
-                case SPELL_EFFECT_FEED_PET:
-                case SPELL_EFFECT_DESTROY_ALL_TOTEMS:
-                case SPELL_EFFECT_KILL_CREDIT2: // only one spell: 42793
-                    AddUnitTarget(m_caster, 1 << i, false);
-                    break;
-                case SPELL_EFFECT_LEARN_PET_SPELL:
-                    if (Guardian* pet = m_caster->GetGuardianPet())
-                        AddUnitTarget(pet, 1 << i);
-                    break;
-                case SPELL_EFFECT_APPLY_AURA:
-                    switch (m_spellInfo->Effects[i].ApplyAuraName)
-                    {
-                        case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TARGET_UNIT_CASTER(1) (and present for other ranks for same spell for example)
-                        case SPELL_AURA_ADD_PCT_MODIFIER:
-                            AddUnitTarget(m_caster, 1 << i, false);
-                            break;
-                        default:                            // apply to target in other case
-                            if (m_targets.GetUnitTarget())
-                                AddUnitTarget(m_targets.GetUnitTarget(), 1 << i, false);
-                            break;
-                    }
-                    break;
-                default:
-                    AddUnitTarget(m_caster, 1 << i, false);
-                    break;
-            }
-        }
         // Select targets of effect based on effect type
         // those are used when no valid target could be added for spell effect based on spell target type
         // some spell effects use explicit target as a default target added to target map (like SPELL_EFFECT_LEARN_SPELL)
@@ -1301,7 +1209,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     m_spellAura = NULL; // Set aura to null for every target-make sure that pointer is not used for unit without aura applied
 
                             //Spells with this flag cannot trigger if effect is casted on self
-                            // Slice and Dice, relentless strikes, eviscerate
     bool canEffectTrigger = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_CANT_TRIGGER_PROC) && unitTarget->CanProc() && CanExecuteTriggersOnHit(mask);
     Unit* spellHitTarget = NULL;
 
@@ -1770,12 +1677,12 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
     // this is executed after spell proc spells on target hit
     // spells are triggered for each hit spell target
     // info confirmed with retail sniffs of permafrost and shadow weaving
-    if (!m_hitTriggerSpells.empty() && CanExecuteTriggersOnHit(effMask))
+    if (!m_hitTriggerSpells.empty())
     {
         int _duration = 0;
         for (HitTriggerSpells::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
         {
-            if (roll_chance_i(i->second))
+            if (CanExecuteTriggersOnHit(effMask, i->first) && roll_chance_i(i->second))
             {
                 m_caster->CastSpell(unit, i->first, true);
                 sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->first->Id);
@@ -6061,7 +5968,6 @@ SpellCastResult Spell::CheckItems()
     {
         CellCoord p(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
 
         GameObject* ok = NULL;
         Trinity::GameObjectFocusCheck go_check(m_caster, m_spellInfo->RequiresSpellFocus);
@@ -7324,17 +7230,17 @@ void Spell::CallScriptAfterUnitTargetSelectHandlers(std::list<Unit*>& unitTarget
     }
 }
 
-bool Spell::CanExecuteTriggersOnHit(uint8 effMask) const
+bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellInfo const* spellInfo) const
 {
-    // check which effects can trigger proc
-    // don't allow to proc for dummy-only spell target hits
-    // prevents triggering/procing effects twice from spells like Eviscerate
-    for (uint8 i = 0;effMask && i < MAX_SPELL_EFFECTS; ++i)
+    bool only_on_dummy = (spellInfo && (spellInfo->AttributesEx4 & SPELL_ATTR4_PROC_ONLY_ON_DUMMY));
+    // If triggered spell has SPELL_ATTR4_PROC_ONLY_ON_DUMMY then it can only proc on a casted spell with SPELL_EFFECT_DUMMY
+    // If triggered spell doesn't have SPELL_ATTR4_PROC_ONLY_ON_DUMMY then it can NOT proc on SPELL_EFFECT_DUMMY (needs confirmation)
+    for (uint8 i = 0;i < MAX_SPELL_EFFECTS; ++i)
     {
-        if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)
-            effMask &= ~(1<<i);
+        if ((effMask & (1 << i)) && (only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)))
+            return true;
     }
-    return effMask;
+    return false;
 }
 
 void Spell::PrepareTriggersExecutedOnHit()
