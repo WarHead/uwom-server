@@ -51,6 +51,154 @@ EndContentData */
 #include "Config.h"
 #include <AccountMgr.h>
 
+enum HATI_ENUM
+{
+    SOUND_AGGRO             = 11176,
+    SOUND_SLAY1             = 11177,
+    SOUND_SLAY2             = 11178,
+    SOUND_SLAY3             = 11183,
+
+    SPELL_DURCHBOHREN       = 58666
+};
+
+enum WEHRLOS
+{
+    SPELL_KRISTALLGEFAENGNIS = 32361,
+
+    EVENT_DURCHBOHREN = 1,
+    EVENT_KRISTALLGEFAENGNIS
+};
+
+// ------------------------------------------------------------------------------------------------------------
+// Skript für die Wehrlosen :-) (Eichhörnchen / Mäuse etc.)
+// ------------------------------------------------------------------------------------------------------------
+class npc_schutz_den_wehrlosen : public CreatureScript
+{
+public:
+    npc_schutz_den_wehrlosen() : CreatureScript("npc_schutz_den_wehrlosen") { }
+
+    struct npc_schutz_den_wehrlosenAI : public ScriptedAI
+    {
+        npc_schutz_den_wehrlosenAI(Creature * creature) : ScriptedAI(creature)
+        {
+            enabled = me->GetMap()->Instanceable() ? false : true;
+            OrgHP = me->GetMaxHealth();
+            OrgLvl = me->getLevel();
+            OrgScale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+        }
+
+        void Reset()
+        {
+            if (enabled)
+            {
+                events.Reset();
+
+                me->SetReactState(REACT_DEFENSIVE);
+                me->SetMaxHealth(OrgHP);
+                me->SetLevel(OrgLvl);
+                me->SetFloatValue(OBJECT_FIELD_SCALE_X, OrgScale);
+            }
+        }
+
+        void EnterCombat(Unit * who)
+        {
+            if (!who || !who->IsInWorld())
+                return;
+
+            if (enabled)
+            {
+                DoPlaySoundToSet(me, SOUND_AGGRO);
+
+                me->SetLevel(DEFAULT_MAX_LEVEL+3);
+                me->SetFloatValue(OBJECT_FIELD_SCALE_X, 7.5f);
+                me->SetMaxHealth(me->GetMaxHealth() * 10000);
+                me->SetHealth(me->GetMaxHealth());
+
+                events.ScheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_05);
+                events.ScheduleEvent(EVENT_KRISTALLGEFAENGNIS, SEKUNDEN_10);
+
+                if (Player * plr = who->ToPlayer())
+                {
+                    plr->SetDrunkValue(23000);
+                    plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5f);
+
+                    plr->SetSpeed(MOVE_WALK, 0.25f, true);
+                    plr->SetSpeed(MOVE_RUN, 0.25f, true);
+                    plr->SetSpeed(MOVE_SWIM, 0.25f, true);
+                    plr->SetSpeed(MOVE_FLIGHT, 0.25f, true);
+                }
+            }
+            ScriptedAI::EnterCombat(who);
+        }
+
+        void DamageTaken(Unit * victim, uint32 & dmg)
+        {
+            if (enabled)
+            {
+                if (FirstTime)
+                    dmg = 0;
+                else
+                    dmg = dmg / 1000;
+
+                FirstTime = false;
+            }
+        }
+
+        void KilledUnit(Unit * /*victim*/)
+        {
+            if (enabled)
+            {
+                switch(urand(0,2))
+                {
+                    case 0: DoPlaySoundToSet(me, SOUND_SLAY1); break;
+                    case 1: DoPlaySoundToSet(me, SOUND_SLAY2); break;
+                    case 2: DoPlaySoundToSet(me, SOUND_SLAY3); break;
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            if (enabled)
+            {
+                events.Update(diff);
+
+                while(uint32 eventId = events.ExecuteEvent())
+                {
+                    switch(eventId)
+                    {
+                        case EVENT_DURCHBOHREN:
+                            DoCastVictim(SPELL_DURCHBOHREN);
+                            events.RescheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_10);
+                            break;
+                        case EVENT_KRISTALLGEFAENGNIS:
+                            DoCastVictim(SPELL_KRISTALLGEFAENGNIS);
+                            events.RescheduleEvent(EVENT_KRISTALLGEFAENGNIS, SEKUNDEN_20);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    private:
+        bool enabled;
+        EventMap events;
+        uint32 OrgHP;
+        uint8 OrgLvl;
+        float OrgScale;
+    };
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new npc_schutz_den_wehrlosenAI(creature);
+    }
+};
+
 // ------------------------------------------------------------------------------------------------------------
 // Feuerrufer 60000
 // ------------------------------------------------------------------------------------------------------------
@@ -2552,16 +2700,6 @@ public:
 // ------------------------------------------------------------------------------------------------------------
 // Hati 60003
 // ------------------------------------------------------------------------------------------------------------
-enum HATI_ENUM
-{
-    SOUND_AGGRO             = 11176,
-    SOUND_SLAY1             = 11177,
-    SOUND_SLAY2             = 11178,
-    SOUND_SLAY3             = 11183,
-
-    SPELL_DURCHBOHREN       = 58666
-};
-
 class npc_hati : public CreatureScript
 {
 public:
@@ -5193,6 +5331,7 @@ public:
 void AddSC_npcs_special()
 {
     // Eigene
+    new npc_schutz_den_wehrlosen;
     new npc_flugmeister;
     new npc_flugmeister_adds;
     new npc_hati;
