@@ -1865,11 +1865,6 @@ void Battleground::CheckArenaWinConditions()
         EndBattleground(ALLIANCE);
 }
 
-void Battleground::ScheduleArenaEnd(uint32 time)
-{
-    m_arenaEndTimer = time;
-}
-
 void Battleground::UpdateArenaWorldState()
 {
     UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
