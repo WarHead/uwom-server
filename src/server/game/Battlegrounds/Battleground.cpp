@@ -272,20 +272,6 @@ void Battleground::Update(uint32 diff)
                     CheckArenaAfterTimerConditions();
                     return;
                 }
-
-                if ((GetAlivePlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE)) || (GetAlivePlayersCountByTeam(HORDE) && !GetAlivePlayersCountByTeam(ALLIANCE)))
-                {
-                    // No player is alive, decrease the time
-                    m_arenaEndTimer -= diff;
-                    // Determine winner team
-                    if (m_arenaEndTimer < 100)
-                    {
-                        if (!GetAlivePlayersCountByTeam(HORDE))
-                            EndBattleground(HORDE);
-                        else
-                            EndBattleground(ALLIANCE);
-                    }
-                }
             }
             else
             {
@@ -1874,19 +1860,9 @@ void Battleground::CheckArenaAfterTimerConditions()
 void Battleground::CheckArenaWinConditions()
 {
     if (!GetAlivePlayersCountByTeam(ALLIANCE) && GetPlayersCountByTeam(HORDE))
-    {
-        if (isArena())
-            ScheduleArenaEnd(3000);
-        else
-            EndBattleground(HORDE);
-    }
+        EndBattleground(HORDE);
     else if (GetPlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
-    {
-        if (isArena())
-            ScheduleArenaEnd(3000);
-        else
-            EndBattleground(ALLIANCE);
-    }
+        EndBattleground(ALLIANCE);
 }
 
 void Battleground::ScheduleArenaEnd(uint32 time)

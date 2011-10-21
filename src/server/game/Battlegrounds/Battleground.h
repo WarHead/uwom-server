@@ -502,7 +502,6 @@ class Battleground
         void CheckArenaAfterTimerConditions();
         void CheckArenaWinConditions();
         void UpdateArenaWorldState();
-        void ScheduleArenaEnd(uint32 timer);
 
         // Triggers handle
         // must be implemented in BG subclass
@@ -630,7 +629,6 @@ class Battleground
         bool   m_IsRated;                                   // is this battle rated?
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
-        uint32 m_arenaEndTimer;                             // Time after death of the remaining mamber of a team before arena ends
         char const* m_Name;
 
         /* Pre- and post-update hooks */
