@@ -273,7 +273,7 @@ class BfCapturePointWG : public BfCapturePoint
 class BattlefieldWG : public Battlefield
 {
     public:
-        /**
+        /*
          * \brief Called when the battle start
          * -Spawn relic and turret
          * -Rebuild tower and wall
@@ -281,7 +281,7 @@ class BattlefieldWG : public Battlefield
          */
         void OnBattleStart();
 
-        /**
+        /*
          * \brief Called when battle end
          * -Remove relic and turret
          * -Change banner/npc in keep if it needed
@@ -292,13 +292,13 @@ class BattlefieldWG : public Battlefield
          */
         void OnBattleEnd(bool endbytimer);
 
-        /**
+        /*
          * \brief Called when grouping start (15 minutes before battlestart)
          * -Invite all player in zone to join queue
          */
         void OnStartGrouping();
 
-        /**
+        /*
          * \brief Called when player accept invite to join battle
          * -Update aura
          * -Teleport if it needed
@@ -306,30 +306,30 @@ class BattlefieldWG : public Battlefield
          * -Update tenacity
          * \param plr: Player who accept invite
          */
-        void OnPlayerJoinWar(Player *plr);
+        void OnPlayerJoinWar(Player * plr);
 
-        /**
+        /*
          * \brief Called when player leave battle
          * -Update player aura
          * \param plr : Player who leave battle
          */
-        void OnPlayerLeaveWar(Player *plr);
+        void OnPlayerLeaveWar(Player * plr);
 
-        /**
+        /*
          * \brief Called when player leave WG zone
          * \param plr : Player who leave zone
          */
-        void OnPlayerLeaveZone(Player *plr);
+        void OnPlayerLeaveZone(Player * plr);
 
-        /**
+        /*
          * \brief Called when player enter in WG zone
          * -Update aura
          * -Update worldstate
          * \param plr : Player who leave zone
          */
-        void OnPlayerEnterZone(Player *plr);
+        void OnPlayerEnterZone(Player * plr);
 
-        /**
+        /*
          * \brief Called for update battlefield data
          * -Save battle timer in database every minutes
          * -Update imunity aura from graveyard
@@ -338,40 +338,40 @@ class BattlefieldWG : public Battlefield
          */
         bool Update(uint32 diff);
 
-        /**
+        /*
          * \brief Called when a creature is spawn or remove from WG
          * -Update vehicle count
          * \param add : true > creature is spawn  false > creature is remove
          */
-        void OnCreatureCreate(Creature *creature, bool add);
+        void OnCreatureCreate(Creature * creature, bool add);
 
-        /**
+        /*
          * \brief Called when a wall/tower is broken
          * -Update quest
          */
         void BrokenWallOrTower(TeamId team);
 
-        /**
+        /*
          * \brief Called when a tower is damaged
          * -Update tower count (for reward calcul)
          */
         void AddDamagedTower(TeamId team);
 
-        /**
+        /*
          * \brief Called when tower is broken
          * -Update tower buff
          * -check if three south tower is down for remove 10 minutes to wg
          */
         void AddBrokenTower(TeamId team);
 
-        void DoCompleteOrIncrementAchievement(uint32 achievement, Player *player, uint8 incrementNumber = 1);
+        void DoCompleteOrIncrementAchievement(uint32 achievement, Player * player, uint8 incrementNumber = 1);
 
-        /**
+        /*
          * \brief called when a player is die, for add him to resurrect queue
          */
         void AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid);
 
-        /**
+        /*
          * \brief Called when battlefield is setup, at server start
          */
         bool SetupBattlefield();
@@ -400,7 +400,7 @@ class BattlefieldWG : public Battlefield
             m_CanClickOnOrb = allow;
         }
 
-        void RewardMarkOfHonor(Player *plr, uint32 count);
+        void RewardMarkOfHonor(Player * plr, uint32 count);
 
         void UpdateVehicleCountWG();
         void UpdateCounterVehicle(bool init);
@@ -409,8 +409,8 @@ class BattlefieldWG : public Battlefield
         void SendInitWorldStatesTo(Player * plr);
         void SendInitWorldStatesToAll();
 
-        void HandleKill(Player *killer, Unit *victim);
-        void PromotePlayer(Player *killer);
+        void HandleKill(Player * killer, Unit * victim);
+        void PromotePlayer(Player * killer);
 
         void UpdateTenacity();
         void ProcessEvent(WorldObject *obj, uint32 eventId);
@@ -1433,7 +1433,7 @@ struct BfWGGameObjectBuilding
         m_WG->BrokenWallOrTower(TeamId(m_Team));
     }
 
-    void Init(GameObject *go, uint32 type, uint32 worldstate, uint32 nameid)
+    void Init(GameObject * go, uint32 type, uint32 worldstate, uint32 nameid)
     {
         // GameObject associated to object
         m_Build = go;
@@ -1515,9 +1515,9 @@ struct BfWGGameObjectBuilding
             for (uint8 i = 0; i < AttackTowers[towerid - 4].nbObject; i++)
             {
                 BfWGObjectPosition gob = AttackTowers[towerid - 4].GameObject[i];
-                if (GameObject *go = m_WG->SpawnGameObject(gob.entryh, gob.x, gob.y, gob.z, gob.o))
+                if (GameObject * go = m_WG->SpawnGameObject(gob.entryh, gob.x, gob.y, gob.z, gob.o))
                     m_GameObjectList[TEAM_HORDE].insert(go);
-                if (GameObject *go = m_WG->SpawnGameObject(gob.entrya, gob.x, gob.y, gob.z, gob.o))
+                if (GameObject * go = m_WG->SpawnGameObject(gob.entrya, gob.x, gob.y, gob.z, gob.o))
                     m_GameObjectList[TEAM_ALLIANCE].insert(go);
             }
 
@@ -1525,9 +1525,9 @@ struct BfWGGameObjectBuilding
             for (uint8 i = 0; i < AttackTowers[towerid - 4].nbCreatureBottom; i++)
             {
                 BfWGObjectPosition crea = AttackTowers[towerid - 4].CreatureBottom[i];
-                if (Creature *creature = m_WG->SpawnCreature(crea.entryh, crea.x, crea.y, crea.z, crea.o, TEAM_HORDE))
+                if (Creature * creature = m_WG->SpawnCreature(crea.entryh, crea.x, crea.y, crea.z, crea.o, TEAM_HORDE))
                     m_CreatureBottomList[TEAM_HORDE].insert(creature->GetGUID());
-                if (Creature *creature = m_WG->SpawnCreature(crea.entrya, crea.x, crea.y, crea.z, crea.o, TEAM_ALLIANCE))
+                if (Creature * creature = m_WG->SpawnCreature(crea.entrya, crea.x, crea.y, crea.z, crea.o, TEAM_ALLIANCE))
                     m_CreatureBottomList[TEAM_ALLIANCE].insert(creature->GetGUID());
             }
 
@@ -1535,9 +1535,9 @@ struct BfWGGameObjectBuilding
             for (uint8 i = 0; i < AttackTowers[towerid - 4].nbCreatureTop; i++)
             {
                 BfWGObjectPosition crea = AttackTowers[towerid - 4].CreatureTop[i];
-                if (Creature *creature = m_WG->SpawnCreature(crea.entryh, crea.x, crea.y, crea.z, crea.o, TEAM_HORDE))
+                if (Creature * creature = m_WG->SpawnCreature(crea.entryh, crea.x, crea.y, crea.z, crea.o, TEAM_HORDE))
                     m_CreatureTopList[TEAM_HORDE].insert(creature->GetGUID());
-                if (Creature *creature = m_WG->SpawnCreature(crea.entrya, crea.x, crea.y, crea.z, crea.o, TEAM_ALLIANCE))
+                if (Creature * creature = m_WG->SpawnCreature(crea.entrya, crea.x, crea.y, crea.z, crea.o, TEAM_ALLIANCE))
                     m_CreatureTopList[TEAM_ALLIANCE].insert(creature->GetGUID());
             }
         }
@@ -1784,10 +1784,10 @@ struct BfWGWorkShopData
     // Spawning associate creature and store them
     void AddCreature(BfWGObjectPosition obj)
     {
-        if (Creature *creature = m_WG->SpawnCreature(obj.entryh, obj.x, obj.y, obj.z, obj.o, TEAM_HORDE))
+        if (Creature * creature = m_WG->SpawnCreature(obj.entryh, obj.x, obj.y, obj.z, obj.o, TEAM_HORDE))
             m_CreatureOnPoint[TEAM_HORDE].insert(creature->GetGUID());
 
-        if (Creature *creature = m_WG->SpawnCreature(obj.entrya, obj.x, obj.y, obj.z, obj.o, TEAM_ALLIANCE))
+        if (Creature * creature = m_WG->SpawnCreature(obj.entrya, obj.x, obj.y, obj.z, obj.o, TEAM_ALLIANCE))
             m_CreatureOnPoint[TEAM_ALLIANCE].insert(creature->GetGUID());
 
     }
