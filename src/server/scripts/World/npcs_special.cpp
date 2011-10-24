@@ -63,10 +63,7 @@ enum HATI_ENUM
 
 enum WEHRLOS
 {
-    SPELL_KRISTALLGEFAENGNIS = 32361,
-
-    EVENT_DURCHBOHREN = 1,
-    EVENT_KRISTALLGEFAENGNIS
+    EVENT_DURCHBOHREN = 1
 };
 
 // ------------------------------------------------------------------------------------------------------------
@@ -85,6 +82,7 @@ public:
             OrgHP = me->GetMaxHealth();
             OrgLvl = me->getLevel();
             OrgScale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+            PlrGUID = 0;
         }
 
         void Reset()
@@ -97,6 +95,26 @@ public:
                 me->SetMaxHealth(OrgHP);
                 me->SetLevel(OrgLvl);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, OrgScale);
+
+                if (PlrGUID)
+                {
+                    if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
+                    {
+                        if (!plr->isAlive())
+                        {
+                            plr->setDeathState(JUST_ALIVED);
+                            plr->RegenerateAll();
+                        }
+                        plr->SetDrunkValue(0);
+                        plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
+                        plr->SetSpeed(MOVE_WALK, 1.0f, true);
+                        plr->SetSpeed(MOVE_RUN, 1.0f, true);
+                        plr->SetSpeed(MOVE_SWIM, 1.0f, true);
+                        plr->SetSpeed(MOVE_FLIGHT, 1.0f, true);
+                    }
+                    PlrGUID = 0;
+                }
             }
         }
 
@@ -115,10 +133,11 @@ public:
                 me->SetHealth(me->GetMaxHealth());
 
                 events.ScheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_05);
-                events.ScheduleEvent(EVENT_KRISTALLGEFAENGNIS, SEKUNDEN_10);
 
                 if (Player * plr = who->ToPlayer())
                 {
+                    PlrGUID = plr->GetGUID();
+
                     plr->SetDrunkValue(23000);
                     plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5f);
 
@@ -174,10 +193,6 @@ public:
                             DoCastVictim(SPELL_DURCHBOHREN);
                             events.RescheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_10);
                             break;
-                        case EVENT_KRISTALLGEFAENGNIS:
-                            DoCastVictim(SPELL_KRISTALLGEFAENGNIS);
-                            events.RescheduleEvent(EVENT_KRISTALLGEFAENGNIS, SEKUNDEN_20);
-                            break;
                         default:
                             break;
                     }
@@ -188,6 +203,7 @@ public:
     private:
         bool enabled;
         EventMap events;
+        uint64 PlrGUID;
         uint32 OrgHP;
         uint8 OrgLvl;
         float OrgScale;
