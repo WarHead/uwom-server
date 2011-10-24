@@ -36,8 +36,11 @@ enum SpellsAndTexts
 {
     SPELL_EINDRINGLING_A    = 54028,
     SPELL_EINDRINGLING_H    = 54029,
+    SPELL_DETECTION         = 18950,
     TEXT_A                  = -1010001,
     TEXT_H                  = -1010000,
+    ALLY_WACHE              = 29254,
+    HORDE_WACHE             = 29255
 };
 
 class npc_mageguard_dalaran : public CreatureScript
@@ -56,48 +59,46 @@ public:
 
         void Reset()
         {
-            me->SetOrientation(me->GetHomePosition().GetOrientation());
+            me->CastSpell(me, SPELL_DETECTION, true);
         }
 
         void EnterCombat(Unit * /*who*/) { }
-        void AttackStart(Unit * /*who*/, float /*dist*/ = 0) { }
+        void AttackStart(Unit * /*who*/, float /*dist*/) { }
 
         void MoveInLineOfSight(Unit * who)
         {
             if (!who)
                 return;
 
-            Player* pwho = NULL;
+            Player * plr = who->ToPlayer();
 
-            if (who->GetTypeId() == TYPEID_PLAYER)
-                pwho = (Player*)who;
-
-            if (!pwho || pwho->isGameMaster())
-                return;
-
-            if (me->GetDistance(pwho) >= 12.0f)
+            if (!plr || !plr->IsInWorld() || plr->isGameMaster() || me->GetDistance(plr) > 12.0f)
                 return;
 
             switch(me->GetEntry())
             {
-                case 29254: // Ally
-                    if (!me->isInCombat() && pwho->GetTeam() == HORDE && !pwho->HasAura(SPELL_EINDRINGLING_A))
+                case ALLY_WACHE:
+                    if (!me->isInCombat() && plr->GetTeam() == HORDE && !plr->HasAura(SPELL_EINDRINGLING_A))
                     {
-                        me->Yell(TEXT_A, LANG_UNIVERSAL, pwho->GetGUID());
-                        DoCast(pwho, SPELL_EINDRINGLING_A);
+                        me->Yell(TEXT_A, LANG_UNIVERSAL, plr->GetGUID());
+                        DoCast(plr, SPELL_EINDRINGLING_A);
+                        EnterEvadeMode();
+                        return;
                     }
                     break;
-                case 29255: // Horde
-                    if (!me->isInCombat() && pwho->GetTeam() == ALLIANCE && !pwho->HasAura(SPELL_EINDRINGLING_H))
+                case HORDE_WACHE:
+                    if (!me->isInCombat() && plr->GetTeam() == ALLIANCE && !plr->HasAura(SPELL_EINDRINGLING_H))
                     {
-                        me->Yell(TEXT_H, LANG_UNIVERSAL, pwho->GetGUID());
-                        DoCast(pwho, SPELL_EINDRINGLING_H);
+                        me->Yell(TEXT_H, LANG_UNIVERSAL, plr->GetGUID());
+                        DoCast(plr, SPELL_EINDRINGLING_H);
+                        EnterEvadeMode();
+                        return;
                     }
                     break;
             }
         }
 
-        void UpdateAI(const uint32 /*diff*/) {}
+        void UpdateAI(const uint32 /*diff*/) { }
     };
 
     CreatureAI *GetAI(Creature *creature) const
