@@ -1,3 +1,5 @@
+SET NAMES utf8;
+
 DELETE FROM `command` WHERE `name`='reset arenaworld';
 DELETE FROM `command` WHERE `name`='reset honorworld';
 
