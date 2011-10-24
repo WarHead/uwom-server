@@ -14,8 +14,8 @@ public:
     {
         static ChatCommand ResetCommandTable[] =
         {
-            { "honorworld",     SEC_ADMINISTRATOR,  true,  &HandleResetHonorWorldCommand,   "", NULL },
             { "arenaworld",     SEC_ADMINISTRATOR,  true,  &HandleResetArenaWorldCommand,   "", NULL },
+            { "honorworld",     SEC_ADMINISTRATOR,  true,  &HandleResetHonorWorldCommand,   "", NULL },
 
             { "achievements",   SEC_ADMINISTRATOR,  true,  &HandleResetAchievementsCommand, "", NULL },
             { "honor",          SEC_ADMINISTRATOR,  true,  &HandleResetHonorCommand,        "", NULL },
@@ -199,11 +199,12 @@ public:
 
     static bool HandleResetStatsCommand(ChatHandler * handler, const char * args)
     {
-        Player* target;
-        if (!handler->extractPlayerTarget((char*)args, &target))
-            return false;
+        Player * target = NULL;
 
-        if (!HandleResetStatsOrLevelHelper(target))
+        if (!handler->extractPlayerTarget((char*)args, &target))
+            target = handler->GetSession()->GetPlayer();
+
+        if (!target || !HandleResetStatsOrLevelHelper(target))
             return false;
 
         target->InitRunes();
