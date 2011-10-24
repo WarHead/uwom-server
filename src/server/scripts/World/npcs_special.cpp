@@ -131,7 +131,7 @@ public:
             ScriptedAI::EnterCombat(who);
         }
 
-        void DamageTaken(Unit * victim, uint32 & dmg)
+        void DamageTaken(Unit * /*victim*/, uint32 & dmg)
         {
             if (enabled)
             {
