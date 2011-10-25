@@ -53,17 +53,29 @@ EndContentData */
 
 enum HATI_ENUM
 {
-    SOUND_AGGRO             = 11176,
-    SOUND_SLAY1             = 11177,
-    SOUND_SLAY2             = 11178,
-    SOUND_SLAY3             = 11183,
+    SOUND_AGGRO = 11176,
+    SOUND_SLAY1 = 11177,
+    SOUND_SLAY2 = 11178,
+    SOUND_SLAY3 = 11183,
 
-    SPELL_DURCHBOHREN       = 58666
+    SPELL_DURCHBOHREN = 58666
 };
 
-enum WEHRLOS
+enum WEHRLOS_ENUM
 {
-    EVENT_DURCHBOHREN = 1
+    SPELL_ABSTOSSENDE_WELLE = 74509, // 50% + 75% HP - selbst
+    SPELL_SCHOCKWELLE       = 75417, // 25% HP - Victim
+    SPELL_VERSENGEN         = 75412, // Victim (30m)
+    SPELL_RUESTUNG_SPALTEN  = 74367, // Victim (5m)
+
+    ACHIEVE_Der_4_Geburtstag_von_WoW    = 2398,
+    ACHIEVE_Jadetiger                   = 3636,
+    ACHIEVE_Der_5_Geburtstag_von_WoW    = 4400,
+
+    EVENT_VERSENGEN         = 1,
+    EVENT_RUESTUNG_SPALTEN  = 2,
+
+    MAP_NORDEND = 571
 };
 
 // ------------------------------------------------------------------------------------------------------------
@@ -76,12 +88,14 @@ public:
 
     struct npc_schutz_den_wehrlosenAI : public ScriptedAI
     {
-        npc_schutz_den_wehrlosenAI(Creature * creature) : ScriptedAI(creature)
+        npc_schutz_den_wehrlosenAI(Creature * creature) : ScriptedAI(creature), summons(me)
         {
-            enabled = me->GetMap()->Instanceable() ? false : true;
+            enabled = me->GetMapId() == MAP_NORDEND ? true : false;
+
             OrgHP = me->GetMaxHealth();
             OrgLvl = me->getLevel();
             OrgScale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+
             PlrGUID = 0;
         }
 
@@ -89,7 +103,12 @@ public:
         {
             if (enabled)
             {
+                done75 = false;
+                done50 = false;
+                done25 = false;
+
                 events.Reset();
+                summons.DespawnAll();
 
                 me->SetReactState(REACT_DEFENSIVE);
                 me->SetMaxHealth(OrgHP);
@@ -97,25 +116,28 @@ public:
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, OrgScale);
 
                 if (PlrGUID)
-                {
                     if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
-                    {
                         if (!plr->isAlive())
-                        {
-                            plr->setDeathState(JUST_ALIVED);
-                            plr->RegenerateAll();
-                        }
-                        plr->SetDrunkValue(0);
-                        plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+                            plr->ResurrectPlayer(100.0f);
 
-                        plr->SetSpeed(MOVE_WALK, 1.0f, true);
-                        plr->SetSpeed(MOVE_RUN, 1.0f, true);
-                        plr->SetSpeed(MOVE_SWIM, 1.0f, true);
-                        plr->SetSpeed(MOVE_FLIGHT, 1.0f, true);
-                    }
-                    PlrGUID = 0;
-                }
+                PlrGUID = 0;
             }
+        }
+
+        void IsSummonedBy(Unit * summoner)
+        {
+            if (enabled && summoner)
+                enabled = false;
+        }
+
+        void JustSummoned(Creature * summon)
+        {
+            summons.Summon(summon);
+        }
+
+        void SummonedCreatureDespawn(Creature * summon)
+        {
+            summons.Despawn(summon);
         }
 
         void EnterCombat(Unit * who)
@@ -128,23 +150,38 @@ public:
                 DoPlaySoundToSet(me, SOUND_AGGRO);
 
                 me->SetLevel(DEFAULT_MAX_LEVEL+3);
-                me->SetFloatValue(OBJECT_FIELD_SCALE_X, 7.5f);
-                me->SetMaxHealth(me->GetMaxHealth() * 10000);
-                me->SetHealth(me->GetMaxHealth());
+                me->SetFloatValue(OBJECT_FIELD_SCALE_X, 5.0f);
+                me->SetMaxHealth(OrgHP * 20000);
 
-                events.ScheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_05);
+                me->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 222.22f);
+                me->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 333.33f);
+                me->SetStatInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 333);
+                me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 77.77f);
+
+                events.ScheduleEvent(EVENT_VERSENGEN, SEKUNDEN_05);
+                events.ScheduleEvent(EVENT_RUESTUNG_SPALTEN, SEKUNDEN_05);
 
                 if (Player * plr = who->ToPlayer())
-                {
                     PlrGUID = plr->GetGUID();
 
-                    plr->SetDrunkValue(23000);
-                    plr->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5f);
+                for (uint8 i=0; i<10; ++i)
+                {
+                    Position pos;
+                    me->GetRandomNearPosition(pos, 10.0f);
 
-                    plr->SetSpeed(MOVE_WALK, 0.25f, true);
-                    plr->SetSpeed(MOVE_RUN, 0.25f, true);
-                    plr->SetSpeed(MOVE_SWIM, 0.25f, true);
-                    plr->SetSpeed(MOVE_FLIGHT, 0.25f, true);
+                    if (TempSummon * ts = me->SummonCreature(me->GetEntry(), pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, SEKUNDEN_60))
+                    {
+                        ts->SetLevel(DEFAULT_MAX_LEVEL+3);
+                        ts->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.5f);
+                        ts->SetMaxHealth(ts->GetMaxHealth() * 20000);
+
+                        ts->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 99.99f);
+                        ts->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 199.99f);
+                        ts->SetStatInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 111);
+                        ts->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 33.33f);
+
+                        ts->AI()->AttackStart(me->getVictim());
+                    }
                 }
             }
             ScriptedAI::EnterCombat(who);
@@ -160,6 +197,22 @@ public:
                     dmg = dmg / 1000;
 
                 FirstTime = false;
+
+                if (!done75 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(75))
+                {
+                    DoCastAOE(SPELL_ABSTOSSENDE_WELLE);
+                    done75 = true;
+                }
+                if (!done50 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(50))
+                {
+                    DoCastAOE(SPELL_ABSTOSSENDE_WELLE);
+                    done50 = true;
+                }
+                if (!done25 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(25))
+                {
+                    DoCastAOE(SPELL_SCHOCKWELLE);
+                    done25 = true;
+                }
             }
         }
 
@@ -176,6 +229,25 @@ public:
             }
         }
 
+        void JustDied(Unit * /*killer*/)
+        {
+            if (enabled && PlrGUID)
+                if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
+                    if (plr->isAlive())
+                    {
+                        AchievementEntry const * AE = NULL;
+
+                        switch(urand(0,2))
+                        {
+                            case 0: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Der_4_Geburtstag_von_WoW);  break;
+                            case 1: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Jadetiger);                 break;
+                            case 2: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Der_5_Geburtstag_von_WoW);  break;
+                        }
+                        if (AE)
+                            plr->CompletedAchievement(AE);
+                    }
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
@@ -189,9 +261,13 @@ public:
                 {
                     switch(eventId)
                     {
-                        case EVENT_DURCHBOHREN:
-                            DoCastVictim(SPELL_DURCHBOHREN);
-                            events.RescheduleEvent(EVENT_DURCHBOHREN, SEKUNDEN_10);
+                        case EVENT_VERSENGEN:
+                            DoCastVictim(SPELL_VERSENGEN);
+                            events.RescheduleEvent(EVENT_VERSENGEN, urand(SEKUNDEN_05, SEKUNDEN_10));
+                            break;
+                        case EVENT_RUESTUNG_SPALTEN:
+                            DoCastVictim(SPELL_RUESTUNG_SPALTEN);
+                            events.RescheduleEvent(EVENT_RUESTUNG_SPALTEN, urand(SEKUNDEN_10, SEKUNDEN_20));
                             break;
                         default:
                             break;
@@ -202,11 +278,15 @@ public:
         }
     private:
         bool enabled;
+        bool done75;
+        bool done50;
+        bool done25;
         EventMap events;
         uint64 PlrGUID;
         uint32 OrgHP;
         uint8 OrgLvl;
         float OrgScale;
+        SummonList summons;
     };
 
     CreatureAI * GetAI(Creature * creature) const
