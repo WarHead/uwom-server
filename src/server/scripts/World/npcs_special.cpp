@@ -103,6 +103,8 @@ public:
         {
             if (enabled)
             {
+                FirstTime = true;
+
                 done75 = false;
                 done50 = false;
                 done25 = false;
@@ -117,8 +119,12 @@ public:
 
                 if (PlrGUID)
                     if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
+                    {
                         if (!plr->isAlive())
                             plr->ResurrectPlayer(100.0f);
+
+                        plr->SetDrunkValue(0);
+                    }
 
                 PlrGUID = 0;
             }
@@ -156,14 +162,17 @@ public:
 
                 me->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 222.22f);
                 me->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 333.33f);
-                me->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 555);
-                me->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 77.77f);
+                me->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 666);
+                me->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 99.99f);
 
                 events.ScheduleEvent(EVENT_VERSENGEN, SEKUNDEN_05);
                 events.ScheduleEvent(EVENT_RUESTUNG_SPALTEN, SEKUNDEN_05);
 
                 if (Player * plr = who->ToPlayer())
+                {
+                    plr->SetDrunkValue(25600);
                     PlrGUID = plr->GetGUID();
+                }
 
                 for (uint8 i=0; i<6; ++i)
                 {
@@ -179,8 +188,8 @@ public:
 
                         ts->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 99.99f);
                         ts->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 199.99f);
-                        ts->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 222);
-                        ts->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 33.33f);
+                        ts->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 333);
+                        ts->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 66.66f);
 
                         ts->AI()->AttackStart(me->getVictim());
                     }
@@ -196,7 +205,7 @@ public:
                 if (FirstTime)
                     dmg = 0;
                 else
-                    dmg = dmg / 100;
+                    dmg = dmg / 75;
 
                 FirstTime = false;
 
@@ -212,7 +221,7 @@ public:
                 }
                 if (!done25 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(25))
                 {
-                    DoCastVictim(SPELL_SCHOCKWELLE);
+                    DoCastAOE(SPELL_SCHOCKWELLE);
                     done25 = true;
                 }
             }
@@ -235,19 +244,25 @@ public:
         {
             if (enabled && PlrGUID)
                 if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
+                {
                     if (plr->isAlive())
                     {
-                        AchievementEntry const * AE = NULL;
-
-                        switch(urand(0,2))
+                        AchievementEntry const * AE[3] =
                         {
-                            case 0: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Der_4_Geburtstag_von_WoW);  break;
-                            case 1: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Jadetiger);                 break;
-                            case 2: AE = GetAchievementStore()->LookupEntry(ACHIEVE_Der_5_Geburtstag_von_WoW);  break;
-                        }
-                        if (AE)
-                            plr->CompletedAchievement(AE);
+                            GetAchievementStore()->LookupEntry(ACHIEVE_Der_4_Geburtstag_von_WoW),
+                            GetAchievementStore()->LookupEntry(ACHIEVE_Jadetiger),
+                            GetAchievementStore()->LookupEntry(ACHIEVE_Der_5_Geburtstag_von_WoW)
+                        };
+
+                        for (uint8 i=0; i<3; ++i)
+                            if (AE[i] && !plr->GetAchievementMgr().HasAchieved(AE[i]))
+                            {
+                                plr->CompletedAchievement(AE[i]);
+                                break;
+                            }
                     }
+                    plr->SetDrunkValue(0);
+                }
         }
 
         void UpdateAI(const uint32 diff)
@@ -265,7 +280,7 @@ public:
                     {
                         case EVENT_VERSENGEN:
                             DoCastVictim(SPELL_VERSENGEN);
-                            events.RescheduleEvent(EVENT_VERSENGEN, urand(SEKUNDEN_05, SEKUNDEN_10));
+                            events.RescheduleEvent(EVENT_VERSENGEN, SEKUNDEN_05);
                             break;
                         case EVENT_RUESTUNG_SPALTEN:
                             DoCastVictim(SPELL_RUESTUNG_SPALTEN);
