@@ -369,55 +369,56 @@ class spell_dk_death_pact : public SpellScriptLoader
 // 55090 Scourge Strike (55265, 55270, 55271)
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
-    public:
-        spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike") { }
+public:
+    spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike") { }
 
-        class spell_dk_scourge_strike_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+    class spell_dk_scourge_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
 			
-        private:
-            float m_multip;
-        public:
-            spell_dk_scourge_strike_SpellScript() : m_multip(0.0f) { }
+    private:
+        float m_multip;
+    public:
+        spell_dk_scourge_strike_SpellScript() : m_multip(0.0f) { }
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (Unit* unitTarget = GetHitUnit())
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
-                    return false;
-                return true;
+                m_multip = float(GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()));
+                // black ice bonus dmg
+                if (caster->HasAura(49664))
+                    m_multip *= 1.1f;
+                else if (caster->HasAura(49663))
+                    m_multip *= 1.08f;
+                else if (caster->HasAura(49662))
+                    m_multip *= 1.06f;
+                else if (caster->HasAura(49661))
+                    m_multip *= 1.04f;
+                else if (caster->HasAura(49140))
+                    m_multip *= 1.02f;
+                // rage of rivendare bonus dmg
+                if (caster->HasAura(50121))
+                    m_multip *= 1.1f;
+                else if (caster->HasAura(50120))
+                    m_multip *= 1.08f;
+                else if (caster->HasAura(50119))
+                    m_multip *= 1.06f;
+                else if (caster->HasAura(50118))
+                    m_multip *= 1.04f;
+                else if (caster->HasAura(50117))
+                    m_multip *= 1.02f;
+
+                m_multip = m_multip / 100.0f;
             }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    m_multip = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()))/* / 100.0f*/; // default with diseases
-                    // black ice bonus dmg
-                    if (caster->HasAura(49664))
-                        m_multip *= 1.1;
-                    else if (caster->HasAura(49663))
-                        m_multip *= 1.08;
-                    else if (caster->HasAura(49662))
-                        m_multip *= 1.06;
-                    else if (caster->HasAura(49661))
-                        m_multip *= 1.04;
-                    else if (caster->HasAura(49140))
-                        m_multip *= 1.02;
-                    // rage of rivendare bonus dmg
-                    if (caster->HasAura(50121))
-                        m_multip *= 1.1;
-                    else if (caster->HasAura(50120))
-                        m_multip *= 1.08;
-                    else if (caster->HasAura(50119))
-                        m_multip *= 1.06;
-                    else if (caster->HasAura(50118))
-                        m_multip *= 1.04;
-                    else if (caster->HasAura(50117))
-                        m_multip *= 1.02;
-                    m_multip = m_multip / 100.0f;
-                }
         }
 
         void HandleAfterHit()
@@ -425,22 +426,22 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             Unit* caster = GetCaster();
             if (Unit* unitTarget = GetHitUnit())
             {
-                int32 bp = GetTrueDamage() * m_multip;
+                int32 bp = int32(GetTrueDamage() * m_multip);
                 caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
             }
         }
 
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
-                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
+        void Register()
         {
-            return new spell_dk_scourge_strike_SpellScript();
+            OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
         }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_scourge_strike_SpellScript();
+    }
 };
 
 // 49145 - Spell Deflection
