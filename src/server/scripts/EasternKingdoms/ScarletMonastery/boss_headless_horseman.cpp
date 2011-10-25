@@ -47,6 +47,7 @@ uint32 RandomLaugh[] = {11965, 11975, 11976};
 #define PUMPKIN_FIEND               23545
 #define HELPER                      23686
 #define WISP_INVIS                  24034
+#define SIR_THOMAS                  23904
 
     //Spells
 #define SPELL_CLEAVE                42587
@@ -465,8 +466,10 @@ public:
                     wp_reached = false;
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     SaySound(SAY_ENTRANCE);
-                    if (Unit* player = Unit::GetUnit((*me), PlayerGUID))
-                        DoStartMovement(player);
+                    if (Player * plr = ObjectAccessor::GetPlayer(*me, PlayerGUID))
+                        AttackStart(plr);
+                    else if (Player * plr = me->FindNearestPlayer(100.0f))
+                        AttackStart(plr);
                     break;
                 }
             }
@@ -479,12 +482,13 @@ public:
                 instance->SetData(DATA_HORSEMAN_EVENT, IN_PROGRESS);
             DoZoneInCombat();
         }
-        void AttackStart(Unit* who) {ScriptedAI::AttackStart(who);}
+
         void MoveInLineOfSight(Unit* who)
         {
             if (withhead && Phase != 0)
                 ScriptedAI::MoveInLineOfSight(who);
         }
+
         void KilledUnit(Unit* player)
         {
             if (player->GetTypeId() == TYPEID_PLAYER)
@@ -546,6 +550,8 @@ public:
                 CAST_AI(mob_wisp_invis::mob_wisp_invisAI, wisp->AI())->SetType(4);
             if (instance)
                 instance->SetData(DATA_HORSEMAN_EVENT, DONE);
+
+            me->SummonCreature(SIR_THOMAS, 1762.756226f, 1344.992432f, 17.561937f, 0.021202f);
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
