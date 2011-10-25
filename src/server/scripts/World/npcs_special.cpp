@@ -196,7 +196,7 @@ public:
                 if (FirstTime)
                     dmg = 0;
                 else
-                    dmg = dmg / 500;
+                    dmg = dmg / 100;
 
                 FirstTime = false;
 
