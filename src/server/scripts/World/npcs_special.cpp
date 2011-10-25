@@ -151,12 +151,13 @@ public:
 
                 me->SetLevel(DEFAULT_MAX_LEVEL+3);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, 5.0f);
-                me->SetMaxHealth(OrgHP * 20000);
+                me->SetMaxHealth(OrgHP * 200000);
+                me->SetFullHealth();
 
                 me->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 222.22f);
                 me->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 333.33f);
-                me->SetStatInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 333);
-                me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 77.77f);
+                me->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 555);
+                me->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 77.77f);
 
                 events.ScheduleEvent(EVENT_VERSENGEN, SEKUNDEN_05);
                 events.ScheduleEvent(EVENT_RUESTUNG_SPALTEN, SEKUNDEN_05);
@@ -164,7 +165,7 @@ public:
                 if (Player * plr = who->ToPlayer())
                     PlrGUID = plr->GetGUID();
 
-                for (uint8 i=0; i<10; ++i)
+                for (uint8 i=0; i<6; ++i)
                 {
                     Position pos;
                     me->GetRandomNearPosition(pos, 10.0f);
@@ -173,12 +174,13 @@ public:
                     {
                         ts->SetLevel(DEFAULT_MAX_LEVEL+3);
                         ts->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.5f);
-                        ts->SetMaxHealth(ts->GetMaxHealth() * 20000);
+                        ts->SetMaxHealth(ts->GetMaxHealth() * 100000);
+                        ts->SetFullHealth();
 
                         ts->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 99.99f);
                         ts->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 199.99f);
-                        ts->SetStatInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 111);
-                        ts->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 33.33f);
+                        ts->SetStatInt32Value(UNIT_FIELD_ATTACK_POWER, 222);
+                        ts->SetStatFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 33.33f);
 
                         ts->AI()->AttackStart(me->getVictim());
                     }
@@ -194,7 +196,7 @@ public:
                 if (FirstTime)
                     dmg = 0;
                 else
-                    dmg = dmg / 1000;
+                    dmg = dmg / 500;
 
                 FirstTime = false;
 
@@ -210,7 +212,7 @@ public:
                 }
                 if (!done25 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(25))
                 {
-                    DoCastAOE(SPELL_SCHOCKWELLE);
+                    DoCastVictim(SPELL_SCHOCKWELLE);
                     done25 = true;
                 }
             }
