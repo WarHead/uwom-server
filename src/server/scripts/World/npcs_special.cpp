@@ -75,7 +75,11 @@ enum WEHRLOS_ENUM
     EVENT_VERSENGEN         = 1,
     EVENT_RUESTUNG_SPALTEN  = 2,
 
-    MAP_NORDEND = 571
+    MAP_NORDEND = 571,
+
+    MAX_HEALTH = 200000,
+
+    DRUNK_VALUE = 25600
 };
 
 // ------------------------------------------------------------------------------------------------------------
@@ -95,6 +99,7 @@ public:
             OrgHP = me->GetMaxHealth();
             OrgLvl = me->getLevel();
             OrgScale = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+            OrgSpeed = me->GetSpeed(MOVE_RUN);
 
             PlrGUID = 0;
         }
@@ -103,6 +108,9 @@ public:
         {
             if (enabled)
             {
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+
                 FirstTime = true;
 
                 done75 = false;
@@ -116,6 +124,7 @@ public:
                 me->SetMaxHealth(OrgHP);
                 me->SetLevel(OrgLvl);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, OrgScale);
+                me->SetSpeed(MOVE_RUN, OrgSpeed);
 
                 if (PlrGUID)
                     if (Player * plr = ObjectAccessor::GetPlayer(*me, PlrGUID))
@@ -155,10 +164,14 @@ public:
             {
                 DoPlaySoundToSet(me, SOUND_AGGRO);
 
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+
                 me->SetLevel(DEFAULT_MAX_LEVEL+3);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, 5.0f);
-                me->SetMaxHealth(OrgHP * 200000);
+                me->SetMaxHealth(MAX_HEALTH);
                 me->SetFullHealth();
+                me->SetSpeed(MOVE_RUN, 2.5f);
 
                 me->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 222.22f);
                 me->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 333.33f);
@@ -170,7 +183,7 @@ public:
 
                 if (Player * plr = who->ToPlayer())
                 {
-                    plr->SetDrunkValue(25600);
+                    plr->SetDrunkValue(DRUNK_VALUE);
                     PlrGUID = plr->GetGUID();
                 }
 
@@ -183,8 +196,9 @@ public:
                     {
                         ts->SetLevel(DEFAULT_MAX_LEVEL+3);
                         ts->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.5f);
-                        ts->SetMaxHealth(ts->GetMaxHealth() * 100000);
+                        ts->SetMaxHealth(MAX_HEALTH / 2);
                         ts->SetFullHealth();
+                        ts->SetSpeed(MOVE_RUN, 2.5f);
 
                         ts->SetStatFloatValue(UNIT_FIELD_MINDAMAGE, 99.99f);
                         ts->SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, 199.99f);
@@ -205,7 +219,7 @@ public:
                 if (FirstTime)
                     dmg = 0;
                 else
-                    dmg = dmg / 75;
+                    dmg = dmg / 50;
 
                 FirstTime = false;
 
@@ -303,6 +317,7 @@ public:
         uint32 OrgHP;
         uint8 OrgLvl;
         float OrgScale;
+        float OrgSpeed;
         SummonList summons;
     };
 
