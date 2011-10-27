@@ -1611,7 +1611,7 @@ void LFGMgr::UpdateBoot(Player* plr, bool accept)
     }
 
     if (agreeNum == pBoot->votedNeeded ||                  // Vote passed
-        votesNum == pBoot->votes.size() ||                 // All voted but not passed
+        votesNum >= pBoot->votes.size() ||                 // All voted but not passed
         (pBoot->votes.size() - votesNum + agreeNum) < pBoot->votedNeeded) // Vote didnt passed
     {
         // Send update info to all players
@@ -1629,7 +1629,7 @@ void LFGMgr::UpdateBoot(Player* plr, bool accept)
 
         uint64 gguid = grp->GetGUID();
         SetState(gguid, LFG_STATE_DUNGEON);
-        if (agreeNum == pBoot->votedNeeded)                // Vote passed - Kick player
+        if (agreeNum >= pBoot->votedNeeded)                // Vote passed - Kick player
         {
             Player::RemoveFromGroup(grp, pBoot->victim);
             if (Player* victim = ObjectAccessor::FindPlayer(pBoot->victim))
@@ -1865,7 +1865,7 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     ClearState(guid);
     SetState(guid, LFG_STATE_FINISHED_DUNGEON);
 
-    // Give rewards only if its a random dungeon
+    // Give rewards only if its a random dungeon or world event
     LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(rDungeonId);
     if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && dungeon->grouptype != 11))
     {
