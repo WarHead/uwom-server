@@ -164,6 +164,8 @@ public:
             {
                 DoPlaySoundToSet(me, SOUND_AGGRO);
 
+                me->SetReactState(REACT_AGGRESSIVE);
+
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
 
