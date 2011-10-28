@@ -42,7 +42,7 @@ class item_stab_der_verwandlung_zufaellig : public ItemScript
 public:
     item_stab_der_verwandlung_zufaellig() : ItemScript("item_stab_der_verwandlung_zufaellig") { }
 
-    bool OnUse(Player * player, Item * /*item*/, SpellCastTargets const & target)
+    bool OnUse(Player * player, Item * item, SpellCastTargets const & target)
     {
         uint32 RandomStabSpells[7] = {24717,24718,24719,24724,24733,24737,24741};
         Group * grp = player->GetGroup();
@@ -50,7 +50,10 @@ public:
         if (Unit * ziel = target.GetUnitTarget())
         {
             if (grp && grp->IsMember(ziel->GetGUID()))
+            {
                 player->CastSpell(ziel, RandomStabSpells[urand(0,6)], false);
+                item->SetSpellCharges(0, item->GetSpellCharges()+1);
+            }
             else
                 return false;
         }
