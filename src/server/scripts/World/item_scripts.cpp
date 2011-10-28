@@ -50,7 +50,7 @@ public:
         if (Unit * ziel = target.GetUnitTarget())
         {
             if (grp && grp->IsMember(ziel->GetGUID()))
-                ziel->CastSpell(ziel, RandomStabSpells[urand(0,6)], true);
+                player->CastSpell(ziel, RandomStabSpells[urand(0,6)], true);
             else
                 return false;
         }
