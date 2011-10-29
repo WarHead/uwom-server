@@ -2500,10 +2500,10 @@ void AchievementGlobalMgr::LoadRewards()
         reward.subject    = fields[5].GetString();
         reward.text       = fields[6].GetString();
 
-        // must be title or mail at least
-        if (!reward.titleId[0] && !reward.titleId[1] && !reward.sender)
+        // must be title / item or sender at least
+        if (!reward.titleId[0] && !reward.titleId[1] && !reward.itemId && !reward.sender)
         {
-            sLog->outErrorDb("Table `achievement_reward` (Entry: %u) not have title or item reward data, ignore.", entry);
+            sLog->outErrorDb("Table `achievement_reward` (Entry: %u) not have title / item reward data nore a sender, ignore.", entry);
             continue;
         }
 

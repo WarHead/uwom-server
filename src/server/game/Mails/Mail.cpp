@@ -327,7 +327,7 @@ void WorldSession::SendExternalMails()
             mail->AddItem(mailItem);
         }
 
-        mail->SendMailTo(trans, receiver ? receiver : MailReceiver(receiver_guid), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+        mail->SendMailTo(trans, receiver ? receiver : MailReceiver(GUID_LOPART(receiver_guid)), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
         delete mail;
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXTERNAL_MAIL);

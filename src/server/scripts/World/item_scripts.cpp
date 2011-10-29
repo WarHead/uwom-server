@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
@@ -33,6 +34,35 @@ EndContentData */
 
 #include "ScriptPCH.h"
 #include "Spell.h"
+#include "Group.h"
+
+// Stab der Verwandlung - zufällig (20413)
+class item_stab_der_verwandlung_zufaellig : public ItemScript
+{
+public:
+    item_stab_der_verwandlung_zufaellig() : ItemScript("item_stab_der_verwandlung_zufaellig") { }
+
+    bool OnUse(Player * player, Item * item, SpellCastTargets const & target)
+    {
+        uint32 RandomStabSpells[7] = {24717,24718,24719,24724,24733,24737,24741};
+        Group * grp = player->GetGroup();
+
+        if (Unit * ziel = target.GetUnitTarget())
+        {
+            if (grp && grp->IsMember(ziel->GetGUID()))
+            {
+                player->CastSpell(ziel, RandomStabSpells[urand(0,6)], false);
+                item->SetSpellCharges(0, item->GetSpellCharges()+1);
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+
+        return true;
+    }
+};
 
 /*#####
 # item_only_for_flight
@@ -451,6 +481,7 @@ public:
 
 void AddSC_item_scripts()
 {
+    new item_stab_der_verwandlung_zufaellig();
     new item_only_for_flight();
     new item_draenei_fishing_net();
     new item_nether_wraith_beacon();

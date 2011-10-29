@@ -6908,7 +6908,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    bool stacker = !procSpell || procSpell->Id == 53595;
+                    bool stacker = !procSpell || procSpell->Id == 53595 || procSpell->Id == 71433 || procSpell->Id == 71434;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
                     bool damager = procSpell && procSpell->EquippedItemClass != -1;
 
@@ -6940,7 +6940,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    bool stacker = !procSpell || procSpell->Id == 53595;
+                    bool stacker = !procSpell || procSpell->Id == 53595 || procSpell->Id == 71433 || procSpell->Id == 71434;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
                     bool damager = procSpell && procSpell->EquippedItemClass != -1;
 
@@ -13273,16 +13273,16 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
     return duration;
 }
 
-int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive)
+int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask)
 {
-    // don't mod permament auras duration
+    // don't mod permanent auras duration
     if (duration < 0)
         return duration;
 
     // cut duration only of negative effects
     if (!positive)
     {
-        int32 mechanic = spellProto->GetAllEffectsMechanicMask();
+        int32 mechanic = spellProto->GetSpellMechanicMaskByEffectMask(effectMask);
 
         int32 durationMod;
         int32 durationMod_always = 0;
@@ -14584,6 +14584,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                 }
                 case SPELL_AURA_PROC_TRIGGER_DAMAGE:
                 {
+                    if(!target) //Crash: spell 49065 casted by GO
+                        return;
                     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", triggeredByAura->GetAmount(), spellInfo->Id, (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
                     SpellNonMeleeDamage damageInfo(this, target, spellInfo->Id, spellInfo->SchoolMask);
                     uint32 damage = SpellDamageBonus(target, spellInfo, triggeredByAura->GetAmount(), SPELL_DIRECT_DAMAGE);

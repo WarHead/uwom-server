@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -519,6 +520,16 @@ void SpellScript::SetCustomCastResultMessage(SpellCustomErrors result)
 SpellValue const* SpellScript::GetSpellValue()
 {
     return m_spell->m_spellValue;
+}
+
+int32 SpellScript::GetTrueDamage()
+{
+    if (!IsInAfterHitPhase())
+    {
+        sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetHitHeal was called while spell not in after-hit phase!", m_scriptName->c_str(), m_scriptSpellId);
+        return NULL;
+    }
+    return m_spell->m_true_damage;
 }
 
 bool AuraScript::_Validate(SpellInfo const* entry)
