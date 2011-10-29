@@ -1,11 +1,14 @@
-/*######
+// Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+
+ /*######
 ## npc_frostlord_ahune
 ######*/
 
-#include "LFGMgr.h"
-#define EMOTE_SUBMERGE             "Ahune Retreats. His Defenses Diminish."
-#define EMOTE_EMERGE_SOON          "Ahune will soon resurface."
-#define GOSSIP_STONE_ITEM          "Disturb the stone and summon Lord Ahune."
+#include <LFGMgr.h>
+
+#define EMOTE_SUBMERGE      "Ahune Retreats. His Defenses Diminish."
+#define EMOTE_EMERGE_SOON   "Ahune will soon resurface."
+#define GOSSIP_STONE_ITEM   "Disturb the stone and summon Lord Ahune."
 
 enum Spells
 {
@@ -103,7 +106,7 @@ class npc_frostlord_ahune : public CreatureScript
                 {
                     case NPC_FROZEN_CORE:
                         summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                        summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true); 
+                        summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
                         summon->SetHealth(me->GetHealth());
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -158,7 +161,7 @@ class npc_frostlord_ahune : public CreatureScript
                 }
             }
 
-            void DoAction(int32 const action)
+            void DoAction(int32 const /*action*/)
             {
                 me->SetVisible(true);
                 me->SetReactState(REACT_AGGRESSIVE);
