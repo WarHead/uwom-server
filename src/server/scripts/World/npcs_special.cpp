@@ -1820,12 +1820,12 @@ public:
                 if (!pPlayer->HasSpell(SPELL_ENGINEERING_GRAND_MASTER))
                 {
                     pPlayer->learnSpellHighRank(SPELL_ENGINEERING_GRAND_MASTER);
-                    pPlayer->SetSkill(SKILL_ENGINERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING));
-                    LearnAllSkillRecipes(pPlayer, SKILL_ENGINERING);
+                    pPlayer->SetSkill(SKILL_ENGINEERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING));
+                    LearnAllSkillRecipes(pPlayer, SKILL_ENGINEERING);
                 }
                 else
                     if (pPlayer->HasSpell(SPELL_ENGINEERING_GRAND_MASTER))
-                        LearnAllSkillRecipes(pPlayer, SKILL_ENGINERING);
+                        LearnAllSkillRecipes(pPlayer, SKILL_ENGINEERING);
                 pPlayer->CLOSE_GOSSIP_MENU();
                 break;
             // Erste Hilfe
@@ -1982,12 +1982,12 @@ public:
                     if (!pPlayer->HasSpell(SPELL_ENGINEERING_GRAND_MASTER))
                     {
                         pPlayer->learnSpellHighRank(SPELL_ENGINEERING_GRAND_MASTER);
-                        pPlayer->SetSkill(SKILL_ENGINERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING));
-                        LearnAllSkillRecipes(pPlayer, SKILL_ENGINERING);
+                        pPlayer->SetSkill(SKILL_ENGINEERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING));
+                        LearnAllSkillRecipes(pPlayer, SKILL_ENGINEERING);
                     }
                     else
                         if (pPlayer->HasSpell(SPELL_ENGINEERING_GRAND_MASTER))
-                            LearnAllSkillRecipes(pPlayer, SKILL_ENGINERING);
+                            LearnAllSkillRecipes(pPlayer, SKILL_ENGINEERING);
                     // Erste Hilfe
                     if (!pPlayer->HasSpell(SPELL_FIRAT_AID_GRAND_MASTER))
                     {
@@ -2663,7 +2663,7 @@ public:
                 if (!pPlayer->HasSpell(SPELL_ENGINEERING_GRAND_MASTER) && ai->SubstructCurrency(pPlayer, ai->ps.Costs_Profession))
                 {
                     pPlayer->learnSpellHighRank(SPELL_ENGINEERING_GRAND_MASTER);
-                    pPlayer->SetSkill(SKILL_ENGINERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING));
+                    pPlayer->SetSkill(SKILL_ENGINEERING, 1, pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING), pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING));
                 }
                 break;
             // Erste Hilfe
@@ -2771,8 +2771,8 @@ public:
                 break;
             // Ingenieurwesen
             case GOSSIP_ACTION_INFO_DEF + 34:
-                if (pPlayer->HasSkill(SKILL_ENGINERING) && pPlayer->GetSkillValue(SKILL_ENGINERING) >= pPlayer->GetPureMaxSkillValue(SKILL_ENGINERING) && ai->SubstructCurrency(pPlayer, ai->ps.Costs_AllRecipes))
-                    LearnAllSkillRecipes(pPlayer, SKILL_ENGINERING);
+                if (pPlayer->HasSkill(SKILL_ENGINEERING) && pPlayer->GetSkillValue(SKILL_ENGINEERING) >= pPlayer->GetPureMaxSkillValue(SKILL_ENGINEERING) && ai->SubstructCurrency(pPlayer, ai->ps.Costs_AllRecipes))
+                    LearnAllSkillRecipes(pPlayer, SKILL_ENGINEERING);
                 else
                     pPlayer->GetSession()->SendNotification(PIMPER_PROF_MAX);
                 break;
