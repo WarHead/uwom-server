@@ -13277,8 +13277,8 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
 
 int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask)
 {
-    // don't mod permanent auras duration
-    if (duration < 0)
+    //don't mod permament auras duration + special Envenom handling
+    if (duration < 0 || ( spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && spellProto->SpellFamilyFlags[1] & 0x8))
         return duration;
 
     // cut duration only of negative effects
@@ -15882,6 +15882,8 @@ void Unit::SetControlled(bool apply, UnitState state)
             case UNIT_STAT_CONFUSED:
                 if (!HasUnitState(UNIT_STAT_STUNNED))
                 {
+                    ClearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    SendMeleeAttackStop(m_attacking);
                     SetConfused(true);
                     CastStop();
                 }
@@ -15889,6 +15891,8 @@ void Unit::SetControlled(bool apply, UnitState state)
             case UNIT_STAT_FLEEING:
                 if (!HasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_CONFUSED))
                 {
+                    ClearUnitState(UNIT_STAT_MELEE_ATTACKING);
+                    SendMeleeAttackStop(m_attacking);
                     SetFeared(true);
                     CastStop();
                 }
