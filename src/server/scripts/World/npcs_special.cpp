@@ -83,6 +83,47 @@ enum WEHRLOS_ENUM
 };
 
 // ------------------------------------------------------------------------------------------------------------
+// Robotron
+// ------------------------------------------------------------------------------------------------------------
+class npc_robotron : public CreatureScript
+{
+public:
+    npc_robotron() : CreatureScript("npc_robotron") { }
+
+    /*struct npc_robotronAI : public ScriptedAI
+    {
+        npc_robotronAI(Creature * creature) : ScriptedAI(creature)
+        {
+        }
+
+        void Reset()
+        {
+        }
+    };*/
+
+    bool OnGossipHello(Player * plr, Creature * cr)
+    {
+    }
+
+    void SendDefaultMenu(Player * plr, Creature * cr, uint32 action)
+    {
+    }
+
+    void SendActionMenu(Player * plr, Creature * cr, uint32 action)
+    {
+    }
+
+    bool OnGossipSelect(Player * plr, Creature * cr, uint32 sender, uint32 action)
+    {
+    }
+
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new npc_robotronAI(creature);
+    }
+};
+
+// ------------------------------------------------------------------------------------------------------------
 // Skript für die Wehrlosen :-) (Eichhörnchen / Mäuse etc.)
 // ------------------------------------------------------------------------------------------------------------
 class npc_schutz_den_wehrlosen : public CreatureScript
@@ -102,15 +143,15 @@ public:
             OrgSpeed = me->GetSpeed(MOVE_RUN);
 
             PlrGUID = 0;
+
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
         }
 
         void Reset()
         {
             if (enabled)
             {
-                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-
                 FirstTime = true;
 
                 done75 = false;
@@ -165,9 +206,6 @@ public:
                 DoPlaySoundToSet(me, SOUND_AGGRO);
 
                 me->SetReactState(REACT_AGGRESSIVE);
-
-                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
 
                 me->SetLevel(DEFAULT_MAX_LEVEL+3);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, 5.0f);
