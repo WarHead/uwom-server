@@ -5040,8 +5040,8 @@ bool Unit::HandleHasteAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
     else
         CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
+     if (cooldown && target->GetTypeId() == TYPEID_PLAYER)	
+        target->ToPlayer()->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
 
     return true;
 }
