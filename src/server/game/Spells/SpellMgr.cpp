@@ -3335,10 +3335,14 @@ void SpellMgr::LoadDbcDataCorrections()
             case 62505: // Harpoon Shot
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
-            case 62968: // Brightleaf's Essence
             case 65761: // Brightleaf's Essence
                 spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[1] = 0;
+                break;
+            case 62968: // Brightleaf's Essence
+                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+                spellInfo->EffectImplicitTargetB[1] = 0;
+                spellInfo->DurationIndex = 39;
                 break;
             case 63018: // Searing Light (XT-002)
             case 65121: // Searing Light (25m) (XT-002)
@@ -3622,13 +3626,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
             case 62661: // Searing Flames
-            case 61915: // Lightning Whirl 10
-            case 63483: // Lightning Whirl 25
             case 55098: // Transformation
                 spellInfo->InterruptFlags = 47;
             break;
             case 62713: // Ironbranch's Essence
-            case 62968: // Brightleaf's Essence
                 spellInfo->DurationIndex = 39;
                 break;
             case 38790:
@@ -3751,10 +3752,6 @@ void SpellMgr::LoadDbcDataCorrections()
             case 53651: // Light's Beacon
                 // aura casted on a whole raid and shouldn't put caster in combat
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-                break;
-            case 62488: // Activate Construct
-            case 62016: // Charge Orb
-                spellInfo->MaxAffectedTargets = 1;
                 break;
             case 66588: // Flaming Spear
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
