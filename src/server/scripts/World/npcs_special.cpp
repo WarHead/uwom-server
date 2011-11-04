@@ -90,7 +90,7 @@ class npc_robotron : public CreatureScript
 public:
     npc_robotron() : CreatureScript("npc_robotron") { }
 
-    /*struct npc_robotronAI : public ScriptedAI
+    struct npc_robotronAI : public ScriptedAI
     {
         npc_robotronAI(Creature * creature) : ScriptedAI(creature)
         {
@@ -99,10 +99,18 @@ public:
         void Reset()
         {
         }
-    };*/
+    };
 
     bool OnGossipHello(Player * plr, Creature * cr)
     {
+        if (cr->isQuestGiver()) plr->PrepareQuestMenu(cr->GetGUID());
+        if (cr->isTrainer())    plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_TEXT_TRAIN,          GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
+        if (cr->isVendor())     plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_TEXT_BROWSE_GOODS,   GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+        if (cr->isAuctioner())  plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GOSSIP_TEXT_AUCTIONHOUSE,   GOSSIP_SENDER_MAIN, GOSSIP_ACTION_AUCTION);
+
+        plr->SEND_GOSSIP_MENU(14134, cr->GetGUID());
+
+        return true;
     }
 
     void SendDefaultMenu(Player * plr, Creature * cr, uint32 action)
@@ -115,6 +123,7 @@ public:
 
     bool OnGossipSelect(Player * plr, Creature * cr, uint32 sender, uint32 action)
     {
+        return true;
     }
 
     CreatureAI * GetAI(Creature * creature) const
