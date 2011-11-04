@@ -467,7 +467,8 @@ bool ChatHandler::HandleCharacterAddArenaPointsCommand(const char * args)
     if (points == 0)
         return true;
 
-    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(sObjectMgr->GetPlayerGUIDByName(name)));
+    uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
     if (!target || !target->IsInWorld())
         return false;
 
@@ -507,7 +508,8 @@ bool ChatHandler::HandleCharacterAddHonorPointsCommand(const char * args)
     if (points == 0)
         return true;
 
-    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(sObjectMgr->GetPlayerGUIDByName(name)));
+    uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
     if (!target || !target->IsInWorld())
         return false;
 
