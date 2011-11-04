@@ -96,7 +96,8 @@ public:
             normalizePlayerName(name);
         }
 
-        target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(sObjectMgr->GetPlayerGUIDByName(name)));
+        uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+        target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
         if (!target || !target->IsInWorld())
             return false;
 

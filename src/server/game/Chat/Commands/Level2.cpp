@@ -42,7 +42,6 @@
 #include "Transport.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
-#include "ObjectDefines.h"
 
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
