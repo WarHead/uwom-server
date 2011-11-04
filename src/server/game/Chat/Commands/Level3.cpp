@@ -700,7 +700,7 @@ bool ChatHandler::HandleCooldownCommand(const char *args)
 
 bool ChatHandler::HandleAddItemConsoleCommand(const char *args)
 {
-    Player * target;
+    Player * target = NULL;
     std::string target_name;
     uint64 target_guid;
     uint32 itemId = 0;
