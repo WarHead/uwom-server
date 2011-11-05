@@ -113,15 +113,15 @@ public:
         return true;
     }
 
-    void SendDefaultMenu(Player * plr, Creature * cr, uint32 action)
+    void SendDefaultMenu(Player * /*plr*/, Creature * /*cr*/, uint32 /*action*/)
     {
     }
 
-    void SendActionMenu(Player * plr, Creature * cr, uint32 action)
+    void SendActionMenu(Player * /*plr*/, Creature * /*cr*/, uint32 /*action*/)
     {
     }
 
-    bool OnGossipSelect(Player * plr, Creature * cr, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player * /*plr*/, Creature * /*cr*/, uint32 /*sender*/, uint32 /*action*/)
     {
         return true;
     }
