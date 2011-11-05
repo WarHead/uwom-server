@@ -2474,6 +2474,29 @@ public:
                 ai->addItem(plr, 45801, 1, true, false, true);
         }
 
+        if (ai->ps.PresentsAllowed && ai->GetPlaytimeMonth(total_playtime_secs) >= 5) // Ab 5 Monate Spielzeit
+        {
+            if (ai->CanGetPresent(plr, 33223, 42766)) // Angelstuhl
+                ai->addItem(plr, 33223, 1, true, false, true);
+
+            if (ai->CanGetPresent(plr, 33079, 42365)) // Murlockostüm
+                ai->addItem(plr, 33079, 1, true, false, true);
+
+            if (plr->GetTeamId() == TEAM_ALLIANCE)
+            {
+                if (ai->CanGetPresent(plr, 12302, 16056)) // Zügel des uralten Frostsäblers
+                    ai->addItem(plr, 12302, 1, true, false, true);
+            }
+            else
+            {
+                if (ai->CanGetPresent(plr, 13317, 17450)) // Pfeife des elfenbeinfarbenen Raptors
+                    ai->addItem(plr, 13317, 1, true, false, true);
+            }
+
+            if (AchievementEntry const * AE = GetAchievementStore()->LookupEntry(2186)) // Der Unsterbliche
+                plr->CompletedAchievement(AE);
+        }
+
         if (cr->isQuestGiver())  plr->PrepareQuestMenu(cr->GetGUID());
         if (cr->isTrainer())     plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER,   GOSSIP_TEXT_TRAIN,          GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
         if (cr->isVendor())      plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR,    GOSSIP_TEXT_BROWSE_GOODS,   GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
