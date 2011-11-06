@@ -77,7 +77,7 @@ public:
         return true;
     }
 
-    static bool HandleAchievementAddConsoleCommand(ChatHandler * handler, char const * args)
+    static bool HandleAchievementAddConsoleCommand(ChatHandler * /*handler*/, char const * args)
     {
         if (!*args)
             return false;
