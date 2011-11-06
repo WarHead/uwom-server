@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -34,14 +35,17 @@ public:
     {
         static ChatCommand achievementCommandTable[] =
         {
-            { "add",            SEC_ADMINISTRATOR,  false,  &HandleAchievementAddCommand,      "", NULL },
-            { NULL,             0,                  false,  NULL,                              "", NULL }
+            { "add",        SEC_ADMINISTRATOR,  false,  &HandleAchievementAddCommand,           "", NULL },
+            { "addconsole", SEC_CONSOLE,        true,   &HandleAchievementAddConsoleCommand,    "", NULL },
+            { NULL,         0,                  false,  NULL,                                   "", NULL }
         };
+
         static ChatCommand commandTable[] =
         {
-            { "achievement",    SEC_ADMINISTRATOR,  false, NULL,            "", achievementCommandTable },
-            { NULL,             0,                  false, NULL,                               "", NULL }
+            { "achievement",    SEC_ADMINISTRATOR,  false, NULL,    "", achievementCommandTable },
+            { NULL,             0,                  false, NULL,    "", NULL }
         };
+
         return commandTable;
     }
 
@@ -69,6 +73,48 @@ public:
 
         if (AchievementEntry const* achievementEntry = GetAchievementStore()->LookupEntry(achievementId))
             target->CompletedAchievement(achievementEntry);
+
+        return true;
+    }
+
+    static bool HandleAchievementAddConsoleCommand(ChatHandler * handler, char const * args)
+    {
+        if (!*args)
+            return false;
+
+        Player * target = NULL;
+        char * cname = NULL;
+        char * cachieve = NULL;
+        std::string name;
+        uint32 achieveId = 0;
+
+        cname = strtok((char*)args, " ");
+        if (!cname)
+            return false;
+        else
+        {
+            name = cname;
+            normalizePlayerName(name);
+        }
+
+        uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+        target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
+        if (!target || !target->IsInWorld())
+            return false;
+
+        cachieve = strtok(NULL, " ");
+        if (!cachieve)
+            return false;
+        else
+            achieveId = atol(cachieve);
+
+        if (!achieveId)
+                return false;
+
+        if (AchievementEntry const * achievementEntry = GetAchievementStore()->LookupEntry(achieveId))
+            target->CompletedAchievement(achievementEntry);
+        else
+            return false;
 
         return true;
     }

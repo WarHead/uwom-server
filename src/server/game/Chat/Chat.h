@@ -156,6 +156,8 @@ class ChatHandler
         bool HandleCastTargetCommand(const char *args);
         bool HandleCastDestCommand(const char *args);
 
+        bool HandleCharacterAddArenaPointsCommand(const char * args);
+        bool HandleCharacterAddHonorPointsCommand(const char * args);
         bool HandleCharacterCustomizeCommand(const char * args);
         bool HandleCharacterChangeFactionCommand(const char * args);
         bool HandleCharacterChangeRaceCommand(const char * args);
@@ -286,6 +288,7 @@ class ChatHandler
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
         bool HandleAddItemCommand(const char* args);
+        bool HandleAddItemConsoleCommand(const char * args);
         bool HandleAddItemSetCommand(const char* args);
         bool HandlePetUnlearnCommand(const char* args);
         bool HandlePetLearnCommand(const char* args);

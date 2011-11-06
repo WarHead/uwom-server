@@ -14,8 +14,8 @@ public:
     {
         static ChatCommand ResetCommandTable[] =
         {
-            { "arenaworld",     SEC_ADMINISTRATOR,  true,  &HandleResetArenaWorldCommand,   "", NULL },
-            { "honorworld",     SEC_ADMINISTRATOR,  true,  &HandleResetHonorWorldCommand,   "", NULL },
+            { "arenaworld",     SEC_ADMINISTRATOR,  false, &HandleResetArenaWorldCommand,   "", NULL },
+            { "honorworld",     SEC_ADMINISTRATOR,  false, &HandleResetHonorWorldCommand,   "", NULL },
 
             { "achievements",   SEC_ADMINISTRATOR,  true,  &HandleResetAchievementsCommand, "", NULL },
             { "honor",          SEC_ADMINISTRATOR,  true,  &HandleResetHonorCommand,        "", NULL },

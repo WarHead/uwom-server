@@ -698,12 +698,72 @@ bool ChatHandler::HandleCooldownCommand(const char *args)
     return true;
 }
 
+bool ChatHandler::HandleAddItemConsoleCommand(const char *args)
+{
+    Player * target = NULL;
+    std::string target_name;
+    uint64 target_guid;
+    uint32 itemId = 0;
+    int32 count = 1;
+    char * citem = NULL;
+
+    if (!extractPlayerTarget((char*)args, &target, &target_guid, &target_name))
+        return false;
+
+    if (!target || !target->IsInWorld())
+        return false;
+
+    citem = strtok(NULL, " ");
+    if (!citem)
+        return false;
+    else
+        itemId = atol(citem);
+
+    if (char * ccount = strtok(NULL, " "))
+        count = strtol(ccount, NULL, 10);
+
+    if (count == 0)
+        count = 1;
+
+    ItemTemplate const * proto = sObjectMgr->GetItemTemplate(itemId);
+    if (!proto)
+        return false;
+
+    if (count < 0)
+    {
+        target->DestroyItemCount(itemId, -count, true, false);
+        return true;
+    }
+
+    uint32 noSpaceForCount = 0;
+
+    ItemPosCountVec dest;
+    InventoryResult msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount);
+    if (msg != EQUIP_ERR_OK)
+        count -= noSpaceForCount;
+
+    if (count == 0 || dest.empty())
+        return false;
+
+    Item * item = target->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+
+    if (count > 0 && item)
+        target->SendNewItem(item, count, true, true);
+
+    return true;
+}
+
 bool ChatHandler::HandleAddItemCommand(const char *args)
 {
     if (!*args)
         return false;
 
+    Player * pl = m_session->GetPlayer();
+    Player * target = getSelectedPlayer();
     uint32 itemId = 0;
+
+    if (!target)
+        target = pl;
 
     if (args[0] == '[')                                        // [name] manual form
     {
@@ -743,11 +803,6 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     if (count == 0)
         count = 1;
 
-    Player* pl = m_session->GetPlayer();
-    Player* plTarget = getSelectedPlayer();
-    if (!plTarget)
-        plTarget = pl;
-
     sLog->outDetail(GetTrinityString(LANG_ADDITEM), itemId, count);
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(itemId);
@@ -761,8 +816,8 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     //Subtract
     if (count < 0)
     {
-        plTarget->DestroyItemCount(itemId, -count, true, false);
-        PSendSysMessage(LANG_REMOVEITEM, itemId, -count, GetNameLink(plTarget).c_str());
+        target->DestroyItemCount(itemId, -count, true, false);
+        PSendSysMessage(LANG_REMOVEITEM, itemId, -count, GetNameLink(target).c_str());
         return true;
     }
 
@@ -771,7 +826,7 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
 
     // check space and find places
     ItemPosCountVec dest;
-    InventoryResult msg = plTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount);
+    InventoryResult msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount);
     if (msg != EQUIP_ERR_OK)                               // convert to possible store amount
         count -= noSpaceForCount;
 
@@ -782,10 +837,10 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
         return false;
     }
 
-    Item* item = plTarget->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+    Item* item = target->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
 
     // remove binding (let GM give it to another player later)
-    if (pl == plTarget)
+    if (pl == target)
         for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
             if (Item* item1 = pl->GetItemByPos(itr->pos))
                 item1->SetBinding(false);
@@ -793,8 +848,8 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     if (count > 0 && item)
     {
         pl->SendNewItem(item, count, false, true);
-        if (pl != plTarget)
-            plTarget->SendNewItem(item, count, true, false);
+        if (pl != target)
+            target->SendNewItem(item, count, true, false);
     }
 
     if (noSpaceForCount > 0)
@@ -1013,7 +1068,7 @@ bool ChatHandler::HandleListItemCommand(const char *args)
             "SELECT  ah.itemguid, ah.itemowner, c.account, c.name FROM auctionhouse ah "
             "INNER JOIN characters c ON c.guid = ah.itemowner "
             "INNER JOIN item_instance ii ON ii.guid = ah.itemguid "
-            "WHERE ii.itemEntry = '%u' AND LIMIT %u", item_id, count);
+            "WHERE ii.itemEntry = '%u' LIMIT %u", item_id, count);
     }
     else
         result = QueryResult(NULL);

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -433,6 +434,88 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     }
     else
         PSendSysMessage(LANG_PINFO_MAP_OFFLINE, map->name[locale], areaName.c_str());
+
+    return true;
+}
+
+bool ChatHandler::HandleCharacterAddArenaPointsCommand(const char * args)
+{
+    if (!*args)
+        return false;
+
+    Player * target = NULL;
+    char * cname = NULL;
+    char * cpoints = NULL;
+    std::string name;
+    int32 points = 0;
+
+    cname = strtok((char*)args, " ");
+    if (!cname)
+        return false;
+    else
+    {
+        name = cname;
+        normalizePlayerName(name);
+    }
+
+    cpoints = strtok(NULL, " ");
+    if (!cpoints)
+        return false;
+    else
+        points = strtol(cpoints, NULL, 10);
+
+    if (points == 0)
+        return true;
+
+    uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
+    if (!target || !target->IsInWorld())
+        return false;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    target->ModifyArenaPoints(points, &trans);
+    CharacterDatabase.CommitTransaction(trans);
+
+    return true;
+}
+
+bool ChatHandler::HandleCharacterAddHonorPointsCommand(const char * args)
+{
+    if (!*args)
+        return false;
+
+    Player * target = NULL;
+    char * cname = NULL;
+    char * cpoints = NULL;
+    std::string name;
+    int32 points = 0;
+
+    cname = strtok((char*)args, " ");
+    if (!cname)
+        return false;
+    else
+    {
+        name = cname;
+        normalizePlayerName(name);
+    }
+
+    cpoints = strtok(NULL, " ");
+    if (!cpoints)
+        return false;
+    else
+        points = strtol(cpoints, NULL, 10);
+
+    if (points == 0)
+        return true;
+
+    uint64 guid = sObjectMgr->GetPlayerGUIDByName(name);
+    target = sObjectMgr->GetPlayerByLowGUID(GUID_LOPART(guid));
+    if (!target || !target->IsInWorld())
+        return false;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    target->ModifyHonorPoints(points, &trans);
+    CharacterDatabase.CommitTransaction(trans);
 
     return true;
 }

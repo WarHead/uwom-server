@@ -115,15 +115,17 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand characterCommandTable[] =
     {
-        { "customize",      SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterCustomizeCommand>,     "", NULL },
-        { "changefaction",  SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterChangeFactionCommand>, "", NULL },
-        { "changerace",     SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterChangeRaceCommand>,    "", NULL },
-        { "deleted",        SEC_GAMEMASTER,     true,  NULL,                                              "", characterDeletedCommandTable},
-        { "erase",          SEC_CONSOLE,        true,  OldHandler<&ChatHandler::HandleCharacterEraseCommand>,         "", NULL },
-        { "level",          SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleCharacterLevelCommand>,         "", NULL },
-        { "rename",         SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterRenameCommand>,        "", NULL },
-        { "reputation",     SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterReputationCommand>,    "", NULL },
-        { "titles",         SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterTitlesCommand>,        "", NULL },
+        { "addarenapoints", SEC_CONSOLE,        true,  OldHandler<&ChatHandler::HandleCharacterAddArenaPointsCommand>,  "", NULL },
+        { "addhonorpoints", SEC_CONSOLE,        true,  OldHandler<&ChatHandler::HandleCharacterAddHonorPointsCommand>,  "", NULL },
+        { "customize",      SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterCustomizeCommand>,       "", NULL },
+        { "changefaction",  SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterChangeFactionCommand>,   "", NULL },
+        { "changerace",     SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterChangeRaceCommand>,      "", NULL },
+        { "deleted",        SEC_GAMEMASTER,     true,  NULL,                                                            "", characterDeletedCommandTable},
+        { "erase",          SEC_CONSOLE,        true,  OldHandler<&ChatHandler::HandleCharacterEraseCommand>,           "", NULL },
+        { "level",          SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleCharacterLevelCommand>,           "", NULL },
+        { "rename",         SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterRenameCommand>,          "", NULL },
+        { "reputation",     SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterReputationCommand>,      "", NULL },
+        { "titles",         SEC_GAMEMASTER,     true,  OldHandler<&ChatHandler::HandleCharacterTitlesCommand>,          "", NULL },
         { NULL,             0,                  false, NULL,                                              "", NULL }
     };
 
@@ -374,6 +376,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "showarea",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleShowAreaCommand>,            "", NULL },
         { "hidearea",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleHideAreaCommand>,            "", NULL },
         { "additem",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleAddItemCommand>,             "", NULL },
+        { "additemconsole", SEC_CONSOLE,        true,  OldHandler<&ChatHandler::HandleAddItemConsoleCommand>,      "", NULL },
         { "additemset",     SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleAddItemSetCommand>,          "", NULL },
         { "bank",           SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleBankCommand>,                "", NULL },
         { "wchange",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleChangeWeather>,              "", NULL },
