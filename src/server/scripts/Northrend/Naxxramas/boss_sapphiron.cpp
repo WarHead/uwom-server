@@ -267,7 +267,7 @@ public:
                             //DoCastAOE(SPELL_SUMMON_BLIZZARD);
                             if (Creature* summon = DoSummon(MOB_BLIZZARD, me, 0.0f, urand(25000, 30000), TEMPSUMMON_TIMED_DESPAWN))
                                 summon->GetMotionMaster()->MoveRandom(40);
-                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20000, 7000), 0, PHASE_GROUND);
+                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20000, 10000), 0, PHASE_GROUND);
                             break;
                         }
                         case EVENT_FLIGHT:
