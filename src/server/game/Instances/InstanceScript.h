@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
  * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -181,6 +182,9 @@ class InstanceScript : public ZoneScript
 
         // Cast spell on all players in instance
         void DoCastSpellOnPlayers(uint32 spell);
+
+        // Complete Achievement for all players in instance
+        void DoCompleteAchievement(uint32 achievement);
 
         // Return wether server allow two side groups or not
         bool ServerAllowsTwoSideGroups() { return sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP); }
