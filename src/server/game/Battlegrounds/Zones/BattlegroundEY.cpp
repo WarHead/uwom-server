@@ -262,10 +262,10 @@ void BattlegroundEY::UpdatePointStatuses()
                 // Their respective IDs are 5866 and 4515
                 // Most probably Blizz wanted it to be this way but could not make it
                 // So they removed areaTrigger 5866. Best would be to implement DISABLE_AREATRIGGER.
-                if (point == FEL_REAVER && m_PointOwnedByTeam[point] == plr->GetTeam())
-                    if (m_FlagState && GetFlagPickerGUID() == plr->GetGUID())
-                        if (plr->GetDistance2d(float(2044), float(1730)) < 2.0f)
-                            EventPlayerCapturedFlag(plr, BG_EY_OBJECT_FLAG_FEL_REAVER);
+                if (point == FEL_REAVER && m_PointOwnedByTeam[point] == player->GetTeam())
+                    if (m_FlagState && GetFlagPickerGUID() == player->GetGUID())
+                        if (player->GetDistance2d(float(2044), float(1730)) < 2.0f)
+                            EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_FEL_REAVER);
             }
         }
     }
