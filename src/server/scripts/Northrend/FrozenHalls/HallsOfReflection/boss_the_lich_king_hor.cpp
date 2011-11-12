@@ -400,7 +400,7 @@ public:
            Jumped = false;
        }
 
-       void JustDied(Unit * killer)
+       void JustDied(Unit * /*killer*/)
        {
            if (!instance)
                return;
@@ -495,7 +495,7 @@ public:
            Emerge = false;
        }
 
-       void JustDied(Unit * killer)
+       void JustDied(Unit * /*killer*/)
        {
            if (!instance)
                return;
@@ -671,7 +671,7 @@ public:
            DoMeleeAttackIfReady();
        }
 
-       void JustDied(Unit * killer)
+       void JustDied(Unit * /*killer*/)
        {
            if (!instance)
                return;

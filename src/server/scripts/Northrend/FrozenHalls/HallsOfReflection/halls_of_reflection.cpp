@@ -607,11 +607,12 @@ public:
 
                 case EVENT_INTRO_LK_10:
                      if (Creature * LichKing = me->GetCreature(*me, LichKingGUID))
+                     {
                          if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                             DoScriptText(SAY_LK_JAINA_INTRO_END, LichKing);
                          else
                              DoScriptText(SAY_LK_SYLVANAS_INTRO_END, LichKing);
-
+                     }
                      events.ScheduleEvent(EVENT_INTRO_END, 7000);
                      break;
 
@@ -1260,7 +1261,7 @@ public:
             DoZoneInCombat();
         }
 
-        void DamageTaken(Unit * attacker, uint32 & dmg)
+        void DamageTaken(Unit * /*attacker*/, uint32 & dmg)
         {
             if (!CloneDone && me->HealthBelowPctDamaged(50, dmg))
                 SummonClones();
@@ -1422,7 +1423,7 @@ class npc_jaina_and_sylvana_hor_part2 : public CreatureScript
 public:
     npc_jaina_and_sylvana_hor_part2() : CreatureScript("npc_jaina_and_sylvana_hor_part2") { }
 
-    bool OnGossipSelect(Player * plr, Creature * creature, uint32 sender, uint32 action)
+    bool OnGossipSelect(Player * plr, Creature * creature, uint32 /*sender*/, uint32 action)
     {
         InstanceScript * instance = creature->GetInstanceScript();
         switch (action)

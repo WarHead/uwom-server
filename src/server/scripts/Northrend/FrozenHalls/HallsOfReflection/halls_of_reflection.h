@@ -269,7 +269,7 @@ struct boss_horAI : ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 /*diff*/)
     {
         if (!instance || !summons.empty() || me->isInCombat())
             return;
