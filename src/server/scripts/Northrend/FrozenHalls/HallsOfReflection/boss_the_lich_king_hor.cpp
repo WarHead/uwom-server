@@ -319,7 +319,7 @@ public:
            }
 
            // Leader caught, wipe
-           if (Creature * leader = ((Creature *)Unit::GetUnit((*me), instance->GetData64(DATA_ESCAPE_LEADER))))
+           if (Creature * leader = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ESCAPE_LEADER)))
            {
                if (leader->IsWithinDistInMap(me, 2.0f) && instance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
                {
@@ -429,14 +429,10 @@ public:
                if (Emerge != true && EmergeTimer < diff)
                {
                    Emerge = true;
-                   LeaderGUID = instance->GetData64(DATA_ESCAPE_LEADER);
-                   if (Creature * leader = ObjectAccessor::GetCreature(*me, LeaderGUID))
-                   {
-                       DoResetThreat();
-                       me->AI()->AttackStart(leader);
-                       me->GetMotionMaster()->Clear();
-                       me->GetMotionMaster()->MoveChase(leader);
-                   }
+                   if (Unit * target = me->FindNearestPlayer(MAX_VISIBLE_DIST))
+                       me->AI()->AttackStart(target);
+
+                   DoZoneInCombat(me, MAX_VISIBLE_DIST);
                }
                else
                    EmergeTimer -= diff;
@@ -525,14 +521,10 @@ public:
                if (Emerge != true && EmergeTimer < diff)
                {
                    Emerge = true;
-                   LeaderGUID = instance->GetData64(DATA_ESCAPE_LEADER);
-                   if (Creature * leader = ObjectAccessor::GetCreature(*me, LeaderGUID))
-                   {
-                       DoResetThreat();
-                       me->AI()->AttackStart(leader);
-                       me->GetMotionMaster()->Clear();
-                       me->GetMotionMaster()->MoveChase(leader);
-                   }
+                   if (Unit * target = me->FindNearestPlayer(MAX_VISIBLE_DIST))
+                       me->AI()->AttackStart(target);
+
+                   DoZoneInCombat(me, MAX_VISIBLE_DIST);
                }
                else
                    EmergeTimer -= diff;
@@ -627,14 +619,10 @@ public:
                if (Walk != true)
                {
                    Walk = true;
-                   LeaderGUID = instance->GetData64(DATA_ESCAPE_LEADER);
-                   if (Creature * leader = ObjectAccessor::GetCreature(*me, LeaderGUID))
-                   {
-                       DoResetThreat();
-                       me->AI()->AttackStart(leader);
-                       me->GetMotionMaster()->Clear();
-                       me->GetMotionMaster()->MoveChase(leader);
-                   }
+                   if (Unit * target = me->FindNearestPlayer(MAX_VISIBLE_DIST))
+                       me->AI()->AttackStart(target);
+
+                   DoZoneInCombat(me, MAX_VISIBLE_DIST);
                }
 
                if (StrikeTimer < diff)
