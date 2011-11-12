@@ -250,7 +250,7 @@ class WorldPacket;
 class AchievementMgr
 {
     public:
-        AchievementMgr(Player* pl);
+        AchievementMgr(Player* player);
         ~AchievementMgr();
 
         void Reset();

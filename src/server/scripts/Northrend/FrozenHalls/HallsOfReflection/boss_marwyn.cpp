@@ -50,11 +50,6 @@ class boss_marwyn : public CreatureScript
 public:
     boss_marwyn() : CreatureScript("boss_marwyn") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_marwynAI(creature);
-    }
-
     struct boss_marwynAI : public boss_horAI
     {
         boss_marwynAI(Creature* creature) : boss_horAI(creature) {}
@@ -67,11 +62,14 @@ public:
                 instance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
+            if (!instance || instance->GetData(DATA_WAVE_COUNT) < 10)
+                return;
+
             DoScriptText(SAY_AGGRO, me);
-            if (instance)
-                instance->SetData(DATA_MARWYN_EVENT, IN_PROGRESS);
+
+            instance->SetData(DATA_MARWYN_EVENT, IN_PROGRESS);
 
             events.ScheduleEvent(EVENT_OBLITERATE, 30000);          // TODO Check timer
             events.ScheduleEvent(EVENT_WELL_OF_CORRUPTION, 13000);
@@ -79,22 +77,26 @@ public:
             events.ScheduleEvent(EVENT_SHARED_SUFFERING, 20000);    // TODO Check timer
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit * /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
 
             if (instance)
+            {
                 instance->SetData(DATA_MARWYN_EVENT, DONE);
+                instance->SetData(DATA_WAVE_COUNT, 0);
+            }
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            // Return since we have no target
+            boss_horAI::UpdateAI(diff);
+
             if (!UpdateVictim())
                 return;
 
@@ -119,16 +121,19 @@ public:
                     events.ScheduleEvent(EVENT_CORRUPTED_FLESH, 20000);
                     break;
                 case EVENT_SHARED_SUFFERING:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                    if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM))
                         DoCast(target, SPELL_SHARED_SUFFERING);
                     events.ScheduleEvent(EVENT_SHARED_SUFFERING, 20000);
                     break;
             }
-
             DoMeleeAttackIfReady();
         }
     };
 
+    CreatureAI * GetAI(Creature * creature) const
+    {
+        return new boss_marwynAI(creature);
+    }
 };
 
 void AddSC_boss_marwyn()
