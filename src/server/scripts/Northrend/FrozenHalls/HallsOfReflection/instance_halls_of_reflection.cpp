@@ -208,10 +208,13 @@ public:
 
         void OnCreatureCreate(Creature * creature)
         {
-            Map::PlayerList const &players = instance->GetPlayers();
-            if (!players.isEmpty())
-                if (Player * plr = players.begin()->getSource())
-                    Team = plr->GetTeam();
+            if (!Team)
+            {
+                Map::PlayerList const &players = instance->GetPlayers();
+                if (!players.isEmpty())
+                    if (Player * plr = players.begin()->getSource())
+                        Team = plr->GetTeam();
+            }
 
             switch (creature->GetEntry())
             {
@@ -367,6 +370,7 @@ public:
                         WaveCnt = 0;
                         DoUpdateWorldState(WORLD_STATE_HOR_WAVE_COUNT, 0);
                         DoUpdateWorldState(WORLD_STATE_HOR, WaveCnt);
+                        events.CancelEvent(EVENT_NEXT_WAVE);
                         break;
                     }
                     if (data == START_WAVES) // Start der Wellen
@@ -560,7 +564,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "H R 1 " << Encounter[0] << " " << Encounter[1] << " " << Encounter[2] << " " << Encounter[3] << " " << IntroDone;
+            saveStream << "H R " << Encounter[0] << " " << Encounter[1] << " " << Encounter[2] << " " << Encounter[3] << " " << IntroDone << " " << Team;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -577,11 +581,10 @@ public:
             OUT_LOAD_INST_DATA(in);
 
             char dataHead1, dataHead2;
-            uint16 version;
-            uint16 data0, data1, data2, data3, data4;
+            uint16 data0, data1, data2, data3, data4, data5;
 
             std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> version >> data0 >> data1 >> data2 >> data3 >> data4;
+            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4 >> data5;
 
             if (dataHead1 == 'H' && dataHead2 == 'R')
             {
@@ -590,18 +593,22 @@ public:
                 Encounter[2] = data2;
                 Encounter[3] = data3;
                 IntroDone = data4;
+                Team = data5;
 
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                for (uint8 i=0; i<MAX_ENCOUNTER; ++i)
                     if (Encounter[i] == IN_PROGRESS)
                         Encounter[i] = NOT_STARTED;
 
                 OpenDoor(FrontDoorGUID);
+
                 if (Encounter[1] == DONE)
                     OpenDoor(FrostwornDoorGUID);
+
                 if (Encounter[2] == DONE)
                     OpenDoor(ArthasDoorGUID);
-
-            } else OUT_LOAD_INST_DATA_FAIL;
+            }
+            else
+                OUT_LOAD_INST_DATA_FAIL;
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
