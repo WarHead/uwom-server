@@ -2247,22 +2247,23 @@ void Unit::SendMeleeAttackStart(Unit* victim)
     WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
     data << uint64(GetGUID());
     data << uint64(victim->GetGUID());
-
     SendMessageToSet(&data, true);
     sLog->outStaticDebug("WORLD: Sent SMSG_ATTACKSTART");
 }
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    if (!victim)
-        return;
-
     WorldPacket data(SMSG_ATTACKSTOP, (8+8+4));            // we guess size
     data.append(GetPackGUID());
-    data.append(victim->GetPackGUID());                     // can be 0x00...
-    data << uint32(0);                                      // can be 0x1
+    data.append(victim ? victim->GetPackGUID() : 0);       // can be 0x00...
+    data << uint32(0);                                     // can be 0x1
     SendMessageToSet(&data, true);
-    sLog->outDetail("%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
+    sLog->outStaticDebug("WORLD: Sent SMSG_ATTACKSTART");
+
+    if (victim)
+        sLog->outDetail("%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
+    else
+        sLog->outDetail("%s %u stopped attacking", (GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), GetGUIDLow());
 }
 
 bool Unit::isSpellBlocked(Unit* victim, SpellInfo const* spellProto, WeaponAttackType attackType)
@@ -7356,7 +7357,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Item - Shaman T10 Elemental 4P Bonus
                 case 70817:
                 {
-                    if(!target)
+                    if (!target)
                         return false;
                     // try to find spell Flame Shock on the target
                     if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0x0, 0x0, GetGUID()))
@@ -8522,6 +8523,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
                     basepoints0 = CalculatePctN(int32(damage), triggerAmount) / (TriggerPS->GetMaxDuration() / TriggerPS->Effects[0].Amplitude);
                     basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+                    break;
+                }
+                // Item - Hunter T9 4P Bonus
+                if (auraSpellInfo->Id == 67151)
+                {
+                    trigger_spell_id = 68130;
+                    target = this;
                     break;
                 }
                 break;
@@ -11832,7 +11840,7 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
     {
         if (spellProto)
         {
-            if ((*i)->GetMiscValue() & spellProto->GetSchoolMask() && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL))
+            if ((*i)->GetMiscValue() & spellProto->GetSchoolMask()) // && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL))
             {
                 if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
                     AddPctN(DoneTotalMod, (*i)->GetAmount());
@@ -14563,7 +14571,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
 
         if (!handled)
-        for (uint8 effIndex = 0; effIndex<MAX_SPELL_EFFECTS; ++effIndex)
+        for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
         {
             if (!(i->effMask & (1<<effIndex)))
                 continue;
@@ -15880,7 +15888,8 @@ void Unit::SetControlled(bool apply, UnitState state)
                 if (!HasUnitState(UNIT_STAT_STUNNED))
                 {
                     ClearUnitState(UNIT_STAT_MELEE_ATTACKING);
-                    SendMeleeAttackStop(m_attacking);
+                    SendMeleeAttackStop();
+                    // SendAutoRepeatCancel ?
                     SetConfused(true);
                     CastStop();
                 }
@@ -15889,7 +15898,8 @@ void Unit::SetControlled(bool apply, UnitState state)
                 if (!HasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_CONFUSED))
                 {
                     ClearUnitState(UNIT_STAT_MELEE_ATTACKING);
-                    SendMeleeAttackStop(m_attacking);
+                    SendMeleeAttackStop();
+                    // SendAutoRepeatCancel ?
                     SetFeared(true);
                     CastStop();
                 }
