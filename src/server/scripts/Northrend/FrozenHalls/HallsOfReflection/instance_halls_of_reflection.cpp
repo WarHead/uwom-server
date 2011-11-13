@@ -362,23 +362,30 @@ public:
             switch (type)
             {
                 case DATA_WAVE_COUNT:
-                    if (data == 99) // Start der Wellen
+                    if (GetData(DATA_MARWYN_EVENT) == DONE)
+                    {
+                        WaveCnt = 0;
+                        DoUpdateWorldState(WORLD_STATE_HOR_WAVE_COUNT, 0);
+                        DoUpdateWorldState(WORLD_STATE_HOR, WaveCnt);
+                        break;
+                    }
+                    if (data == START_WAVES) // Start der Wellen
                     {
                         CloseDoor(FrontDoorGUID);
                         events.ScheduleEvent(EVENT_NEXT_WAVE, 0);
                         break;
                     }
-                    if (data == 77) // Nächste Welle sofort
+                    if (data == START_NEXT_WAVE_INSTANT) // Nächste Welle sofort
                     {
                         events.RescheduleEvent(EVENT_NEXT_WAVE, 0);
                         break;
                     }
-                    if (data == 55) // Nächste Welle starten
+                    if (data == START_NEXT_WAVE) // Nächste Welle starten
                     {
                         events.RescheduleEvent(EVENT_NEXT_WAVE, SEKUNDEN_60);
                         break;
                     }
-                    if (WaveCnt && data == 0) // Wipe
+                    if (WaveCnt && data == START_RESET) // Wipe
                     {
                         DoWipe();
                         break;

@@ -139,6 +139,14 @@ enum DiverseSpells
     SPELL_SUICIDE = 69908
 };
 
+enum StartOptionen
+{
+    START_RESET             = 0,
+    START_NEXT_WAVE         = 55,
+    START_NEXT_WAVE_INSTANT = 77,
+    START_WAVES             = 99
+};
+
 const Position OutroSpawns[2] =
 {
     {5564.25f, 2274.69f, 733.01f, 3.93f}, // Lich King
@@ -233,11 +241,11 @@ struct boss_horAI : ScriptedAI
             {
                 case NPC_FALRIC:
                     instance->SetData(DATA_FALRIC_EVENT, NOT_STARTED);
-                    instance->SetData(DATA_WAVE_COUNT, 0);
+                    instance->SetData(DATA_WAVE_COUNT, START_RESET);
                     break;
                 case NPC_MARWYN:
                     instance->SetData(DATA_MARWYN_EVENT, NOT_STARTED);
-                    instance->SetData(DATA_WAVE_COUNT, 0);
+                    instance->SetData(DATA_WAVE_COUNT, START_RESET);
                     break;
             }
 
@@ -250,9 +258,9 @@ struct boss_horAI : ScriptedAI
         if (instance && summons.empty())
         {
             if (instance->GetData(DATA_WAVE_COUNT) == 4 || instance->GetData(DATA_WAVE_COUNT) == 9)
-                instance->SetData(DATA_WAVE_COUNT, 77);
+                instance->SetData(DATA_WAVE_COUNT, START_NEXT_WAVE_INSTANT);
             else
-                instance->SetData(DATA_WAVE_COUNT, 55);
+                instance->SetData(DATA_WAVE_COUNT, START_NEXT_WAVE);
         }
     }
 
@@ -263,9 +271,9 @@ struct boss_horAI : ScriptedAI
         if (!AliveSumCnt && instance)
         {
             if (instance->GetData(DATA_WAVE_COUNT) == 4 || instance->GetData(DATA_WAVE_COUNT) == 9)
-                instance->SetData(DATA_WAVE_COUNT, 77);
+                instance->SetData(DATA_WAVE_COUNT, START_NEXT_WAVE_INSTANT);
             else
-                instance->SetData(DATA_WAVE_COUNT, 55);
+                instance->SetData(DATA_WAVE_COUNT, START_NEXT_WAVE);
         }
     }
 

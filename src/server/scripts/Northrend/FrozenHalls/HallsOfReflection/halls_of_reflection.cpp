@@ -2056,9 +2056,6 @@ public:
 
         if (instance->GetData(DATA_MARWYN_EVENT) == IN_PROGRESS || instance->GetData(DATA_MARWYN_EVENT) == DONE)
             return true;
-        
-        if (instance->GetData(DATA_FALRIC_EVENT) == DONE && instance->GetData(DATA_MARWYN_EVENT) == IN_PROGRESS)
-            return true;
 
         if (instance->GetData(DATA_FALRIC_EVENT) != DONE)
             if (Creature * Falric = plr->GetCreature(*plr, instance->GetData64(DATA_FALRIC)))
@@ -2066,16 +2063,16 @@ public:
                 Falric->SetVisible(true);
                 Falric->CastSpell(Falric, SPELL_BOSS_SPAWN_AURA, true);
             }
-        
+
         if (instance->GetData(DATA_MARWYN_EVENT) != DONE)
+        {
             if (Creature * Marwyn = plr->GetCreature(*plr, instance->GetData64(DATA_MARWYN)))
             {
                 Marwyn->SetVisible(true);
                 Marwyn->CastSpell(Marwyn, SPELL_BOSS_SPAWN_AURA, true);
             }
-
-        instance->SetData(DATA_WAVE_COUNT, 99);
-
+            instance->SetData(DATA_WAVE_COUNT, START_WAVES);
+        }
         return true;
     }
 };
