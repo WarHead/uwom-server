@@ -44,8 +44,8 @@ enum Yells
     SAY_SACRIFICE_PLAYER_3                        = -1575025,
     SAY_SACRIFICE_PLAYER_4                        = -1575026,
     SAY_SACRIFICE_PLAYER_5                        = -1575027,
-    SAY_DIALOG_OF_ARTHAS_1                        = -1575028,
-    SAY_DIALOG_OF_ARTHAS_2                        = -1575029
+    SAY_DIALOG_OF_ARTHAS_1                        = -1575003,
+    SAY_DIALOG_OF_ARTHAS_2                        = -1575014
 };
 enum Creatures
 {
@@ -160,22 +160,22 @@ public:
                     case 0:
                         DoScriptText(SAY_DIALOG_WITH_ARTHAS_1, me);
                         ++uiIntroPhase;
-                        uiIntroTimer = 3500;
+                        uiIntroTimer = 8100;
                         break;
                     case 1:
                         DoScriptText(SAY_DIALOG_OF_ARTHAS_1, pArthas);
                         ++uiIntroPhase;
-                        uiIntroTimer = 3500;
+                        uiIntroTimer = 18200;
                         break;
                     case 2:
                         DoScriptText(SAY_DIALOG_WITH_ARTHAS_2, me);
                         ++uiIntroPhase;
-                        uiIntroTimer = 3500;
+                        uiIntroTimer = 10000;
                         break;
                     case 3:
                         DoScriptText(SAY_DIALOG_OF_ARTHAS_2, pArthas);
                         ++uiIntroPhase;
-                        uiIntroTimer = 3500;
+                        uiIntroTimer = 7200;
                         break;
                     case 4:
                         DoScriptText(SAY_DIALOG_WITH_ARTHAS_3, me);
