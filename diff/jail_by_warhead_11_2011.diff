@@ -165,7 +165,7 @@ index 65ba160..7fc9f80 100644
    ${CMAKE_CURRENT_SOURCE_DIR}/Mails
    ${CMAKE_CURRENT_SOURCE_DIR}/Maps
 diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
-index 961d1e5..ac05afa 100755
+index 24e83da..f96efe3 100755
 --- a/src/server/game/Entities/Player/Player.cpp
 +++ b/src/server/game/Entities/Player/Player.cpp
 @@ -1,4 +1,5 @@
@@ -319,7 +319,7 @@ index 961d1e5..ac05afa 100755
      CharacterDatabase.CommitTransaction(trans);
  
 diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
-index 7d0803a..3fd0828 100755
+index 9aad63c..d99ca17 100755
 --- a/src/server/game/Entities/Player/Player.h
 +++ b/src/server/game/Entities/Player/Player.h
 @@ -1,4 +1,5 @@
@@ -328,7 +328,7 @@ index 7d0803a..3fd0828 100755
   * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
   * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
   *
-@@ -1159,6 +1160,23 @@ class Player : public Unit, public GridObject<Player>
+@@ -1169,6 +1170,23 @@ class Player : public Unit, public GridObject<Player>
  
          void InitStatsForLevel(bool reapplyMods = false);
  
@@ -1498,7 +1498,7 @@ index 26d7034..7995ff2 100755
      AddSC_misc_commandscript();
      AddSC_modify_commandscript();
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 408db18..f57a9e0 100755
+index 8aca456..5cc01d7 100755
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -1,4 +1,5 @@
@@ -1561,7 +1561,7 @@ index 408db18..f57a9e0 100755
      RecordTimeDiff(NULL);
      UpdateSessions(diff);
 diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
-index b493b8b..dc4964a 100755
+index f643ae6..095c233 100755
 --- a/src/server/game/World/World.h
 +++ b/src/server/game/World/World.h
 @@ -1,4 +1,5 @@
