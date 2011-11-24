@@ -42,6 +42,7 @@
 #include "GroupMgr.h"
 #include "Chat.h"
 #include "DBCStores.h"
+#include "DB2Stores.h"
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "MapManager.h"
@@ -1278,6 +1279,7 @@ void World::SetInitialWorldSettings()
     ///- Load the DBC files
     sLog->outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
+	LoadDB2Stores(m_dataPath);
     DetectDBCLang();
 
     sLog->outString("Loading spell dbc data corrections...");
@@ -1785,6 +1787,9 @@ void World::SetInitialWorldSettings()
     else
         sLog->SetLogDB(false);
 
+    sLog->outString("Initializing Opcodes...");
+    InitOpcodes();
+
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();
     sLog->outString("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000) );
@@ -1793,15 +1798,15 @@ void World::SetInitialWorldSettings()
 
 void World::DetectDBCLang()
 {
-    uint8 m_lang_confid = ConfigMgr::GetIntDefault("DBC.Locale", 255);
+    uint8 m_lang_confid = ConfigMgr::GetIntDefault("DBC.Locale", 0);
 
-    if (m_lang_confid != 255 && m_lang_confid >= TOTAL_LOCALES)
+    if (m_lang_confid >= TOTAL_LOCALES)
     {
         sLog->outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", TOTAL_LOCALES);
         m_lang_confid = LOCALE_enUS;
     }
 
-    ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
+    /*ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
 
     std::string availableLocalsStr;
 
@@ -1827,11 +1832,11 @@ void World::DetectDBCLang()
     {
         sLog->outError("Unable to determine your DBC Locale! (corrupt DBC?)");
         exit(1);
-    }
+    }*/
 
-    m_defaultDbcLocale = LocaleConstant(default_locale);
+    m_defaultDbcLocale = LocaleConstant(m_lang_confid);
 
-    sLog->outString("Using %s DBC Locale as default. All available DBC locales: %s", localeNames[m_defaultDbcLocale], availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
+    sLog->outString("Using %s DBC Locale", localeNames[m_defaultDbcLocale]);
     sLog->outString();
 }
 
