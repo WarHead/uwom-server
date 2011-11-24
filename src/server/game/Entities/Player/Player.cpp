@@ -1961,7 +1961,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* data)
     if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (plrClass == CLASS_WARLOCK || plrClass == CLASS_HUNTER || plrClass == CLASS_DEATH_KNIGHT))
     {
         uint32 entry = fields[16].GetUInt32();
-		CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(entry);
+        CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(entry);
         if (creatureInfo)
         {
             petDisplayId = fields[17].GetUInt32();
@@ -1997,7 +1997,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* data)
 
     if (Guid3)
         *data << uint8(Guid3^1);
-    
+
     //*data << uint8(2);                  // unk, bit 14
 
     uint32 playerBytes2 = fields[6].GetUInt32();
@@ -2036,29 +2036,29 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* data)
         *data << uint8(Guid2^1);
 
     *data << uint32(petDisplayId);                        // Pet DisplayID
-    
+
     //if (uint8(GuildGuid >> 56))
     //    *data << uint8(GuildGuid^1 >> 56);
-    
+
     *data << uint8(level);                                // Level
     *data << uint8(playerBytes >> 16);                    // Hair style
-    
+
     //if (uint8(GuildGuid >> 16))
     //    *data << uint8(GuildGuid^1 >> 16);
-    
+
     *data << uint8(plrRace);                              // Race
     *data << uint8(playerBytes >> 24);                    // Hair color
 
     //if (uint8(GuildGuid >> 48))
     //    *data << uint8(GuildGuid^1 >> 48);
-    
+
     *data << uint8(gender);                               // Gender
 
     //if (uint8(GuildGuid >> 24))
     //    *data << uint8(GuildGuid^1 >> 24);
-    
+
     *data << uint8(0);                                    // character order id (used for char list positioning) TODO: implement
-    
+
     Tokens equipment(fields[19].GetString(), ' ');
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
     {
@@ -2073,7 +2073,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* data)
             *data << uint32(0);
             continue;
         }
-        
+
         SpellItemEnchantmentEntry const *enchant = NULL;
         uint32 enchants = GetUInt32ValueFromArray(equipment, visualbase + 1);
         for (uint8 enchantSlot = PERM_ENCHANTMENT_SLOT; enchantSlot <= TEMP_ENCHANTMENT_SLOT; ++enchantSlot)
@@ -2112,7 +2112,7 @@ bool Player::BuildEnumData(QueryResult result, ByteBuffer* data)
 
     else
         *data << uint32(CHAR_CUSTOMIZE_FLAG_NONE);
-    
+
     //if (uint8(GuildGuid >> 8))
     //    *data << uint8(GuildGuid^1 >> 8);
 
@@ -5707,7 +5707,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     if (!cMgr)
         return;
 
-    std::string current_zone_name = current_zone->area_name[GetSession()->GetSessionDbcLocale()];
+    std::string current_zone_name = current_zone->area_name;
 
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
@@ -5743,7 +5743,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
                     else
                         currentNameExt = current_zone_name.c_str();
 
-                    snprintf(new_channel_name_buf, 100, channel->pattern[m_session->GetSessionDbcLocale()], currentNameExt);
+                    snprintf(new_channel_name_buf, 100, channel->pattern, currentNameExt);
 
                     joinChannel = cMgr->GetJoinChannel(new_channel_name_buf, channel->ChannelID);
                     if (usedChannel)
@@ -5758,7 +5758,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
                     }
                 }
                 else
-                    joinChannel = cMgr->GetJoinChannel(channel->pattern[m_session->GetSessionDbcLocale()], channel->ChannelID);
+                    joinChannel = cMgr->GetJoinChannel(channel->pattern, channel->ChannelID);
             }
             else
                 removeChannel = usedChannel;
@@ -7963,7 +7963,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     if (ssd && ssd_level > ssd->MaxLevel)
         ssd_level = ssd->MaxLevel;
 
-    ScalingStatValuesEntry const* ssv = proto->ScalingStatValue ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
+    ScalingStatValuesEntry const* ssv = ssd ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
     if (only_level_scale && !ssv)
         return;
 
@@ -7977,7 +7977,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             if (ssd->StatMod[i] < 0)
                 continue;
             statType = ssd->StatMod[i];
-            val = (ssv->getssdMultiplier(proto->ScalingStatValue) * ssd->Modifier[i]) / 10000;
+            val = (ssv->GetStatMultiplier(proto->InventoryType) * ssd->Modifier[i]) / 10000;
         }
         else
         {
@@ -8145,15 +8145,14 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     }
 
     // Apply Spell Power from ScalingStatValue if set
-    if (ssv)
-        if (int32 spellbonus = ssv->getSpellBonus(proto->ScalingStatValue))
+    if (ssv && proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON)
+        if (int32 spellbonus = int32(ssv->Spellpower))
             ApplySpellPowerBonus(spellbonus, apply);
 
     // If set ScalingStatValue armor get it or use item armor
     uint32 armor = proto->Armor;
-    if (ssv)
-        if (uint32 ssvarmor = ssv->getArmorMod(proto->ScalingStatValue))
-            armor = ssvarmor;
+    if (ssv && proto->Class == ITEM_CLASS_ARMOR)
+        armor = ssv->GetArmor(proto->InventoryType, proto->SubClass - 1);
 
     if (armor)
     {
@@ -8215,15 +8214,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     if (CanUseAttackType(attType))
         _ApplyWeaponDamage(slot, proto, ssv, apply);
 
-   // Apply feral bonus from ScalingStatValue if set
-    if (ssv)
-        if (int32 feral_bonus = ssv->getFeralBonus(proto->ScalingStatValue))
-            ApplyFeralAPBonus(feral_bonus, apply);
-
-    // Druids get feral AP bonus from weapon dps (lso use DPS from ScalingStatValue)
-    if (getClass() == CLASS_DRUID)
-        if (int32 feral_bonus = proto->getFeralBonus(ssv->getDPSMod(proto->ScalingStatValue)))
-            ApplyFeralAPBonus(feral_bonus, apply);
 }
 
 void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingStatValuesEntry const* ssv, bool apply)
@@ -8246,14 +8236,16 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
     float maxDamage = proto->Damage[0].DamageMax;
 
     // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
+    int32 extraDPS = 0;
     if (ssv)
     {
-        int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
+        float damageMultiplier = 0.0f;
+        extraDPS = ssv->GetDPSAndDamageMultiplier(proto->SubClass, proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON, &damageMultiplier);
         if (extraDPS)
         {
             float average = extraDPS * proto->Delay / 1000.0f;
-            minDamage = 0.7f * average;
-            maxDamage = 1.3f * average;
+            minDamage = (1.0f - damageMultiplier) * average;
+            maxDamage = (1.0f + damageMultiplier) * average;
         }
     }
 
@@ -8285,6 +8277,11 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
 
     if (CanModifyStats() && (damage || proto->Delay))
         UpdateDamagePhysical(attType);
+
+    // Druids get feral AP bonus from weapon dps (lso use DPS from ScalingStatValue)
+    if (getClass() == CLASS_DRUID)
+        if (int32 feral_bonus = proto->getFeralBonus(extraDPS))
+            ApplyFeralAPBonus(feral_bonus, apply);
 }
 
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
@@ -24813,7 +24810,7 @@ void Player::SendRefundInfo(Item *item)
 
     WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
     data << uint64(item->GetGUID());                    // item guid
-    data << uint32(item->GetPaidMoney());               // money cost    
+    data << uint32(item->GetPaidMoney());               // money cost
     for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)                       // item cost data
     {
         data << uint32(iece->RequiredItem[i]);
