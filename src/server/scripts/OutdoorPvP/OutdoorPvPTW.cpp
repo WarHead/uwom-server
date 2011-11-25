@@ -2062,7 +2062,7 @@ void Tausendwinter::OrdneFriedhoefeZu()
     {
         if ((*iter)->icon[1] == 8)
         {
-            WorldSafeLocsEntry const * loc = sObjectMgr->GetClosestGraveYard((*iter)->x, (*iter)->y, (*iter)->z, (*iter)->mapId, 0);
+            WorldSafeLocsEntry const * loc = sObjectMgr->GetClosestGraveYard((*iter)->x, (*iter)->y, 0.0f, (*iter)->mapId, 0);
             if (!loc)
             {
                 ++iter;
