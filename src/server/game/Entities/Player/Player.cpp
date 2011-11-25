@@ -799,6 +799,8 @@ Player::Player (WorldSession* session): Unit(), m_achievementMgr(this), m_reputa
     m_activeSpec = 0;
     m_specsCount = 1;
 
+    m_freeTalentPoints = 0;
+
     for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
     {
         for (uint8 g = 0; g < MAX_GLYPH_SLOT_INDEX; ++g)
@@ -990,7 +992,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     SetByteValue(PLAYER_BYTES_3, 0, createInfo->Gender);
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
 
-    SetUInt32Value(PLAYER_GUILDID, 0);
     SetUInt32Value(PLAYER_GUILDRANK, 0);
     SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
 
@@ -1177,7 +1178,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
                 RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                 EquipItem(eDest, pItem, true);
             }
-            // move other items to more appropriate slots (ammo not equipped in special bag)
+            // move other items to more appropriate slots
             else
             {
                 ItemPosCountVec sDest;
@@ -1187,11 +1188,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
                     RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                     pItem = StoreItem(sDest, pItem, true);
                 }
-
-                // if  this is ammo then use it
-                msg = CanUseAmmo(pItem->GetEntry());
-                if (msg == EQUIP_ERR_OK)
-                    SetAmmo(pItem->GetEntry());
             }
         }
     }
@@ -3194,7 +3190,7 @@ void Player::GiveLevel(uint8 level)
     SetFullHealth();
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-    if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
+    if ((uint32)GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, 0);
 
@@ -3333,10 +3329,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0.0f);
 
     SetInt32Value(UNIT_FIELD_ATTACK_POWER,            0);
-    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0);
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 0.0f);
     SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0);
-    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, 0);
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 0.0f);
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
@@ -3417,7 +3411,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFullHealth();
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-    if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
+    if ((uint32)GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
     SetPower(POWER_RUNIC_POWER, 0);
@@ -4585,12 +4579,6 @@ bool Player::resetTalents(bool no_cost)
     return true;
 }
 
-void Player::SetFreeTalentPoints(uint32 points)
-{
-    sScriptMgr->OnPlayerFreeTalentPointsChanged(this, points);
-    SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
-}
-
 Mail* Player::GetMail(uint32 id)
 {
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -4648,16 +4636,12 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_POWER3);
     updateVisualBits.SetBit(UNIT_FIELD_POWER4);
     updateVisualBits.SetBit(UNIT_FIELD_POWER5);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER6);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER7);
     updateVisualBits.SetBit(UNIT_FIELD_MAXHEALTH);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER1);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER2);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER3);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER4);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER5);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER6);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER7);
     updateVisualBits.SetBit(UNIT_FIELD_LEVEL);
     updateVisualBits.SetBit(UNIT_FIELD_FACTIONTEMPLATE);
     updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_ID + 0);
@@ -4686,7 +4670,6 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 0);
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 1);
     updateVisualBits.SetBit(PLAYER_FLAGS);
-    updateVisualBits.SetBit(PLAYER_GUILDID);
     updateVisualBits.SetBit(PLAYER_GUILDRANK);
     updateVisualBits.SetBit(PLAYER_BYTES);
     updateVisualBits.SetBit(PLAYER_BYTES_2);
@@ -5374,11 +5357,9 @@ void Player::CreateCorpse()
         flags |= CORPSE_FLAG_HIDE_CLOAK;
     if (InBattleground() && !InArena())
         flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
+
     corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
-
     corpse->SetUInt32Value(CORPSE_FIELD_DISPLAY_ID, GetNativeDisplayId());
-
-    corpse->SetUInt32Value(CORPSE_FIELD_GUILD, GetGuildId());
 
     uint32 iDisplayID;
     uint32 iIventoryType;
@@ -7944,10 +7925,6 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
         _ApplyWeaponDependentAuraMods(item, WeaponAttackType(attacktype), apply);
 
     _ApplyItemBonuses(proto, slot, apply);
-
-    if (slot == EQUIPMENT_SLOT_RANGED)
-        _ApplyAmmoBonuses();
-
     ApplyItemEquipSpell(item, apply);
     ApplyEnchantment(item, apply);
 
@@ -8146,6 +8123,24 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_SPELL_HEALING_DONE:
             case ITEM_MOD_SPELL_DAMAGE_DONE:
                 break;
+            case ITEM_MOD_FIRE_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_FROST_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_HOLY_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_SHADOW_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_NATURE_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_ARCANE_RESISTANCE:
+                HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(val), apply);
+                break;
         }
     }
 
@@ -8182,27 +8177,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     if (proto->ArmorDamageModifier > 0)
         HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier), apply);
 
-    if (proto->Block)
-        HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block), apply);
-
-    if (proto->HolyRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->HolyRes), apply);
-
-    if (proto->FireRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(proto->FireRes), apply);
-
-    if (proto->NatureRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(proto->NatureRes), apply);
-
-    if (proto->FrostRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(proto->FrostRes), apply);
-
-    if (proto->ShadowRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(proto->ShadowRes), apply);
-
-    if (proto->ArcaneRes)
-        HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
-
     WeaponAttackType attType = BASE_ATTACK;
 
     if (slot == EQUIPMENT_SLOT_RANGED && (
@@ -8237,8 +8211,8 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
         attType = OFF_ATTACK;
     }
 
-    float minDamage = proto->Damage[0].DamageMin;
-    float maxDamage = proto->Damage[0].DamageMax;
+    float minDamage = proto->DamageMin;
+    float maxDamage = proto->DamageMax;
 
     // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
     int32 extraDPS = 0;
@@ -8524,7 +8498,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
 
             float chance = (float)spellInfo->ProcChance;
 
-            if (spellData.SpellPPMRate)
+            if (proto->SpellPPMRate)
             {
                 if (spellData.SpellId == 52781) // Persuasive Strike
                 {
@@ -8539,7 +8513,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                     }
                 }
                 uint32 WeaponSpeed = GetAttackTime(attType);
-                chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
+                chance = GetPPMProcChance(WeaponSpeed, proto->SpellPPMRate, spellInfo);
             }
             else if (chance > 100.0f)
             {
@@ -8755,9 +8729,6 @@ void Player::_RemoveAllItemMods()
                 _ApplyWeaponDependentAuraMods(m_items[i], WeaponAttackType(attacktype), false);
 
             _ApplyItemBonuses(proto, i, false);
-
-            if (i == EQUIPMENT_SLOT_RANGED)
-                _ApplyAmmoBonuses();
         }
     }
 
@@ -8784,9 +8755,6 @@ void Player::_ApplyAllItemMods()
                 _ApplyWeaponDependentAuraMods(m_items[i], WeaponAttackType(attacktype), true);
 
             _ApplyItemBonuses(proto, i, true);
-
-            if (i == EQUIPMENT_SLOT_RANGED)
-                _ApplyAmmoBonuses();
         }
     }
 
@@ -8829,63 +8797,6 @@ void Player::_ApplyAllLevelScaleItemMods(bool apply)
             _ApplyItemBonuses(proto, i, apply, true);
         }
     }
-}
-
-void Player::_ApplyAmmoBonuses()
-{
-    // check ammo
-    uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
-    if (!ammo_id)
-        return;
-
-    float currentAmmoDPS;
-
-    ItemTemplate const* ammo_proto = sObjectMgr->GetItemTemplate(ammo_id);
-    if (!ammo_proto || ammo_proto->Class != ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
-        currentAmmoDPS = 0.0f;
-    else
-        currentAmmoDPS = (ammo_proto->Damage[0].DamageMin + ammo_proto->Damage[0].DamageMax) / 2;
-
-    if (currentAmmoDPS == GetAmmoDPS())
-        return;
-
-    m_ammoDPS = currentAmmoDPS;
-
-    if (CanModifyStats())
-        UpdateDamagePhysical(RANGED_ATTACK);
-}
-
-bool Player::CheckAmmoCompatibility(const ItemTemplate* ammo_proto) const
-{
-    if (!ammo_proto)
-        return false;
-
-    // check ranged weapon
-    Item* weapon = GetWeaponForAttack(RANGED_ATTACK);
-    if (!weapon  || weapon->IsBroken())
-        return false;
-
-    ItemTemplate const* weapon_proto = weapon->GetTemplate();
-    if (!weapon_proto || weapon_proto->Class != ITEM_CLASS_WEAPON)
-        return false;
-
-    // check ammo ws. weapon compatibility
-    switch (weapon_proto->SubClass)
-    {
-        case ITEM_SUBCLASS_WEAPON_BOW:
-        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-            if (ammo_proto->SubClass != ITEM_SUBCLASS_ARROW)
-                return false;
-            break;
-        case ITEM_SUBCLASS_WEAPON_GUN:
-            if (ammo_proto->SubClass != ITEM_SUBCLASS_BULLET)
-                return false;
-            break;
-        default:
-            return false;
-    }
-
-    return true;
 }
 
 /*  If in a battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
@@ -12107,71 +12018,6 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
     }
 
     return EQUIP_ERR_ITEM_NOT_FOUND;
-}
-
-InventoryResult Player::CanUseAmmo(uint32 item) const
-{
-    sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE:  CanUseAmmo item = %u", item);
-    if (!isAlive())
-        return EQUIP_ERR_YOU_ARE_DEAD;
-    //if (isStunned())
-    //    return EQUIP_ERR_YOU_ARE_STUNNED;
-    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
-    if (pProto)
-    {
-        if (pProto->InventoryType!= INVTYPE_AMMO)
-            return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-
-        InventoryResult res = CanUseItem(pProto);
-        if (res != EQUIP_ERR_OK)
-            return res;
-
-        /*if (GetReputationMgr().GetReputation() < pProto->RequiredReputation)
-        return EQUIP_ERR_CANT_EQUIP_REPUTATION;
-        */
-
-        // Requires No Ammo
-        if (HasAura(46699))
-            return EQUIP_ERR_BAG_FULL6;
-
-        return EQUIP_ERR_OK;
-    }
-    return EQUIP_ERR_ITEM_NOT_FOUND;
-}
-
-void Player::SetAmmo(uint32 item)
-{
-    if (!item)
-        return;
-
-    // already set
-    if (GetUInt32Value(PLAYER_AMMO_ID) == item)
-        return;
-
-    // check ammo
-    if (item)
-    {
-        InventoryResult msg = CanUseAmmo(item);
-        if (msg != EQUIP_ERR_OK)
-        {
-            SendEquipError(msg, NULL, NULL, item);
-            return;
-        }
-    }
-
-    SetUInt32Value(PLAYER_AMMO_ID, item);
-
-    _ApplyAmmoBonuses();
-}
-
-void Player::RemoveAmmo()
-{
-    SetUInt32Value(PLAYER_AMMO_ID, 0);
-
-    m_ammoDPS = 0.0f;
-
-    if (CanModifyStats())
-        UpdateDamagePhysical(RANGED_ATTACK);
 }
 
 Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update, int32 randomPropertyId)
@@ -16756,10 +16602,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask, "
     // 39           40                41                 42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
-    // 50      51      52      53      54      55      56      57      58      59      60       61       62           63         64          65             66
-    //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, power11, instance_id, speccount, activespec, exploredZones, equipmentCache, "
-    // 67      68           69          70
-    //"ammoId, knownTitles, actionBars, grantableLevels FROM characters WHERE guid = '%u'", guid);
+    // 50      51      52      53      54      55      56           57         58         59              60
+    //"health, power1, power2, power3, power4, power5, instance_id, speccount, activespec, exploredZones, equipmentCache, "
+    // 61           62          63               64
+    //"knownTitles, actionBars, grantableLevels, guildId FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -16818,8 +16664,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
     SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
 
-    _LoadIntoDataField(fields[65].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
-    _LoadIntoDataField(fields[68].GetCString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
+    _LoadIntoDataField(fields[59].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
+    _LoadIntoDataField(fields[61].GetCString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
@@ -16841,10 +16687,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     SetUInt64Value(PLAYER_FIELD_KNOWN_CURRENCIES, fields[47].GetUInt64());
 
-    SetUInt32Value(PLAYER_AMMO_ID, fields[67].GetUInt32());
-
     // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
-    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[69].GetUInt8());
+    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[62].GetUInt8());
 
     InitDisplayIds();
 
@@ -16875,7 +16719,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     uint32 transGUID = uint32(fields[30].GetUInt64());   // field type is uint64 but lowguid is saved
     Relocate(fields[12].GetFloat(), fields[13].GetFloat(), fields[14].GetFloat(), fields[16].GetFloat());
     uint32 mapId = fields[15].GetUInt16();
-    uint32 instanceId = fields[62].GetUInt8();
+    uint32 instanceId = fields[56].GetUInt8();
 
     uint32 dungeonDiff = fields[38].GetUInt32() & 0x0F;
     if (dungeonDiff >= MAX_DUNGEON_DIFFICULTY)
@@ -17237,8 +17081,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    m_specsCount = fields[63].GetUInt8();
-    m_activeSpec = fields[64].GetUInt8();
+    m_specsCount = fields[57].GetUInt8();
+    m_activeSpec = fields[58].GetUInt8();
 
     // sanity check
     if (m_specsCount > MAX_TALENT_SPECS || m_activeSpec > MAX_TALENT_SPEC || m_specsCount < MIN_TALENT_SPECS)
@@ -17310,7 +17154,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // restore remembered power/health values (but not more max values)
     uint32 savedHealth = fields[50].GetUInt32();
     SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
-    for (uint8 i = 0; i < MAX_POWERS; ++i)
+    for (uint8 i = 0; i < MAX_STORED_POWERS; ++i)
     {
         uint32 savedPower = fields[51+i].GetUInt32();
         SetPower(Powers(i), savedPower > GetMaxPower(Powers(i)) ? GetMaxPower(Powers(i)) : savedPower);
@@ -17368,7 +17212,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     }
 
     // RaF stuff.
-    m_grantableLevels = fields[70].GetUInt32();
+    m_grantableLevels = fields[63].GetUInt32();
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
         SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
 
@@ -18601,7 +18445,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setFloat(index++, finiteAlways(GetPositionY()));
         stmt->setFloat(index++, finiteAlways(GetPositionZ()));
         stmt->setFloat(index++, finiteAlways(GetOrientation()));
-        
+
         std::ostringstream ss;
         ss << m_taxi;
         stmt->setString(index++, ss.str());
@@ -18623,7 +18467,7 @@ void Player::SaveToDB(bool create /*=false*/)
 
         ss.str().clear();
         ss << m_taxi.SaveTaxiDestinationsToString();
-        
+
         stmt->setString(index++, ss.str());
         stmt->setUInt32(index++, GetArenaPoints());
         stmt->setUInt32(index++, GetHonorPoints());
@@ -18638,7 +18482,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt16(index++, (uint16)(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE));
         stmt->setUInt32(index++, GetHealth());
 
-        for (uint32 i = 0; i < MAX_POWERS; ++i)
+        for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
             stmt->setUInt32(index++, GetPower(Powers(i)));
 
         stmt->setUInt32(index++, GetSession()->GetLatency());
@@ -18656,7 +18500,7 @@ void Player::SaveToDB(bool create /*=false*/)
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)
             ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << ' ';
         stmt->setString(index++, ss.str());
-        
+
         ss.str().clear();
         // ...and bags for enum opcode
         for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -18669,7 +18513,6 @@ void Player::SaveToDB(bool create /*=false*/)
         }
 
         stmt->setString(index++, ss.str());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_AMMO_ID));
 
         ss.str().clear();
         for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)
@@ -18751,7 +18594,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt16(index++, (uint16)(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE));
         stmt->setUInt32(index++, GetHealth());
 
-        for (uint32 i = 0; i < MAX_POWERS; ++i)
+        for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
             stmt->setUInt32(index++, GetPower(Powers(i)));
 
         stmt->setUInt32(index++, GetSession()->GetLatency());
@@ -18782,7 +18625,6 @@ void Player::SaveToDB(bool create /*=false*/)
         }
 
         stmt->setString(index++, ss.str());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_AMMO_ID));
 
         ss.str().clear();
         for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)
@@ -19262,12 +19104,12 @@ void Player::_SaveStats(SQLTransaction& trans)
 
     trans->PAppend("DELETE FROM character_stats WHERE guid = '%u'", GetGUIDLow());
     std::ostringstream ss;
-    ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10, maxpower11, "
+    ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
         "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience) VALUES ("
         << GetGUIDLow() << ','
         << GetMaxHealth() << ',';
-    for (uint8 i = 0; i < MAX_POWERS; ++i)
+    for (uint8 i = 0; i < MAX_STORED_POWERS; ++i)
         ss << GetMaxPower(Powers(i)) << ',';
     for (uint8 i = 0; i < MAX_STATS; ++i)
         ss << GetStat(Stats(i)) << ',';
