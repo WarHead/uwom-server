@@ -63,7 +63,7 @@ enum HATI_ENUM
 
 enum WEHRLOS_ENUM
 {
-    SPELL_ABSTOSSENDE_WELLE = 74509, // 50% + 75% HP - selbst
+    //SPELL_ABSTOSSENDE_WELLE = 74509, // 50% + 75% HP - selbst
     SPELL_SCHOCKWELLE       = 75417, // 25% HP - victim
     SPELL_VERSENGEN         = 75412, // victim (30m)
     SPELL_RUESTUNG_SPALTEN  = 74367, // victim (5m)
@@ -274,14 +274,16 @@ public:
 
                 if (!done75 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(75))
                 {
-                    DoCastAOE(SPELL_ABSTOSSENDE_WELLE);
+                    DoCastAOE(SPELL_SCHOCKWELLE);
                     done75 = true;
                 }
+
                 if (!done50 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(50))
                 {
-                    DoCastAOE(SPELL_ABSTOSSENDE_WELLE);
+                    DoCastAOE(SPELL_SCHOCKWELLE);
                     done50 = true;
                 }
+
                 if (!done25 && !me->HasUnitState(UNIT_STAT_CASTING) && me->HealthBelowPct(25))
                 {
                     DoCastAOE(SPELL_SCHOCKWELLE);
