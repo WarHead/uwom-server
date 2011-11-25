@@ -34,7 +34,7 @@ enum LFGenum
     LFG_TIME_PROPOSAL                            = 2*MINUTE,
     LFG_TANKS_NEEDED                             = 1,
     LFG_HEALERS_NEEDED                           = 1,
-    LFG_DPS_NEEDED                               = 3,
+    LFG_DPS_NEEDED                               = 1, // Temporär von 3 auf 1 reduziert, damit man auch zu dritt den DF nutzen kann! ;)
     LFG_QUEUEUPDATE_INTERVAL                     = 15*IN_MILLISECONDS,
     LFG_SPELL_DUNGEON_COOLDOWN                   = 71328,
     LFG_SPELL_DUNGEON_DESERTER                   = 71041,
