@@ -2180,7 +2180,6 @@ uint32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) 
             case POWER_RAGE:
             case POWER_FOCUS:
             case POWER_ENERGY:
-            case POWER_HAPPINESS:
                 powerCost += int32(CalculatePctU(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;
             case POWER_RUNE:
