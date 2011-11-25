@@ -3880,7 +3880,7 @@ void ObjectMgr::LoadQuests()
             //check for proper RequiredSkill value (skill case)
             if (int32 skill_id =  SkillByQuestSort(-int32(qinfo->ZoneOrSort)))
             {
-                if (qinfo->RequiredSkill != skill_id)
+                if (int32(qinfo->RequiredSkill) != skill_id)
                 {
                     sLog->outErrorDb("Quest %u has `ZoneOrSort` = %i but `RequiredSkill` does not have a corresponding value (%i).",
                         qinfo->GetQuestId(), qinfo->ZoneOrSort, skill_id);
