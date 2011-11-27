@@ -2982,7 +2982,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
     return true;
 }
 
- bool ChatHandler::HandleServerShutDownCancelCommand(const char* /*args*/)
+bool ChatHandler::HandleServerShutDownCancelCommand(const char* /*args*/)
 {
     sWorld->ShutdownCancel();
     return true;
