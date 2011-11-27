@@ -474,9 +474,10 @@ bool ChatHandler::HandleCharacterAddArenaPointsCommand(const char * args)
     if (!target || !target->IsInWorld())
         return false;
 
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    // TODO: Implementierung für Cata!
+    /*SQLTransaction trans = CharacterDatabase.BeginTransaction();
     target->ModifyArenaPoints(points, &trans);
-    CharacterDatabase.CommitTransaction(trans);
+    CharacterDatabase.CommitTransaction(trans);*/
 
     return true;
 }
@@ -515,9 +516,10 @@ bool ChatHandler::HandleCharacterAddHonorPointsCommand(const char * args)
     if (!target || !target->IsInWorld())
         return false;
 
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    // TODO: Implementierung für Cata!
+    /*SQLTransaction trans = CharacterDatabase.BeginTransaction();
     target->ModifyHonorPoints(points, &trans);
-    CharacterDatabase.CommitTransaction(trans);
+    CharacterDatabase.CommitTransaction(trans);*/
 
     return true;
 }

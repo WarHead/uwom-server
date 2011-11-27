@@ -246,10 +246,10 @@ void WorldSession::HandleCharEnum(QueryResult result)
                     //case 14:
                     //    data.writeBit(1);//unk
                     //    break;
-                    case 11: data.writeBit(Guid0 ? 1 : 0); break;
-                    case 12: data.writeBit(Guid1 ? 1 : 0); break;
-                    case 9: data.writeBit(Guid2 ? 1 : 0); break;
-                    case 8: data.writeBit(Guid3 ? 1 : 0); break;
+                    case 11: data.WriteBit(Guid0 ? 1 : 0); break;
+                    case 12: data.WriteBit(Guid1 ? 1 : 0); break;
+                    case 9: data.WriteBit(Guid2 ? 1 : 0); break;
+                    case 8: data.WriteBit(Guid3 ? 1 : 0); break;
                     /*case 15:
                         if(uint8(GuildGuid))
                             data.writeBit(1);
@@ -283,12 +283,12 @@ void WorldSession::HandleCharEnum(QueryResult result)
                             data.writeBit(1);
                         break;*/
                     default:
-                        data.writeBit(0);
+                        data.WriteBit(0);
                         break;
                 }
             }
         }
-        data.flushBits();
+        data.FlushBits();
         data.append(buffer);
         data.put<uint32>(1, guidsVect.size());
     }
@@ -842,7 +842,22 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket & recv_data)
 
     sLog->outStaticDebug("WORLD: Recvd Player Logon Message");
 
-    recv_data >> playerGuid;
+    BitStream mask = recv_data.ReadBitStream(8);
+
+    ByteBuffer bytes(8, true);
+
+    if (mask[6]) bytes[5] = recv_data.ReadUInt8() ^ 1;
+    if (mask[0]) bytes[0] = recv_data.ReadUInt8() ^ 1;
+    if (mask[4]) bytes[3] = recv_data.ReadUInt8() ^ 1;
+    if (mask[1]) bytes[4] = recv_data.ReadUInt8() ^ 1;
+    if (mask[2]) bytes[7] = recv_data.ReadUInt8() ^ 1;
+    if (mask[5]) bytes[2] = recv_data.ReadUInt8() ^ 1;
+    if (mask[7]) bytes[6] = recv_data.ReadUInt8() ^ 1;
+    if (mask[3]) bytes[1] = recv_data.ReadUInt8() ^ 1;
+
+    playerGuid = BitConverter::ToUInt64(bytes);
+
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "Character (Guid: %u) logging in", playerGuid);
 
     if (!CharCanLogin(GUID_LOPART(playerGuid)))
     {
@@ -1868,7 +1883,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
         if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
         {
             // Reset guild
-            if (uint32 guildId = Player::GetGuildIdFromDB(guid))
+            if (uint32 guildId = Player::GetGuildIdFromGuid(guid))
                 if (Guild* guild = sGuildMgr->GetGuildById(guildId))
                     guild->DeleteMember(guid);
         }

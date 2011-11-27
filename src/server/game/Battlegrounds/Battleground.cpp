@@ -838,14 +838,18 @@ void Battleground::EndBattleground(uint32 winner)
         uint32 loser_kills = plr->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_LAST : BG_REWARD_LOSER_HONOR_FIRST;
         uint32 winner_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
 
+        // remove temporary currency bonus auras before rewarding player
+        plr->RemoveAura(SPELL_HONORABLE_DEFENDER_25Y);
+        plr->RemoveAura(SPELL_HONORABLE_DEFENDER_60Y);
+
         // Reward winner team
         if (team == winner)
         {
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
             {
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_kills));
-                if (CanAwardArenaPoints())
-                    plr->ModifyArenaPoints(winner_arena);
+                /*if (CanAwardArenaPoints())
+                    player->ModifyConquestPoints(winner_arena);*/
                 if (!plr->GetRandomWinner())
                     plr->SetRandomWinner(true);
             }

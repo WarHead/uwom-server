@@ -2353,15 +2353,17 @@ public:
                         return true;
                     break;
                 case 1:
-                    if (pl->GetHonorPoints() < static_cast<uint32>(amount))
+                    // TODO: Implementierung für Cata!
+                    /*if (pl->GetHonorPoints() < static_cast<uint32>(amount))
                         pl->GetSession()->SendNotification(PIMPER_NOT_ENOUGH, "Ehre");
-                    else
+                    else*/
                         return true;
                     break;
                 case 2:
-                    if (pl->GetArenaPoints() < static_cast<uint32>(amount))
+                    // TODO: Implementierung für Cata!
+                    /*if (pl->GetArenaPoints() < static_cast<uint32>(amount))
                         pl->GetSession()->SendNotification(PIMPER_NOT_ENOUGH, "Arenapunkte");
-                    else
+                    else*/
                         return true;
                     break;
                 case 3:
@@ -2391,15 +2393,17 @@ public:
                         return false;
                     break;
                 case 1:
-                    if (HasEnough(pl, amount))
+                    // TODO: Implementierung für Cata!
+                    /*if (HasEnough(pl, amount))
                         pl->ModifyHonorPoints(-amount);
-                    else
+                    else*/
                         return false;
                     break;
                 case 2:
-                    if (HasEnough(pl, amount))
+                    // TODO: Implementierung für Cata!
+                    /*if (HasEnough(pl, amount))
                         pl->ModifyArenaPoints(-amount);
-                    else
+                    else*/
                         return false;
                     break;
                 case 3:

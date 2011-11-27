@@ -46,7 +46,8 @@ public:
                     plr->GetSession()->LogoutPlayer(true); // Alle online Spieler ausloggen und speichern, damit die Änderungen sofort aktiv sind!
                 else
                 {
-                    plr->SetArenaPoints(0);
+                    // TODO: Implementierung für Cata!
+                    //plr->SetArenaPoints(0);
                     plr->GetSession()->LogoutRequest(time(NULL));
                 }
             }
@@ -84,7 +85,8 @@ public:
                     plr->GetSession()->LogoutPlayer(true); // Alle online Spieler ausloggen und speichern, damit die Änderungen sofort aktiv sind!
                 else
                 {
-                    plr->SetHonorPoints(0);
+                    // TODO: Implementierung für Cata!
+                    //plr->SetHonorPoints(0);
                     plr->GetSession()->LogoutRequest(time(NULL));
                 }
             }
@@ -123,11 +125,12 @@ public:
         if (!handler->extractPlayerTarget((char*)args, &target))
             return false;
 
-        target->SetHonorPoints(0);
+        // TODO: Implementierung für Cata!
+        //target->SetHonorPoints(0);
         target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
         target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
-        target->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-        target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+        //target->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
+        //target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
         target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
 
         return true;
