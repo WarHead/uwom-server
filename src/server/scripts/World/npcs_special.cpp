@@ -2353,17 +2353,15 @@ public:
                         return true;
                     break;
                 case 1:
-                    // TODO: Implementierung für Cata!
-                    /*if (pl->GetHonorPoints() < static_cast<uint32>(amount))
+                    if (pl->GetCurrency(CURRENCY_TYPE_HONOR_POINTS) < static_cast<uint32>(amount))
                         pl->GetSession()->SendNotification(PIMPER_NOT_ENOUGH, "Ehre");
-                    else*/
+                    else
                         return true;
                     break;
                 case 2:
-                    // TODO: Implementierung für Cata!
-                    /*if (pl->GetArenaPoints() < static_cast<uint32>(amount))
+                    if (pl->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS) < static_cast<uint32>(amount))
                         pl->GetSession()->SendNotification(PIMPER_NOT_ENOUGH, "Arenapunkte");
-                    else*/
+                    else
                         return true;
                     break;
                 case 3:
@@ -2393,17 +2391,15 @@ public:
                         return false;
                     break;
                 case 1:
-                    // TODO: Implementierung für Cata!
-                    /*if (HasEnough(pl, amount))
-                        pl->ModifyHonorPoints(-amount);
-                    else*/
+                    if (HasEnough(pl, amount))
+                        pl->ModifyCurrency(CURRENCY_TYPE_HONOR_POINTS, -amount);
+                    else
                         return false;
                     break;
                 case 2:
-                    // TODO: Implementierung für Cata!
-                    /*if (HasEnough(pl, amount))
-                        pl->ModifyArenaPoints(-amount);
-                    else*/
+                    if (HasEnough(pl, amount))
+                        pl->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, -amount);
+                    else
                         return false;
                     break;
                 case 3:
