@@ -1503,4 +1503,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vehicle_scaling();
     new spell_gen_oracle_wolvar_reputation();
     new spell_gen_turkey_tracker();
+    new spell_gen_damage_reduction_aura();
 }
