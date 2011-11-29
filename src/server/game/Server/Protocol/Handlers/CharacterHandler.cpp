@@ -43,6 +43,7 @@
 #include "ScriptMgr.h"
 #include "Battleground.h"
 #include "AccountMgr.h"
+#include "DBCStores.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -923,9 +924,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADACCOUNTDATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 7);         // checked in 4.2.2
     data << uint8(2);                                       // unknown value
     data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
+    data << uint8(0);
+    data << uint32(0);                                      // mail related
     SendPacket(&data);
 
     // Send MOTD
@@ -1984,5 +1987,30 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recv_data)
     data << uint8(hairColor);
     data << uint8(facialHair);
     data << uint8(race);
+    SendPacket(&data);
+}
+
+void WorldSession::HandleRandomizeCharNameOpcode(WorldPacket& recv_data)
+{
+    uint8 gender, race;
+
+    recv_data >> gender;
+    recv_data >> race;
+
+    if (!(1 << race-1) & RACEMASK_ALL_PLAYABLE)
+    {
+        sLog->outError("Invalid race sent by accountId: %u", GetAccountId());
+        return;
+    }
+
+    if (!Player::IsValidGender(gender))
+    {
+        sLog->outError("Invalid gender sent by accountId: %u", GetAccountId());
+        return;
+    }
+
+    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 10);
+    data << uint8(128); // unk1
+    data << *GetRandomCharacterName(race, gender);
     SendPacket(&data);
 }

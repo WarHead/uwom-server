@@ -493,6 +493,13 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket & recv_data)
     //GetPlayer()->SendInitWorldStates(true, newZone);
 }
 
+void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
+{
+    if (GetPlayer()->isAlive() || !GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        return;
+    GetPlayer()->RepopAtGraveyard();
+}
+
 void WorldSession::HandleSetSelectionOpcode(WorldPacket & recv_data)
 {
     uint64 guid;

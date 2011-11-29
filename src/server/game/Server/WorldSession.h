@@ -409,6 +409,8 @@ class WorldSession
         void HandleCharEnum(QueryResult result);
         void HandlePlayerLogin(LoginQueryHolder * holder);
         void HandleCharFactionOrRaceChange(WorldPacket& recv_data);
+        void HandleRandomizeCharNameOpcode(WorldPacket& recv_data);
+
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
@@ -417,6 +419,7 @@ class WorldSession
         void HandleMoveUnRootAck(WorldPacket& recvPacket);
         void HandleMoveRootAck(WorldPacket& recvPacket);
         void HandleLookingForGroup(WorldPacket& recvPacket);
+        void HandleReturnToGraveyard(WorldPacket& recvPacket);
 
         // new inspect
         void HandleInspectOpcode(WorldPacket& recvPacket);
