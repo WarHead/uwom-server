@@ -95,6 +95,7 @@ enum CreaturesIds
     NPC_METEOR_STRIKE_SOUTH         = 40044,
     NPC_METEOR_STRIKE_FLAME         = 40055,
     NPC_COMBUSTION                  = 40001,
+    NPC_CONSUMPTION                 = 40135,
     // Schnitter
     NPC_KUGELTRAEGER                = 40081,
     NPC_KUGELROTATIONSFOKUS         = 40091,
