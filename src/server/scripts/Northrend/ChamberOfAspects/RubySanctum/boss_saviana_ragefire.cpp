@@ -150,7 +150,7 @@ class boss_saviana_ragefire : public CreatureScript
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SetReactState(REACT_PASSIVE);
                             me->GetMotionMaster()->MovePoint(POINT_FLIGHT, SavianaRagefireFlyPos);
-                            events.ScheduleEvent(EVENT_FLIGHT, SEKUNDEN_40);
+                            events.ScheduleEvent(EVENT_FLIGHT, SEKUNDEN_30);
                             events.DelayEvents(12500, EVENT_GROUP_LAND_PHASE);
                             break;
                         }
@@ -158,8 +158,8 @@ class boss_saviana_ragefire : public CreatureScript
                             DoCast(me, SPELL_CONFLAGRATION, true);
                             break;
                         case EVENT_ENRAGE:
-                            DoCast(me, SPELL_ENRAGE);
                             Talk(EMOTE_ENRAGED);
+                            DoCast(me, SPELL_ENRAGE);
                             events.ScheduleEvent(EVENT_ENRAGE, urand(SEKUNDEN_15, SEKUNDEN_20), EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_FLAME_BREATH:
