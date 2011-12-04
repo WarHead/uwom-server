@@ -491,9 +491,6 @@ public:
                 DoCast(me, SPELL_DUSK_SHROUD, true);
 
                 events.CancelEvent(EVENT_FLAME_BREATH);
-                // TODO: Überprüfen, ob das nicht zu viel des "Guten" ist! Wenn ja, einfach wieder aktivieren! ;)
-                //events.CancelEvent(EVENT_COMBUSTION);
-
                 events.ScheduleEvent(EVENT_DARK_BREATH, urand(SEKUNDEN_10, SEKUNDEN_15));
                 events.ScheduleEvent(EVENT_CONSUMTION, urand(SEKUNDEN_15, SEKUNDEN_20));
             }
@@ -557,7 +554,7 @@ public:
                         break;
                     case EVENT_ENRAGE:
                         Talk(SAY_BERSERK);
-                        DoCast(SPELL_BERSERK);
+                        DoCast(me, SPELL_BERSERK);
                         break;
                     case EVENT_DARK_BREATH:
                         DoCast(me, SPELL_DARK_BREATH);
