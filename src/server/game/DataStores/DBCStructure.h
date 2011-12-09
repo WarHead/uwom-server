@@ -128,7 +128,7 @@ struct AchievementCriteriaEntry
         } complete_quests_in_zone;
 
         // ACHIEVEMENT_CRITERIA_TYPE_CURRENCY = 12
-        struct  
+        struct
         {
             uint32 currency;
             uint32 count;
@@ -536,12 +536,22 @@ struct AreaTableEntry
     uint32  mapid;                                          // 1
     uint32  zone;                                           // 2 if 0 then it's zone, else it's zone id of this area
     uint32  exploreFlag;                                    // 3, main index
-    uint32  flags;                                          // 4, unknown value but 312 for all cities
-                                                            // 5-9 unused
+    uint32  flags;                                          // 4,
+    //uint32 unk5;                                          // 5,
+    //uint32 unk6;                                          // 6,
+    //uint32 unk7;                                          // 7,
+    //uint32 unk8;                                          // 8,
+    //uint32 unk9;                                          // 9,
     int32   area_level;                                     // 10
-    char* area_name;                                        // 11
+    char*   area_name;                                        // 11
     uint32  team;                                           // 12
-                                                            // 13-19 unknown
+    //uint32 unk13;                                         // 13,
+    //uint32 unk14;                                         // 14, All zeros (4.2.2)
+    //uint32 unk15;                                         // 15,
+    //uint32 unk16;                                         // 16, Only Naxxramas has value (21)
+    //float  unk13;                                         // 17,
+    //float  unk13;                                         // 18,
+    //uint32 unk19;                                         // 19, All zeros (4.2.2)
     //uint32 unk20;                                         // 20 4.0.0
     //uint32 unk21;                                         // 21 4.0.0
     //uint32 unk22;                                         // 22 4.0.0
@@ -1436,6 +1446,14 @@ struct MovieEntry
     //uint32      unk2;                                     // 3 4.0.0
 };
 
+struct NameGenEntry
+{
+    //uint32 id;
+    char*  name;
+    uint32 race;
+    uint32 gender;
+};
+
 #define MAX_OVERRIDE_SPELL 10
 
 struct OverrideSpellDataEntry
@@ -2274,15 +2292,6 @@ struct WorldStateUI
 #else
 #pragma pack(pop)
 #endif
-
-// NamesGen.dbc
-struct NameGenEntry
-{
-    uint32 id;
-    char* name; 
-    uint32 race;
-    uint32 gender;
-};
 
 struct VectorArray
 {
