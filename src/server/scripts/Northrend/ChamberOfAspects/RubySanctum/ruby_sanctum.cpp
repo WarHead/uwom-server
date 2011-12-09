@@ -307,7 +307,7 @@ public:
                         {
                             case EVENT_Kommandant_der_Schmorschuppen_Sammelruf:
                                 if (instance)
-                                    instance->DoSendNotifyToInstance("%s ruft seine Truppen herbei!", me->GetNameForLocaleIdx(LOCALE_deDE));
+                                    instance->DoSendNotifyToInstance("Der Kommandant der Schmorschuppen ruft seine Truppen herbei!");
                                 me->AddAura(SPELL_Kommandant_der_Schmorschuppen_Sammelruf, me);
                                 Sammelruf(60.0f, SPELL_Kommandant_der_Schmorschuppen_Sammelruf);
                                 events.RescheduleEvent(EVENT_Kommandant_der_Schmorschuppen_Sammelruf, urand(SEKUNDEN_60, SEKUNDEN_60+SEKUNDEN_30));
