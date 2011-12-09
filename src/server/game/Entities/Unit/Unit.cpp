@@ -6143,6 +6143,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 60478; 
                     break; 
                 }
+                // Glyph of Succubus
+                case 56250:
+                {
+                    if (!target)
+                        return false;
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    return true;
+                }
             }
             break;
         }
@@ -6581,17 +6591,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
-                // Tricks of the Trade
-                case 57934:
+                case 57934: // Tricks of the Trade
                 {
-                    if (Unit * unitTarget = GetMisdirectionTarget())
-                    {
-                        RemoveAura(dummySpell->Id, GetGUID(), 0, AURA_REMOVE_BY_DEFAULT);
-                        CastSpell(this, 59628, true);
-                        CastSpell(unitTarget, 57933, true);
-                        return true;
-                    }
-                    return false;
+                    Unit* redirectTarget = GetMisdirectionTarget();
+                    RemoveAura(57934);
+                    if (!redirectTarget)
+                        break;
+                    redirectTarget->CastSpell(this,59628,true);
+                    CastSpell(redirectTarget,57933,true);
+                    break;
                 }
             }
 
