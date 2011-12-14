@@ -320,7 +320,7 @@ public:
                         };
 
                         for (uint8 i=0; i<3; ++i)
-                            if (AE[i] && !plr->GetAchievementMgr().HasAchieved(AE[i]))
+                            if (AE[i] && !plr->GetAchievementMgr().HasAchieved(AE[i]->ID))
                             {
                                 plr->CompletedAchievement(AE[i]);
                                 break;
