@@ -708,7 +708,7 @@ void SmartAI::SetRun(bool run)
         me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
     else
         me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-    me->SendMovementFlagUpdate();
+
     mRun = run;
 }
 
@@ -812,6 +812,12 @@ void SmartAI::SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker)
         GetScript()->mLastInvoker = invoker->GetGUID();
     GetScript()->SetScript9(e, entry);
 }
+    
+void SmartAI::sOnGameEvent(bool start, uint16 eventId)
+{
+    GetScript()->ProcessEventsFor(start ? SMART_EVENT_GAME_EVENT_START : SMART_EVENT_GAME_EVENT_END, NULL, eventId);
+}
+
 /*
 SMART_EVENT_UPDATE_OOC
 SMART_EVENT_SPELLHIT
@@ -912,6 +918,11 @@ void SmartGameObjectAI::SetScript9(SmartScriptHolder& e, uint32 entry, Unit* inv
     if (invoker)
         GetScript()->mLastInvoker = invoker->GetGUID();
     GetScript()->SetScript9(e, entry);
+}
+
+void SmartGameObjectAI::OnGameEvent(bool start, uint16 eventId)
+{
+    GetScript()->ProcessEventsFor(start ? SMART_EVENT_GAME_EVENT_START : SMART_EVENT_GAME_EVENT_END, NULL, eventId);
 }
 
 class SmartTrigger : public AreaTriggerScript
