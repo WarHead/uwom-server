@@ -689,8 +689,7 @@ void Map::RemoveFromMap(T *obj, bool remove)
     }
 }
 
-void
-Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
+void Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
 {
     ASSERT(player);
 
@@ -714,8 +713,7 @@ Map::PlayerRelocation(Player* player, float x, float y, float z, float orientati
     player->UpdateObjectVisibility(false);
 }
 
-void
-Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
+void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
 {
     ASSERT(CheckGridIntegrity(creature, false));
 
@@ -1165,7 +1163,7 @@ bool GridMap::loadHeihgtData(FILE* in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
-bool  GridMap::loadLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
+bool GridMap::loadLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     map_liquidHeader header;
     fseek(in, offset, SEEK_SET);
@@ -1207,12 +1205,12 @@ uint16 GridMap::getArea(float x, float y)
     return m_area_map[lx*16 + ly];
 }
 
-float  GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
+float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
 {
     return m_gridHeight;
 }
 
-float  GridMap::getHeightFromFloat(float x, float y) const
+float GridMap::getHeightFromFloat(float x, float y) const
 {
     if (!m_V8 || !m_V9)
         return m_gridHeight;
@@ -1294,7 +1292,7 @@ float  GridMap::getHeightFromFloat(float x, float y) const
     return a * x + b * y + c;
 }
 
-float  GridMap::getHeightFromUint8(float x, float y) const
+float GridMap::getHeightFromUint8(float x, float y) const
 {
     if (!m_uint8_V8 || !m_uint8_V9)
         return m_gridHeight;
@@ -1361,7 +1359,7 @@ float  GridMap::getHeightFromUint8(float x, float y) const
     return (float)((a * x) + (b * y) + c)*m_gridIntHeightMultiplier + m_gridHeight;
 }
 
-float  GridMap::getHeightFromUint16(float x, float y) const
+float GridMap::getHeightFromUint16(float x, float y) const
 {
     if (!m_uint16_V8 || !m_uint16_V9)
         return m_gridHeight;
@@ -1428,7 +1426,7 @@ float  GridMap::getHeightFromUint16(float x, float y) const
     return (float)((a * x) + (b * y) + c)*m_gridIntHeightMultiplier + m_gridHeight;
 }
 
-float  GridMap::getLiquidLevel(float x, float y)
+float GridMap::getLiquidLevel(float x, float y)
 {
     if (!m_liquid_map)
         return m_liquidLevel;
@@ -1447,7 +1445,7 @@ float  GridMap::getLiquidLevel(float x, float y)
     return m_liquid_map[cx_int*m_liquid_width + cy_int];
 }
 
-uint8  GridMap::getTerrainType(float x, float y)
+uint8 GridMap::getTerrainType(float x, float y)
 {
     if (!m_liquid_type)
         return 0;
@@ -1830,7 +1828,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     return true;
 }
 
-const char* Map::GetMapName() const
+char const* Map::GetMapName() const
 {
     return i_mapEntry ? i_mapEntry->name : "UNNAMEDMAP\x0";
 }
@@ -2642,20 +2640,17 @@ void BattlegroundMap::RemoveAllPlayers()
                     player->TeleportTo(player->GetBattlegroundEntryPoint());
 }
 
-Creature*
-Map::GetCreature(uint64 guid)
+Creature* Map::GetCreature(uint64 guid)
 {
     return ObjectAccessor::GetObjectInMap(guid, this, (Creature*)NULL);
 }
 
-GameObject*
-Map::GetGameObject(uint64 guid)
+GameObject* Map::GetGameObject(uint64 guid)
 {
     return ObjectAccessor::GetObjectInMap(guid, this, (GameObject*)NULL);
 }
 
-DynamicObject*
-Map::GetDynamicObject(uint64 guid)
+DynamicObject* Map::GetDynamicObject(uint64 guid)
 {
     return ObjectAccessor::GetObjectInMap(guid, this, (DynamicObject*)NULL);
 }

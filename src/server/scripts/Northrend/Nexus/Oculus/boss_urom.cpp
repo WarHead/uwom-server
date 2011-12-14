@@ -92,11 +92,6 @@ class boss_urom : public CreatureScript
 public:
     boss_urom() : CreatureScript("boss_urom") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_uromAI (creature);
-    }
-
     struct boss_uromAI : public BossAI
     {
         boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT)
@@ -380,6 +375,11 @@ public:
         uint32 frostBombTimer;
         uint32 timeBombTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_uromAI (creature);
+    }
 };
 
 void AddSC_boss_urom()

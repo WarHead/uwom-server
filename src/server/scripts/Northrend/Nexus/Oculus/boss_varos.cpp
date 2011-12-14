@@ -99,6 +99,13 @@ public:
             }
         }
 
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            Talk(SAY_DEATH);
+            DoCast(me, SPELL_DEATH_SPELL, true); // we cast the spell as triggered or the summon effect does not occur
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
@@ -108,12 +115,6 @@ public:
         float GetCoreEnergizeOrientation()
         {
             return coreEnergizeOrientation;
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            _JustDied();
-            Talk(SAY_DEATH);
         }
 
         void UpdateAI(const uint32 diff)

@@ -4866,6 +4866,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case 71563:
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
+                        break;
+                case 59628: // Tricks of the Trade
+                    target->SetReducedThreatPercent(100,caster->GetGUID());
+                    break;
             }
         }
         // AT REMOVE
