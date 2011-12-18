@@ -255,9 +255,9 @@ public:
 
     struct npc_image_belgaristraszAI : public ScriptedAI
     {
-        npc_image_belgaristraszAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_image_belgaristraszAI(Creature * creature) : ScriptedAI(creature) {}
 
-        void IsSummonedBy(Unit* summoner)
+        void IsSummonedBy(Unit * summoner)
         {
             if (summoner->GetEntry() == NPC_VAROS)
             {
@@ -272,7 +272,7 @@ public:
         }            
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI * GetAI(Creature * creature) const
     {
         return new npc_image_belgaristraszAI(creature);
     }

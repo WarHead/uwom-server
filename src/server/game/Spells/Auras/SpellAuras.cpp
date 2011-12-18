@@ -1945,11 +1945,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     }
 
     if (GetSpellInfo()->IsPassive() && !GetCastItemGUID())
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint8 i=0; i<MAX_SPELL_EFFECTS; ++i)
         {
             if (m_effects[i] && m_effects[i]->GetAuraType() == SPELL_AURA_MECHANIC_DURATION_MOD)
             {
-                uint32 spell_immune;
+                uint32 spell_immune = 0;
+
                 switch(m_effects[i]->GetMiscValue())
                 {
                     case 5:  spell_immune = 55357; break;
@@ -1959,9 +1960,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 12: spell_immune = 55358; break;
                     default: break;
                 }
+
                 if (spell_immune)
                 {
-                    if (apply) target->RemoveAurasDueToSpell(spell_immune);
+                    if (apply)
+                        target->RemoveAurasDueToSpell(spell_immune);
+
                     target->ApplySpellImmune(0, IMMUNITY_ID, spell_immune, apply);
                 }
             }

@@ -4523,40 +4523,12 @@ class npc_winter_reveler : public CreatureScript
     public:
         npc_winter_reveler() : CreatureScript("npc_winter_reveler") { }
 
-<<<<<<< HEAD
-    struct npc_winter_revelerAI : public ScriptedAI
-    {
-        npc_winter_revelerAI(Creature * cr) : ScriptedAI(cr) {}
-        void ReceiveEmote(Player * plr, uint32 emote)
-        {
-            if (!IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL))
-                return;
-            //TODO: check auralist.
-            if (plr->HasAura(26218))
-                return;
-=======
         struct npc_winter_revelerAI : public ScriptedAI
         {
             npc_winter_revelerAI(Creature* c) : ScriptedAI(c) {}
->>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
 
             void ReceiveEmote(Player* player, uint32 emote)
             {
-<<<<<<< HEAD
-                me->CastSpell(me, 26218, false);
-                plr->CastSpell(plr, 26218, false);
-                switch (urand(0, 2))
-                {
-                    case 0:
-                        me->CastSpell(plr, 26207, false);
-                        break;
-                    case 1:
-                        me->CastSpell(plr, 26206, false);
-                        break;
-                    case 2:
-                        me->CastSpell(plr, 45036, false);
-                        break;
-=======
                 if (player->HasAura(SPELL_MISTLETOE_DEBUFF))
                     return;
 
@@ -4568,22 +4540,14 @@ class npc_winter_reveler : public CreatureScript
                     uint32 spellId = RAND<uint32>(SPELL_CREATE_MISTLETOE, SPELL_CREATE_HOLLY, SPELL_CREATE_SNOWFLAKES);
                     me->CastSpell(player, spellId, false);
                     me->CastSpell(player, SPELL_MISTLETOE_DEBUFF, false);
->>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
                 }
             }
         };
 
-<<<<<<< HEAD
-    CreatureAI * GetAI(Creature * cr) const
-    {
-        return new npc_winter_revelerAI(cr);
-    }
-=======
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_winter_revelerAI(creature);
         }
->>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
 };
 
 /*####

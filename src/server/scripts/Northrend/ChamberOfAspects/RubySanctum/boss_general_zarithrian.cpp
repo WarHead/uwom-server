@@ -159,19 +159,19 @@ class boss_general_zarithrian : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SUMMON_ADDS:
+                            Talk(SAY_ADDS);
                             if (Creature * stalker1 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_1)))
                                 stalker1->AI()->DoCast(stalker1, SPELL_SUMMON_FLAMECALLER);
                             if (Creature * stalker2 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHIAN_SPAWN_STALKER_2)))
                                 stalker2->AI()->DoCast(stalker2, SPELL_SUMMON_FLAMECALLER);
-                            Talk(SAY_ADDS);
-                            events.ScheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_40);
+                            events.RescheduleEvent(EVENT_SUMMON_ADDS, SEKUNDEN_40);
                             break;
                         case EVENT_INTIDMDATING_ROAR:
                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
-                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
+                            events.RescheduleEvent(EVENT_INTIDMDATING_ROAR, SEKUNDEN_30);
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE_ARMOR);
-                            events.ScheduleEvent(EVENT_CLEAVE, SEKUNDEN_20);
+                            events.RescheduleEvent(EVENT_CLEAVE, urand(SEKUNDEN_20, SEKUNDEN_25));
                             break;
                         default:
                             break;
@@ -270,18 +270,18 @@ class npc_onyx_flamecaller : public CreatureScript
                     {
                         case EVENT_BLAST_NOVA:
                             DoCastAOE(SPELL_BLAST_NOVA);
-                            events.ScheduleEvent(EVENT_BLAST_NOVA, urand(SEKUNDEN_10, SEKUNDEN_20));
+                            events.RescheduleEvent(EVENT_BLAST_NOVA, urand(SEKUNDEN_10, SEKUNDEN_20));
                             break;
                         case EVENT_LAVA_GOUT:
                             if (lavaGoutCnt >= 3)
                             {
                                 lavaGoutCnt = 0;
-                                events.ScheduleEvent(EVENT_LAVA_GOUT, 8 * IN_MILLISECONDS);
+                                events.RescheduleEvent(EVENT_LAVA_GOUT, 8 * IN_MILLISECONDS);
                                 break;
                             }
                             DoCastVictim(SPELL_LAVA_GOUT);
                             ++lavaGoutCnt;
-                            events.ScheduleEvent(EVENT_LAVA_GOUT, 1500);
+                            events.RescheduleEvent(EVENT_LAVA_GOUT, 1500);
                             break;
                         default:
                             break;
