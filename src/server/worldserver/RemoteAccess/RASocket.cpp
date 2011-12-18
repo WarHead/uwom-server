@@ -286,7 +286,11 @@ int RASocket::subnegotiate()
 
     if (n >= 1024)
     {
+<<<<<<< HEAD
         sLog->outRemote("RASocket::subnegotiate: allocated buffer 1024 bytes was too small for negotiation packet, size: %lu", n);
+=======
+        sLog->outRemote("RASocket::subnegotiate: allocated buffer 1024 bytes was too small for negotiation packet, size: %u", uint32(n));
+>>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
         return -1;
     }
 

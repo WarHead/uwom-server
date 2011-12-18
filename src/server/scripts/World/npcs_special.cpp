@@ -4510,11 +4510,20 @@ public:
 ## npc_winter_reveler
 ####*/
 
+enum WinterReveler
+{
+    SPELL_MISTLETOE_DEBUFF       = 26218,
+    SPELL_CREATE_MISTLETOE       = 26206,
+    SPELL_CREATE_HOLLY           = 26207,
+    SPELL_CREATE_SNOWFLAKES      = 45036,
+};
+
 class npc_winter_reveler : public CreatureScript
 {
-public:
-    npc_winter_reveler() : CreatureScript("npc_winter_reveler") { }
+    public:
+        npc_winter_reveler() : CreatureScript("npc_winter_reveler") { }
 
+<<<<<<< HEAD
     struct npc_winter_revelerAI : public ScriptedAI
     {
         npc_winter_revelerAI(Creature * cr) : ScriptedAI(cr) {}
@@ -4525,9 +4534,15 @@ public:
             //TODO: check auralist.
             if (plr->HasAura(26218))
                 return;
+=======
+        struct npc_winter_revelerAI : public ScriptedAI
+        {
+            npc_winter_revelerAI(Creature* c) : ScriptedAI(c) {}
+>>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
 
-            if (emote == TEXT_EMOTE_KISS)
+            void ReceiveEmote(Player* player, uint32 emote)
             {
+<<<<<<< HEAD
                 me->CastSpell(me, 26218, false);
                 plr->CastSpell(plr, 26218, false);
                 switch (urand(0, 2))
@@ -4541,15 +4556,34 @@ public:
                     case 2:
                         me->CastSpell(plr, 45036, false);
                         break;
+=======
+                if (player->HasAura(SPELL_MISTLETOE_DEBUFF))
+                    return;
+
+                if (!IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL))
+                    return;
+
+                if (emote == TEXT_EMOTE_KISS)
+                {
+                    uint32 spellId = RAND<uint32>(SPELL_CREATE_MISTLETOE, SPELL_CREATE_HOLLY, SPELL_CREATE_SNOWFLAKES);
+                    me->CastSpell(player, spellId, false);
+                    me->CastSpell(player, SPELL_MISTLETOE_DEBUFF, false);
+>>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
                 }
             }
-        }
-    };
+        };
 
+<<<<<<< HEAD
     CreatureAI * GetAI(Creature * cr) const
     {
         return new npc_winter_revelerAI(cr);
     }
+=======
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_winter_revelerAI(creature);
+        }
+>>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
 };
 
 /*####
@@ -4564,8 +4598,6 @@ public:
 #define VIPER_TIMER 3000
 
 #define C_VIPER 19921
-
-#define RAND 5
 
 class npc_snake_trap : public CreatureScript
 {
@@ -4613,7 +4645,7 @@ public:
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
                 {
-                    if (!(rand() % RAND))
+                    if (!(rand() % 5))
                     {
                         me->setAttackTimer(BASE_ATTACK, (rand() % 10) * 100);
                         SpellTimer = (rand() % 10) * 100;
@@ -5047,6 +5079,121 @@ public:
     CreatureAI * GetAI(Creature * cr) const
     {
         return new npc_shadowfiendAI(cr);
+    }
+};
+
+/*######
+# npc_fire_elemental
+######*/
+#define SPELL_FIRENOVA        12470
+#define SPELL_FIRESHIELD      13376
+#define SPELL_FIREBLAST       57984
+
+class npc_fire_elemental : public CreatureScript
+{
+public:
+    npc_fire_elemental() : CreatureScript("npc_fire_elemental") { }
+
+    struct npc_fire_elementalAI : public ScriptedAI
+    {
+        npc_fire_elementalAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 FireNova_Timer;
+        uint32 FireShield_Timer;
+        uint32 FireBlast_Timer;
+
+        void Reset()
+        {
+            FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
+            FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
+            FireShield_Timer = 0;
+            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            if (FireShield_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_FIRESHIELD);
+                FireShield_Timer = 2 * IN_MILLISECONDS;
+            }
+            else
+                FireShield_Timer -= diff;
+
+            if (FireBlast_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_FIREBLAST);
+                FireBlast_Timer = 5000 + rand() % 15000; // 5-20 sec cd
+            }
+            else
+                FireBlast_Timer -= diff;
+
+            if (FireNova_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_FIRENOVA);
+                FireNova_Timer = 5000 + rand() % 15000; // 5-20 sec cd
+            }
+            else
+                FireNova_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI *GetAI(Creature* creature) const
+    {
+        return new npc_fire_elementalAI(creature);
+    }
+};
+
+/*######
+# npc_earth_elemental
+######*/
+#define SPELL_ANGEREDEARTH        36213
+
+class npc_earth_elemental : public CreatureScript
+{
+public:
+    npc_earth_elemental() : CreatureScript("npc_earth_elemental") { }
+
+    struct npc_earth_elementalAI : public ScriptedAI
+    {
+        npc_earth_elementalAI(Creature* creature) : ScriptedAI(creature) {}
+
+        uint32 AngeredEarth_Timer;
+
+        void Reset()
+        {
+            AngeredEarth_Timer = 0;
+            me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (AngeredEarth_Timer <= diff)
+            {
+                DoCast(me->getVictim(), SPELL_ANGEREDEARTH);
+                AngeredEarth_Timer = 5000 + rand() % 15000; // 5-20 sec cd
+            }
+            else
+                AngeredEarth_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI *GetAI(Creature* creature) const
+    {
+        return new npc_earth_elementalAI(creature);
     }
 };
 
@@ -5569,5 +5716,7 @@ void AddSC_npcs_special()
     new npc_locksmith;
     new npc_tabard_vendor;
     new npc_experience;
+    new npc_fire_elemental;
+    new npc_earth_elemental;
 }
 

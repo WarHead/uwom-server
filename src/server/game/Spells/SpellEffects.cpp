@@ -119,7 +119,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   // 49 SPELL_EFFECT_DETECT                   one spell: Detect
     &Spell::EffectTransmitted,                              // 50 SPELL_EFFECT_TRANS_DOOR
     &Spell::EffectUnused,                                   // 51 SPELL_EFFECT_FORCE_CRITICAL_HIT       unused
-    &Spell::EffectUnused,                                   // 52 SPELL_EFFECT_GUARANTEE_HIT            one spell: zzOLDCritical Shot
+    &Spell::EffectUnused,                                   // 52 SPELL_EFFECT_GUARANTEE_HIT            unused
     &Spell::EffectEnchantItemPerm,                          // 53 SPELL_EFFECT_ENCHANT_ITEM
     &Spell::EffectEnchantItemTmp,                           // 54 SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY
     &Spell::EffectTameCreature,                             // 55 SPELL_EFFECT_TAMECREATURE
@@ -230,8 +230,21 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //160 SPELL_EFFECT_160                      1 spell - 45534
     &Spell::EffectSpecCount,                                //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
-    &Spell::EffectNULL,                                     //163 unused
+    &Spell::EffectUnused,                                   //163 SPELL_EFFECT_163  unused
     &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
+    &Spell::EffectNULL,                                     //165 SPELL_EFFECT_165
+    &Spell::EffectNULL,                                     //166 SPELL_EFFECT_166
+    &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167
+    &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168
+    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_169
+    &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170
+    &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171
+    &Spell::EffectNULL,                                     //172 SPELL_EFFECT_172
+    &Spell::EffectNULL,                                     //173 SPELL_EFFECT_173
+    &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174
+    &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175  unused
+    &Spell::EffectNULL,                                     //176 SPELL_EFFECT_176
+    &Spell::EffectNULL,                                     //177 SPELL_EFFECT_177
 };
 
 void Spell::EffectNULL(SpellEffIndex /*effIndex*/)
@@ -634,57 +647,75 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             case SPELLFAMILY_ROGUE:
             {
                 // Envenom
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[1] & 0x8))
+                if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008)
                 {
-                    // consume from stack dozes not more that have combo-points
-                    if (uint32 combo = m_caster->ToPlayer()->GetComboPoints())
+                    if (Player* player = m_caster->ToPlayer())
                     {
-                        // Lookup for Deadly poison (only attacker applied)
-                        if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x10000, 0, 0, m_caster->GetGUID()))
+                        // consume from stack dozes not more that have combo-points
+                        if (uint32 combo = player->GetComboPoints())
                         {
-                            // count consumed deadly poison doses at target
-                            bool needConsume = true;
-                            uint32 spellId = aurEff->GetId();
-                            uint32 doses = aurEff->GetBase()->GetStackAmount();
-                            if (doses > combo)
-                                doses = combo;
-                            // Master Poisoner
-                            Unit::AuraEffectList const& auraList = m_caster->ToPlayer()->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
-                            for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
+                            // Lookup for Deadly poison (only attacker applied)
+                            if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00010000, 0, 0, m_caster->GetGUID()))
                             {
-                                if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
+                                // count consumed deadly poison doses at target
+                                bool needConsume = true;
+                                uint32 spellId = aurEff->GetId();
+
+                                uint32 doses = aurEff->GetBase()->GetStackAmount();
+                                if (doses > combo)
+                                    doses = combo;
+
+                                // Master Poisoner
+                                Unit::AuraEffectList const& auraList = player->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
+                                for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
                                 {
-                                    uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
+                                    if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
+                                    {
+                                        uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
 
-                                    if (chance && roll_chance_i(chance))
-                                        needConsume = false;
+                                        if (chance && roll_chance_i(chance))
+                                            needConsume = false;
 
-                                    break;
+                                        break;
+                                    }
                                 }
+
+                                if (needConsume)
+                                    for (uint32 i = 0; i < doses; ++i)
+                                        unitTarget->RemoveAuraFromStack(spellId);
+
+                                damage *= doses;
+                                damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
                             }
 
+<<<<<<< HEAD
                             if (needConsume)
                                 for (uint32 i = 0; i < doses; ++i)
                                     unitTarget->RemoveAuraFromStack(spellId);
                             damage *= doses;
                             damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
+=======
+                            // Eviscerate and Envenom Bonus Damage (item set effect)
+                            if (m_caster->HasAura(37169))
+                                damage += combo * 40;
+>>>>>>> b3670c9712064934f357e6b9118fb91e50c288bd
                         }
-                        // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if (m_caster->HasAura(37169))
-                            damage += ((Player*)m_caster)->GetComboPoints()*40;
                     }
                 }
                 // Eviscerate
-                else if ((m_spellInfo->SpellFamilyFlags[0] & 0x00020000) && m_caster->GetTypeId() == TYPEID_PLAYER)
+                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
                 {
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
+                        if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                        {
+                            float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                            damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
 
-                        // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if (m_caster->HasAura(37169))
-                            damage += combo*40;
+                            // Eviscerate and Envenom Bonus Damage (item set effect)
+                            if (m_caster->HasAura(37169))
+                                damage += combo*40;
+                        }
                     }
                 }
                 break;
@@ -6421,9 +6452,13 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         if (!unitTarget)
             return;
 
-        float x, y, z;
-        unitTarget->GetContactPoint(m_caster, x, y, z);
-        m_caster->GetMotionMaster()->MoveCharge(x, y, z);
+        float angle = unitTarget->GetRelativeAngle(m_caster);
+        Position pos;
+
+        unitTarget->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
+
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize());
     }
 
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -6444,9 +6479,13 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
 
     if (m_targets.HasDst())
     {
-        float x, y, z;
-        m_targets.GetDst()->GetPosition(x, y, z);
-        m_caster->GetMotionMaster()->MoveCharge(x, y, z);
+        Position pos;
+        m_targets.GetDst()->GetPosition(&pos);
+        float angle = m_caster->GetRelativeAngle(pos.GetPositionX(), pos.GetPositionY());
+        float dist = m_caster->GetDistance(pos);
+        m_caster->GetFirstCollisionPosition(pos, dist, angle);
+
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     }
 }
 

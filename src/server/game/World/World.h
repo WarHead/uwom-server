@@ -41,11 +41,19 @@ class SystemMgr;
 // ServerMessages.dbc
 enum ServerMessageType
 {
-    SERVER_MSG_SHUTDOWN_TIME      = 1,
-    SERVER_MSG_RESTART_TIME       = 2,
-    SERVER_MSG_STRING             = 3,
-    SERVER_MSG_SHUTDOWN_CANCELLED = 4,
-    SERVER_MSG_RESTART_CANCELLED  = 5
+    SERVER_MSG_SHUTDOWN_TIME          = 1,
+    SERVER_MSG_RESTART_TIME           = 2,
+    SERVER_MSG_STRING                 = 3,
+    SERVER_MSG_SHUTDOWN_CANCELLED     = 4,
+    SERVER_MSG_RESTART_CANCELLED      = 5,
+    SERVER_MSG_BG_SHUTDOWN_TIME       = 6,
+    SERVER_MSG_BG_RESTART_TIME        = 7,
+    SERVER_MSG_INSTANCE_SHUTDOWN_TIME = 8,
+    SERVER_MSG_INSTANCE_RESTART_TIME  = 9,
+    SERVER_MSG_CONTENT_READY          = 10,
+    SERVER_MSG_TICKET_SERVICED_SOON   = 11,
+    SERVER_MSG_WAIT_TIME_UNAVAILABLE  = 12,
+    SERVER_MSG_TICKET_WAIT_TIME       = 13,
 };
 
 enum ShutdownMask
@@ -706,7 +714,8 @@ class World
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
 
         /// Are we in the middle of a shutdown?
-        bool IsShutdowning() const { return m_ShutdownTimer > 0; }
+        bool IsShuttingDown() const { return m_ShutdownTimer > 0; }
+        uint32 GetShutDownTimeLeft() const { return m_ShutdownTimer; }
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
