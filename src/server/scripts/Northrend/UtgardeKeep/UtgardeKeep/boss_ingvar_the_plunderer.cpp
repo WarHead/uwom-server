@@ -181,6 +181,10 @@ public:
                     for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
                         if (Player * pl = itr->getSource())
                             pl->KilledMonsterCredit(MOB_INGVAR_HUMAN, 0);
+
+                // Ingvar has MOB_INGVAR_UNDEAD id in this moment, so we have to update encounter state for his original id
+                instance->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, MOB_INGVAR_HUMAN, me);
+                instance->SetData(DATA_INGVAR_EVENT, DONE);
             }
         }
 

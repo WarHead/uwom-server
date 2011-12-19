@@ -241,6 +241,9 @@ public:
                         player->DeMorph();
                         player->CastSpell(player, SPELL_ACHIEVEMENT_CHECK, true);
                     }
+
+                DoCast(me, SPELL_ACHIEVEMENT_CHECK);
+
                 instance->SetData(DATA_THARON_JA_EVENT, DONE);
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_ACHIEVEMENT_CHECK);
             }
