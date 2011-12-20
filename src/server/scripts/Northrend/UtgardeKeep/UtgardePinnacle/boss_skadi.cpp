@@ -205,7 +205,7 @@ public:
 
         void JustReachedHome()
         {
-            me->Unmount();
+            me->Dismount();
             me->SetFlying(false);
             me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -282,7 +282,7 @@ public:
                 {
                     Phase = SKADI;
 
-                    me->Unmount();
+                    me->Dismount();
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
 
                     if (Creature* grauf = me->SummonCreature(MOB_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3 * IN_MILLISECONDS))
