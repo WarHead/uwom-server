@@ -2526,7 +2526,7 @@ void Tausendwinter::HandlePlayerEnterZone(Player * pPl, uint32 zone)
             if (UnMount && (pPl->IsFlying() || pPl->isInFlight() || pPl->IsMounted() || pPl->GetVehicle() || pPl->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT)))
             {
                 pPl->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
-                pPl->Unmount();
+                pPl->Dismount();
 
                 if (Vehicle * Veh = pPl->GetVehicle())
                     if (Veh->GetBase())
