@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -572,6 +572,7 @@ void AddSC_the_eye();
 void AddSC_boss_gatewatcher_iron_hand();     //TK The Mechanar
 void AddSC_boss_nethermancer_sepethrea();
 void AddSC_boss_pathaleon_the_calculator();
+void AddSC_boss_mechano_lord_capacitus();
 void AddSC_instance_mechanar();
 
 void AddSC_blades_edge_mountains();
@@ -1033,6 +1034,7 @@ void AddOutlandScripts()
     AddSC_boss_gatewatcher_iron_hand();     //TK The Mechanar
     AddSC_boss_nethermancer_sepethrea();
     AddSC_boss_pathaleon_the_calculator();
+    AddSC_boss_mechano_lord_capacitus();
     AddSC_instance_mechanar();
 
     AddSC_blades_edge_mountains();
