@@ -449,7 +449,6 @@ class AreaTrigger_at_brewfest : public AreaTriggerScript
 
 void AddSC_areatrigger_scripts()
 {
-    new AreaTrigger_at_bring_your_orphan_to();
     new AreaTrigger_at_coilfang_waterfall();
     new AreaTrigger_at_legion_teleporter();
     new AreaTrigger_at_stormwright_shelf();
