@@ -9,3 +9,7 @@ build*/
 *.bak
 log/
 diff/tausendwinter.patch
+*.REMOTE.*
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*

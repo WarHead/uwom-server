@@ -3143,17 +3143,9 @@ void AuraEffect::HandleModPossess(AuraApplication const* aurApp, uint8 mode, boo
     }
 
     if (apply)
-    {
-        if (target->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp))
-            caster->ToPlayer()->SetMover(target);
-    }
+        target->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp);
     else
-    {
         target->RemoveCharmedBy(caster);
-        caster->ToPlayer()->SetMover(caster);
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            target->ToPlayer()->SetMover(target);
-    }
 }
 
 // only one spell has this aura
@@ -3181,13 +3173,11 @@ void AuraEffect::HandleModPossessPet(AuraApplication const* aurApp, uint8 mode, 
         if (caster->ToPlayer()->GetPet() != pet)
             return;
 
-        if (pet->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp))
-            caster->ToPlayer()->SetMover(pet);
+        pet->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp);
     }
     else
     {
         pet->RemoveCharmedBy(caster);
-        caster->ToPlayer()->SetMover(caster);
 
         if (!pet->IsWithinDistInMap(caster, pet->GetMap()->GetVisibilityRange()))
             pet->Remove(PET_SAVE_NOT_IN_SLOT, true);
@@ -4814,11 +4804,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     break;
                 case 46361:                                     // Reinforced Net
                     if (caster)
-                    {
-                        float currentGroundLevel = target->GetBaseMap()->GetHeight(target->GetPositionX(), target->GetPositionY(), MAX_HEIGHT);
-                        if (target->GetPositionZ() > currentGroundLevel)
-                            target->GetMotionMaster()->MoveFall(currentGroundLevel);
-                    }
+                        target->GetMotionMaster()->MoveFall();
                     break;
                 case 46699:                                     // Requires No Ammo
                     if (target->GetTypeId() == TYPEID_PLAYER)

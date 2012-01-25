@@ -32,15 +32,29 @@ Script Data End */
  * npc_mageguard_dalaran
  *******************************************************/
 
-enum SpellsAndTexts
+enum Spells
 {
     SPELL_EINDRINGLING_A    = 54028,
     SPELL_EINDRINGLING_H    = 54029,
-    SPELL_DETECTION         = 18950,
-    TEXT_A                  = -1010001,
-    TEXT_H                  = -1010000,
-    ALLY_WACHE              = 29254,
-    HORDE_WACHE             = 29255
+
+    SPELL_DETECTION = 18950,
+
+    SPELL_SUNREAVER_DISGUISE_FEMALE        = 70973,
+    SPELL_SUNREAVER_DISGUISE_MALE          = 70974,
+    SPELL_SILVER_COVENANT_DISGUISE_FEMALE  = 70971,
+    SPELL_SILVER_COVENANT_DISGUISE_MALE    = 70972
+};
+
+enum Texte
+{
+    TEXT_A  = -1010001,
+    TEXT_H  = -1010000
+};
+
+enum NPCs
+{
+    ALLY_WACHE  = 29254,
+    HORDE_WACHE = 29255
 };
 
 class npc_mageguard_dalaran : public CreatureScript
@@ -70,27 +84,30 @@ public:
             if (!who)
                 return;
 
-            Player * plr = who->ToPlayer();
-
-            if (!plr || !plr->IsInWorld() || plr->isGameMaster() || me->GetDistance(plr) > 12.0f)
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            
+            if (!player || !player->IsInWorld() || player->isGameMaster() || player->IsBeingTeleported() || me->GetDistance(player) > 12.0f ||
+                // If player has Disguise aura for quest A Meeting With The Magister or An Audience With The Arcanist, do not teleport it away but let it pass
+                player->HasAura(SPELL_SUNREAVER_DISGUISE_FEMALE) || player->HasAura(SPELL_SUNREAVER_DISGUISE_MALE) ||
+                player->HasAura(SPELL_SILVER_COVENANT_DISGUISE_FEMALE) || player->HasAura(SPELL_SILVER_COVENANT_DISGUISE_MALE))
                 return;
 
             switch(me->GetEntry())
             {
                 case ALLY_WACHE:
-                    if (!me->isInCombat() && plr->GetTeam() == HORDE && !plr->HasAura(SPELL_EINDRINGLING_A))
+                    if (!me->isInCombat() && player->GetTeam() == HORDE && !player->HasAura(SPELL_EINDRINGLING_A))
                     {
-                        me->Yell(TEXT_A, LANG_UNIVERSAL, plr->GetGUID());
-                        DoCast(plr, SPELL_EINDRINGLING_A);
+                        me->Yell(TEXT_A, LANG_UNIVERSAL, player->GetGUID());
+                        DoCast(player, SPELL_EINDRINGLING_A);
                         EnterEvadeMode();
                         return;
                     }
                     break;
                 case HORDE_WACHE:
-                    if (!me->isInCombat() && plr->GetTeam() == ALLIANCE && !plr->HasAura(SPELL_EINDRINGLING_H))
+                    if (!me->isInCombat() && player->GetTeam() == ALLIANCE && !player->HasAura(SPELL_EINDRINGLING_H))
                     {
-                        me->Yell(TEXT_H, LANG_UNIVERSAL, plr->GetGUID());
-                        DoCast(plr, SPELL_EINDRINGLING_H);
+                        me->Yell(TEXT_H, LANG_UNIVERSAL, player->GetGUID());
+                        DoCast(player, SPELL_EINDRINGLING_H);
                         EnterEvadeMode();
                         return;
                     }

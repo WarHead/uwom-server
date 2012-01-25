@@ -582,7 +582,7 @@ public:
                                 // Wird nur auf die Eiternden Schrecken gecastet dieser Spell, und auch nur außerhalb des Kampfes!
                                 if (Creature * Schrecken = GetClosestCreatureWithEntry(me, EITERNDER_SCHRECKEN, 80.0f, true))
                                 {
-                                    me->SetFacing(0, Schrecken);
+                                    me->SetFacingToObject(Schrecken);
                                     DoCast(Schrecken->ToUnit(), SEUCHENWISSENSCHAFTLER_SEUCHENSTROM);
                                 }
                                 OOCevents.RescheduleEvent(EVENT_SEUCHENWISSENSCHAFTLER_SEUCHENSTROM, urand(SEKUNDEN_30, SEKUNDEN_60));
@@ -2337,7 +2337,7 @@ struct npc_argent_captainAI : public ScriptedAI
         void EnterEvadeMode()
         {
             // not yet following
-            if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) != TARGETED_MOTION_TYPE || IsUndead)
+            if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) != CHASE_MOTION_TYPE || IsUndead)
             {
                 ScriptedAI::EnterEvadeMode();
                 return;

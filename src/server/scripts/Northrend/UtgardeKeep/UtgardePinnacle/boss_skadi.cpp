@@ -287,8 +287,8 @@ public:
 
                     if (Creature* grauf = me->SummonCreature(MOB_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3 * IN_MILLISECONDS))
                     {
+                        grauf->GetMotionMaster()->MoveFall();
                         grauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
-                        grauf->GetMotionMaster()->MoveFall(0);
                         grauf->SetTimeUntilDisappear(SEKUNDEN_10);
 
                         DoScriptText(SAY_DRAKE_DEATH, me);

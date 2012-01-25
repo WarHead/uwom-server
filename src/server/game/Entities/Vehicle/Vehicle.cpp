@@ -365,7 +365,6 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     {
         if (!_me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
             ASSERT(false);
-        unit->ToPlayer()->SetMover(this->GetBase());
     }
 
     // hide passenger from selection
@@ -421,10 +420,7 @@ void Vehicle::RemovePassenger(Unit* unit)
     unit->ClearUnitState(UNIT_STAT_ONVEHICLE);
 
     if (_me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
-    {
         _me->RemoveCharmedBy(unit);
-        unit->ToPlayer()->SetMover(unit->ToPlayer());
-    }
 
     // restore passenger selection
     if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE)

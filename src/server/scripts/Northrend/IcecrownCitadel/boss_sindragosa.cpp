@@ -273,7 +273,7 @@ class boss_sindragosa : public CreatureScript
 
             void MovementInform(uint32 type, uint32 point)
             {
-                if (type != POINT_MOTION_TYPE)
+                if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
                     return;
 
                 switch (point)
@@ -630,6 +630,38 @@ class npc_spinestalker : public CreatureScript
                 _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, 0);
             }
 
+            void DoAction(int32 const action)
+            {
+                if (action == ACTION_START_FROSTWYRM)
+                {
+                    _instance->SetData(DATA_SPINESTALKER, 255);
+                    if (me->isDead())
+                        return;
+
+                    me->setActive(true);
+                    me->SetSpeed(MOVE_FLIGHT, 2.0f);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    float moveTime = me->GetExactDist(&SpinestalkerFlyPos) / (me->GetSpeed(MOVE_FLIGHT) * 0.001f);
+                    me->m_Events.AddEvent(new FrostwyrmLandEvent(*me, SpinestalkerLandPos), me->m_Events.CalculateTime(uint64(moveTime) + 250));
+                    me->SetDefaultMovementType(IDLE_MOTION_TYPE);
+                    me->GetMotionMaster()->MoveIdle();
+                    me->StopMoving();
+                    me->GetMotionMaster()->MovePoint(POINT_FROSTWYRM_FLY_IN, SpinestalkerFlyPos);
+                }
+            }
+
+            void MovementInform(uint32 type, uint32 point)
+            {
+                if (type != POINT_MOTION_TYPE || point != POINT_FROSTWYRM_LAND)
+                    return;
+
+                me->setActive(false);
+                me->SetFlying(false);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetHomePosition(SpinestalkerLandPos);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -718,6 +750,26 @@ class npc_rimefang : public CreatureScript
             {
                 _events.Reset();
                 _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, 0);
+            }
+
+            void DoAction(int32 const action)
+            {
+                if (action == ACTION_START_FROSTWYRM)
+                {
+                    _instance->SetData(DATA_RIMEFANG, 255);
+                    if (me->isDead())
+                        return;
+
+                    me->setActive(true);
+                    me->SetSpeed(MOVE_FLIGHT, 2.0f);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    float moveTime = me->GetExactDist(&RimefangFlyPos) / (me->GetSpeed(MOVE_FLIGHT) * 0.001f);
+                    me->m_Events.AddEvent(new FrostwyrmLandEvent(*me, RimefangLandPos), me->m_Events.CalculateTime(uint64(moveTime) + 250));
+                    me->SetDefaultMovementType(IDLE_MOTION_TYPE);
+                    me->GetMotionMaster()->MoveIdle();
+                    me->StopMoving();
+                    me->GetMotionMaster()->MovePoint(POINT_FROSTWYRM_FLY_IN, RimefangFlyPos);
+                }
             }
 
             void MovementInform(uint32 type, uint32 point)
