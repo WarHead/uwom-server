@@ -1,3 +1,4 @@
+
 build*/
 .directory
 .mailmap
@@ -10,3 +11,7 @@ build*/
 *.patch
 log/
 *.diff
+*.REMOTE.*
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
