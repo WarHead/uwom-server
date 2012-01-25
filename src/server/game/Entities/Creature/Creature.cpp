@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (c) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -140,14 +140,14 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-Creature::Creature(): Unit(), MapCreature(), lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0), m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0),
-m_corpseRemoveTime(0), m_respawnTime(0), m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE), m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0),
-m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_creatureInfo(NULL), m_creatureData(NULL),
-m_isCaster(false),                              // Ist dieser NPC ein Caster?
-m_CasterDefaultMinCombatRange(10),              // Standard minimum Castrange für Caster
-m_CasterDefaultMaxCombatRange(30),              // Standard maximum Castrange für Caster
-m_CasterDefaultLoSRange(10),                    // Standard Distanz um LoS zu erreichen
-m_CasterDefaultMelee(true),                     // Soll er Meleeattacken machen?
+Creature::Creature(bool isWorldObject): Unit(isWorldObject), MapCreature(), lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0), m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0),
+m_corpseRemoveTime(0), m_respawnTime(0), m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE), m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
+m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_creatureInfo(NULL), m_creatureData(NULL),
+m_isCaster(false),                  // Ist dieser NPC ein Caster?
+m_CasterDefaultMinCombatRange(10),  // Standard minimum Castrange für Caster
+m_CasterDefaultMaxCombatRange(30),  // Standard maximum Castrange für Caster
+m_CasterDefaultLoSRange(10),        // Standard Distanz um LoS zu erreichen
+m_CasterDefaultMelee(true),         // Soll er Meleeattacken machen?
 m_formation(NULL)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
@@ -165,6 +165,7 @@ m_formation(NULL)
 
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
+    m_isTempWorldObject = false;
 }
 
 Creature::~Creature()
@@ -1528,9 +1529,6 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if (ZoneScript* zoneScript = GetZoneScript())
-            zoneScript->OnCreatureDeath(this);
-
         if ((canFly() || IsFlying()) && FallGround())
             return;
 
@@ -1669,7 +1667,20 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo)
     if (!spellInfo)
         return false;
 
-    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+    // Spells that don't have effectMechanics.
+    if (!spellInfo->HasAnyEffectMechanic() && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+        return true;
+
+    // This check must be done instead of 'if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))' for not break
+    // the check of mechanic immunity on DB (tested) because GetCreatureInfo()->MechanicImmuneMask and m_spellImmune[IMMUNITY_MECHANIC] don't have same data.
+    bool immunedToAllEffects = true;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (!IsImmunedToSpellEffect(spellInfo, i))
+        {
+            immunedToAllEffects = false;
+            break;
+        }
+    if (immunedToAllEffects)
         return true;
 
     return Unit::IsImmunedToSpell(spellInfo);

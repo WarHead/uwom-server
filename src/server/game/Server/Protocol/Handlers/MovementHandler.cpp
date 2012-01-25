@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -500,22 +500,8 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 
     if (GetPlayer()->IsInWorld())
     {
-        if (Unit* mover = ObjectAccessor::GetUnit(*GetPlayer(), guid))
-        {
-            GetPlayer()->SetMover(mover);
-            if (mover != GetPlayer() && mover->canFly())
-            {
-                WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                data.append(mover->GetPackGUID());
-                data << uint32(0);
-                SendPacket(&data);
-            }
-        }
-        else
-        {
+        if (_player->m_mover->GetGUID() != guid)
             sLog->outError("HandleSetActiveMoverOpcode: incorrect mover guid: mover is " UI64FMTD " (%s - Entry: %u) and should be " UI64FMTD, guid, GetLogNameForGuid(guid), GUID_ENPART(guid), _player->m_mover->GetGUID());
-            GetPlayer()->SetMover(GetPlayer());
-        }
     }
 }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -325,7 +325,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 _done = false;
             }
 
-            void AttackStart(Unit * /*target*/, float /*dist*/ = 0)
+            void AttackStart(Unit * /*target*/, float /*dist*/)
             {
             }
 
@@ -1334,9 +1334,9 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                     return;
 
                 // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                if (InstanceScript * instance = caster->GetInstanceScript())
+                /*if (InstanceScript * instance = caster->GetInstanceScript())
                     if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
-                        return;
+                        return;*/
 
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
@@ -1348,11 +1348,11 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
                     // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                    summoners.front()->CastSpell(summoners.front(), 70935, true);
+                    //summoners.front()->CastSpell(summoners.front(), 70935, true);
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
                     // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                    summoners.back()->CastSpell(summoners.back(), 70935, true);
+                    //summoners.back()->CastSpell(summoners.back(), 70935, true);
             }
 
             void Register()

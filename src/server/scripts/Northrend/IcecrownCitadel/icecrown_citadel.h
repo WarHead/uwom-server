@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -52,10 +52,11 @@ enum SharedSpells
     SPELL_ORANGE_BLIGHT_RESIDUE         = 72144,
     SPELL_GREEN_BLIGHT_RESIDUE          = 72145,
 
-    // Kill Credit 38121 - Soul Feast Kill Credit Bunny - Quest 24547 - A Feast of Souls
-    // Must be used by every killable NPC within the ICC
     // The Lich King
     SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
+
+    // Kill Credit 38121 - Soul Feast Kill Credit Bunny - Quest 24547 - A Feast of Souls
+    // Must be used by every killable NPC within the ICC
     SPELL_SOUL_FEAST_1                  = 71203,
     SPELL_SOUL_FEAST_2                  = 53677
 };
@@ -69,57 +70,57 @@ enum TeleporterSpells
     DEATHBRINGER_S_RISE_TELEPORT    = 70858,
     UPPER_SPIRE_TELEPORT            = 70859,
     FROZEN_THRONE_TELEPORT          = 70860,
-    SINDRAGOSA_S_LAIR_TELEPORT      = 70861
+    SINDRAGOSA_S_LAIR_TELEPORT      = 70861,
 };
 
 enum DataTypes
 {
     // Encounter States/Boss GUIDs
-    DATA_LORD_MARROWGAR,
-    DATA_LADY_DEATHWHISPER,
-    DATA_GUNSHIP_EVENT,
-    DATA_DEATHBRINGER_SAURFANG,
-    DATA_FESTERGUT,
-    DATA_ROTFACE,
-    DATA_PROFESSOR_PUTRICIDE,
-    DATA_BLOOD_PRINCE_COUNCIL,
-    DATA_BLOOD_QUEEN_LANA_THEL,
-    DATA_SISTER_SVALNA,
-    DATA_VALITHRIA_DREAMWALKER,
-    DATA_SINDRAGOSA,
-    DATA_THE_LICH_KING,
+    DATA_LORD_MARROWGAR             = 0,
+    DATA_LADY_DEATHWHISPER          = 1,
+    DATA_GUNSHIP_EVENT              = 2,
+    DATA_DEATHBRINGER_SAURFANG      = 3,
+    DATA_FESTERGUT                  = 4,
+    DATA_ROTFACE                    = 5,
+    DATA_PROFESSOR_PUTRICIDE        = 6,
+    DATA_BLOOD_PRINCE_COUNCIL       = 7,
+    DATA_BLOOD_QUEEN_LANA_THEL      = 8,
+    DATA_SISTER_SVALNA              = 9,
+    DATA_VALITHRIA_DREAMWALKER      = 10,
+    DATA_SINDRAGOSA                 = 11,
+    DATA_THE_LICH_KING              = 12,
 
     // Additional data
-    DATA_SAURFANG_EVENT_NPC,
-    DATA_BONED_ACHIEVEMENT,
-    DATA_OOZE_DANCE_ACHIEVEMENT,
-    DATA_PUTRICIDE_TABLE,
-    DATA_NAUSEA_ACHIEVEMENT,
-    DATA_ORB_WHISPERER_ACHIEVEMENT,
-    DATA_PRINCE_KELESETH_GUID,
-    DATA_PRINCE_TALDARAM_GUID,
-    DATA_PRINCE_VALANAR_GUID,
-    DATA_BLOOD_PRINCES_CONTROL,
-    DATA_SINDRAGOSA_FROSTWYRMS,
-    DATA_SPINESTALKER,
-    DATA_RIMEFANG,
-    DATA_COLDFLAME_JETS,
-    DATA_TEAM_IN_INSTANCE,
-    DATA_BLOOD_QUICKENING_STATE,
-    DATA_HEROIC_ATTEMPTS,
-    DATA_CROK_SCOURGEBANE,
-    DATA_CAPTAIN_ARNATH,
-    DATA_CAPTAIN_BRANDON,
-    DATA_CAPTAIN_GRONDEL,
-    DATA_CAPTAIN_RUPERT,
-    DATA_VALITHRIA_TRIGGER,
-    DATA_VALITHRIA_LICH_KING,
-    DATA_HIGHLORD_TIRION_FORDRING,
-    DATA_ARTHAS_PLATFORM,
-    DATA_TERENAS_MENETHIL,
+    DATA_SAURFANG_EVENT_NPC         = 13,
+    DATA_BONED_ACHIEVEMENT          = 14,
+    DATA_OOZE_DANCE_ACHIEVEMENT     = 15,
+    DATA_PUTRICIDE_TABLE            = 16,
+    DATA_NAUSEA_ACHIEVEMENT         = 17,
+    DATA_ORB_WHISPERER_ACHIEVEMENT  = 18,
+    DATA_PRINCE_KELESETH_GUID       = 19,
+    DATA_PRINCE_TALDARAM_GUID       = 20,
+    DATA_PRINCE_VALANAR_GUID        = 21,
+    DATA_BLOOD_PRINCES_CONTROL      = 22,
+    DATA_SINDRAGOSA_FROSTWYRMS      = 23,
+    DATA_SPINESTALKER               = 24,
+    DATA_RIMEFANG                   = 25,
+    DATA_COLDFLAME_JETS             = 26,
+    DATA_TEAM_IN_INSTANCE           = 27,
+    DATA_BLOOD_QUICKENING_STATE     = 28,
+    DATA_HEROIC_ATTEMPTS            = 29,
+    DATA_CROK_SCOURGEBANE           = 30,
+    DATA_CAPTAIN_ARNATH             = 31,
+    DATA_CAPTAIN_BRANDON            = 32,
+    DATA_CAPTAIN_GRONDEL            = 33,
+    DATA_CAPTAIN_RUPERT             = 34,
+    DATA_VALITHRIA_TRIGGER          = 35,
+    DATA_VALITHRIA_LICH_KING        = 36,
+    DATA_HIGHLORD_TIRION_FORDRING   = 37,
+    DATA_ARTHAS_PLATFORM            = 38,
+    DATA_TERENAS_MENETHIL           = 39,
 
-    DATA_FALLEN_ADDS_SPAWNEN,
-    DATA_KILL_CREDIT
+    DATA_FALLEN_ADDS_SPAWNEN        = 40,
+    DATA_KILL_CREDIT                = 41
 };
 
 enum CreaturesIds
@@ -255,7 +256,6 @@ enum CreaturesIds
     NPC_NIGHTMARE_PORTAL_PRE_EFFECT             = 38429,
     NPC_DREAM_PORTAL                            = 37945,
     NPC_NIGHTMARE_PORTAL                        = 38430,
-    NPC_WORLD_TRIGGER                           = 22515,
 
     // Sindragosa
     NPC_SINDRAGOSA                              = 36853,
@@ -282,18 +282,19 @@ enum CreaturesIds
     NPC_VILE_SPIRIT                             = 37799,
     NPC_WICKED_SPIRIT                           = 39190,
     NPC_STRANGULATE_VEHICLE                     = 36598,
+    NPC_WORLD_TRIGGER                           = 22515,
     NPC_WORLD_TRIGGER_INFINITE_AOI              = 36171,
     NPC_SPIRIT_BOMB                             = 39189,
-    NPC_FROSTMOURNE_TRIGGER                     = 38584
+    NPC_FROSTMOURNE_TRIGGER                     = 38584,
 };
 
 enum GameObjectsIds
 {
     // Lower Spire Trash
-    GO_SPIRIT_ALARM_1                       = 201814, // unten
-    GO_SPIRIT_ALARM_2                       = 201815, // unten
-    GO_SPIRIT_ALARM_3                       = 201816, // unten
-    GO_SPIRIT_ALARM_4                       = 201817, // unten
+    GO_SPIRIT_ALARM_1                       = 201814,
+    GO_SPIRIT_ALARM_2                       = 201815,
+    GO_SPIRIT_ALARM_3                       = 201816,
+    GO_SPIRIT_ALARM_4                       = 201817,
 
     GO_SPIRIT_ALARM_5                       = 201888, // oben
     GO_SPIRIT_ALARM_6                       = 201889, // oben
@@ -380,7 +381,7 @@ enum GameObjectsIds
     GO_DOODAD_ICECROWN_SNOWEDGEWARNING01    = 202190,
     GO_FROZEN_LAVAMAN                       = 202436,
     GO_LAVAMAN_PILLARS_CHAINED              = 202437,
-    GO_LAVAMAN_PILLARS_UNCHAINED            = 202438
+    GO_LAVAMAN_PILLARS_UNCHAINED            = 202438,
 };
 
 enum AchievementCriteriaIds
@@ -415,7 +416,7 @@ enum AchievementCriteriaIds
     CRITERIA_ONCE_BITTEN_TWICE_SHY_10N  = 12780,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_25N  = 13012,
     CRITERIA_ONCE_BITTEN_TWICE_SHY_10V  = 13011,
-    CRITERIA_ONCE_BITTEN_TWICE_SHY_25V  = 13013
+    CRITERIA_ONCE_BITTEN_TWICE_SHY_25V  = 13013,
 };
 
 enum SharedActions
@@ -443,7 +444,7 @@ enum SharedActions
 
     // The Lich King
     ACTION_RESTORE_LIGHT        = -72262,
-    ACTION_FROSTMOURNE_INTRO    = -36823
+    ACTION_FROSTMOURNE_INTRO    = -36823,
 };
 
 enum WeekliesICC
@@ -457,7 +458,7 @@ enum WeekliesICC
     QUEST_BLOOD_QUICKENING_10               = 24874,
     QUEST_BLOOD_QUICKENING_25               = 24879,
     QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_10  = 24872,
-    QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_25  = 24880
+    QUEST_RESPITE_FOR_A_TORNMENTED_SOUL_25  = 24880,
 };
 
 enum WorldStatesICC
@@ -466,12 +467,12 @@ enum WorldStatesICC
     WORLDSTATE_EXECUTION_TIME       = 4904,
     WORLDSTATE_SHOW_ATTEMPTS        = 4940,
     WORLDSTATE_ATTEMPTS_REMAINING   = 4941,
-    WORLDSTATE_ATTEMPTS_MAX         = 4942
+    WORLDSTATE_ATTEMPTS_MAX         = 4942,
 };
 
 enum AreaIds
 {
-    AREA_THE_FROZEN_THRONE  = 4859
+    AREA_THE_FROZEN_THRONE  = 4859,
 };
 
 class spell_trigger_spell_from_caster : public SpellScriptLoader

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,6 +31,9 @@ at_stormwright_shelf            q12741
 at_last_rites                   q12019
 at_sholazar_waygate             q12548
 at_azure_dragons_sanctuary      q12110/q12107
+at_nats_landing                 q11209
+at_bring_your_orphan_to         q910 q910 q1800 q1479 q1687 q1558 q10951 q10952
+at_brewfest
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -38,8 +41,6 @@ EndContentData */
 /*######
 ## at_bring_your_orphan_to
 ######*/
-
-// Geändert übernommen aus: https://github.com/TrinityCore/TrinityCore/issues/3322
 
 enum ChildrensWeek
 {
@@ -65,31 +66,46 @@ enum ChildrensWeek
 
 class AreaTrigger_at_bring_your_orphan_to : public AreaTriggerScript
 {
-public:
-    AreaTrigger_at_bring_your_orphan_to() : AreaTriggerScript("at_bring_your_orphan_to") { }
+    public:
+        AreaTrigger_at_bring_your_orphan_to() : AreaTriggerScript("at_bring_your_orphan_to") { }
 
-    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
-    {
-        uint32 questId = 0;
-
-        if (player->isDead() || !player->HasAura(AURA_ORPHAN_OUT))
-            return false;
-
-        switch (trigger->id)
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
         {
-            case AT_DOWN_AT_THE_DOCKS:          questId = QUEST_DOWN_AT_THE_DOCKS; break;
-            case AT_GATEWAY_TO_THE_FRONTIER:    questId = QUEST_GATEWAY_TO_THE_FRONTIER; break;
-            case AT_LORDAERON_THRONE_ROOM:      questId = QUEST_LORDAERON_THRONE_ROOM; break;
-            case AT_BOUGHT_OF_ETERNALS:         questId = QUEST_BOUGHT_OF_ETERNALS; break;
-            case AT_SPOOKY_LIGHTHOUSE:          questId = QUEST_SPOOKY_LIGHTHOUSE; break;
-            case AT_STONEWROUGHT_DAM:           questId = QUEST_STONEWROUGHT_DAM; break;
-            case AT_DARK_PORTAL:                questId = player->GetTeam() == ALLIANCE ? QUEST_DARK_PORTAL_A : QUEST_DARK_PORTAL_H; break;
-        }
-        if (questId && player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
-            player->AreaExploredOrEventHappens(questId);
+            uint32 questId = 0;
 
-        return true;
-    }
+            if (player->isDead() || !player->HasAura(AURA_ORPHAN_OUT))
+                return false;
+
+            switch (trigger->id)
+            {
+                case AT_DOWN_AT_THE_DOCKS:
+                    questId = QUEST_DOWN_AT_THE_DOCKS;
+                    break;
+                case AT_GATEWAY_TO_THE_FRONTIER:
+                    questId = QUEST_GATEWAY_TO_THE_FRONTIER;
+                    break;
+                case AT_LORDAERON_THRONE_ROOM:
+                    questId = QUEST_LORDAERON_THRONE_ROOM;
+                    break;
+                case AT_BOUGHT_OF_ETERNALS:
+                    questId = QUEST_BOUGHT_OF_ETERNALS;
+                    break;
+                case AT_SPOOKY_LIGHTHOUSE:
+                    questId = QUEST_SPOOKY_LIGHTHOUSE;
+                    break;
+                case AT_STONEWROUGHT_DAM:
+                    questId = QUEST_STONEWROUGHT_DAM;
+                    break;
+                case AT_DARK_PORTAL:
+                    questId = player->GetTeam() == ALLIANCE ? QUEST_DARK_PORTAL_A : QUEST_DARK_PORTAL_H;
+                    break;
+            }
+
+            if (questId && player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+                player->AreaExploredOrEventHappens(questId);
+
+            return true;
+        }
 };
 
 /*######
@@ -319,6 +335,7 @@ class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
 /*#####
 ## at_azure_dragons_sanctuary
 ######*/
+
 enum eDragonsSanctuary
 {
     QUEST_THE_END_OF_THE_LINE_A                  = 12107,
@@ -330,6 +347,7 @@ class AreaTrigger_at_azure_dragons_sanctuary : public AreaTriggerScript
 {
 public:
     AreaTrigger_at_azure_dragons_sanctuary() : AreaTriggerScript("at_azure_dragons_sanctuary") { }
+
     bool OnTrigger(Player * player, AreaTriggerEntry const * /*trigger*/)
     {
         // Should we use the GUID of the NPC spawned where the areatrigger is ?
@@ -337,6 +355,96 @@ public:
             player->KilledMonsterCredit(NPC_THE_END_OF_THE_LINE_AT_KILL_CREDIT_BUNNY,0);
         return true;
     }
+};
+
+/*######
+## at_nats_landing
+######*/
+
+enum NatsLanding
+{
+    QUEST_NATS_BARGAIN = 11209,
+    SPELL_FISH_PASTE   = 42644,
+    NPC_LURKING_SHARK  = 23928
+};
+
+class AreaTrigger_at_nats_landing : public AreaTriggerScript
+{
+    public:
+        AreaTrigger_at_nats_landing() : AreaTriggerScript("at_nats_landing") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+        {
+            if (!player->isAlive() || !player->HasAura(SPELL_FISH_PASTE))
+                return false;
+
+            if (player->GetQuestStatus(QUEST_NATS_BARGAIN) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (!player->FindNearestCreature(NPC_LURKING_SHARK, 20.0f))
+                {
+                    if (Creature* shark = player->SummonCreature(NPC_LURKING_SHARK, -4246.243f, -3922.356f, -7.488f, 5.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 100000))
+                        shark->AI()->AttackStart(player);
+
+                    return false;
+                }
+            }
+            return true;
+        }
+};
+
+/*######
+## at_brewfest
+######*/
+
+enum Brewfest
+{
+    NPC_TAPPER_SWINDLEKEG       = 24711,
+    NPC_IPFELKOFER_IRONKEG      = 24710,
+
+    AT_BREWFEST_DUROTAR         = 4829,
+    AT_BREWFEST_DUN_MOROGH      = 4820,
+
+    SAY_WELCOME                 = 4,
+
+    AREATRIGGER_TALK_COOLDOWN   = 5, // in seconds
+};
+
+class AreaTrigger_at_brewfest : public AreaTriggerScript
+{
+    public:
+        AreaTrigger_at_brewfest() : AreaTriggerScript("at_brewfest")
+        {
+            // Initialize for cooldown
+            _triggerTimes[AT_BREWFEST_DUROTAR] = _triggerTimes[AT_BREWFEST_DUN_MOROGH] = 0;
+        }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            uint32 triggerId = trigger->id;
+            // Second trigger happened too early after first, skip for now
+            if (sWorld->GetGameTime() - _triggerTimes[triggerId] < AREATRIGGER_TALK_COOLDOWN)
+                return false;
+
+            switch (triggerId)
+            {
+                case AT_BREWFEST_DUROTAR:
+                    if (Creature* tapper = player->FindNearestCreature(NPC_TAPPER_SWINDLEKEG, 20.0f))
+                        tapper->AI()->Talk(SAY_WELCOME, player->GetGUID());
+                    break;
+                case AT_BREWFEST_DUN_MOROGH:
+                    if (Creature* ipfelkofer = player->FindNearestCreature(NPC_IPFELKOFER_IRONKEG, 20.0f))
+                        ipfelkofer->AI()->Talk(SAY_WELCOME, player->GetGUID());
+                    break;
+                default:
+                    break;
+            }
+
+            _triggerTimes[triggerId] = sWorld->GetGameTime();
+            return false;
+        }
+
+    private:
+        std::map<uint32, time_t> _triggerTimes;
 };
 
 void AddSC_areatrigger_scripts()
@@ -349,4 +457,7 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_last_rites();
     new AreaTrigger_at_sholazar_waygate();
     new AreaTrigger_at_azure_dragons_sanctuary();
+    new AreaTrigger_at_nats_landing();
+    new AreaTrigger_at_bring_your_orphan_to();
+    new AreaTrigger_at_brewfest();
 }

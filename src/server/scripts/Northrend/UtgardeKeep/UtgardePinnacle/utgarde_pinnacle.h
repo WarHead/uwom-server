@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (c) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,7 +55,7 @@ enum eCreatures
     MOB_MASSIVE_JORMUNGAR    = 26685,
     MOB_FEROCIOUS_RHINO      = 26686,
     MOB_SVALA                = 29281,
-    MOB_PALEHOOF_ORB         = 26688,
+    MOB_PALEHOOF_ORB         = 26688
 };
 
 #endif

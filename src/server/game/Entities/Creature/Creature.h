@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (c) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -452,7 +452,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 {
     public:
 
-        explicit Creature();
+        explicit Creature(bool isWorldObject = false);
         virtual ~Creature();
 
         void AddToWorld();
@@ -728,6 +728,8 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
 
         bool isCasterWithMelee() const { return m_CasterDefaultMelee; }
         bool isCaster() const { return m_isCaster; }
+
+        bool m_isTempWorldObject; //true when possessed
 
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint32 team, const CreatureData* data = NULL);

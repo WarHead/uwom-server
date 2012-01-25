@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2008-2011 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (c) 2008-2012 by WarHead - United Worlds of MaNGOS - http://www.uwom.de
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -1660,27 +1660,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             break;
         case SPELLFAMILY_DRUID:
             // Enrage
-            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000)
+            if ((GetSpellInfo()->SpellFamilyFlags[0] & 0x80000) && GetSpellInfo()->SpellIconID == 961)
             {
-                if (target->HasAura(70726)) // Druid T10 Feral 4P Bonus
-                {
+                if (target->HasAura(70726)) // Item - Druid T10 Feral 4P Bonus
                     if (apply)
                         target->CastSpell(target, 70725, true);
-                }
-                else // armor reduction implemented here
-                    if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
-                    {
-                        int32 value = auraEff->GetAmount();
-                        int32 mod;
-                        switch (auraEff->GetId())
-                        {
-                            case 1178: mod = 27; break;
-                            case 9635: mod = 16; break;
-                        }
-                        mod = value / 100 * mod;
-                        value = value + (apply ? -mod : mod);
-                        auraEff->ChangeAmount(value);
-                    }
                 break;
             }
             break;
@@ -2241,7 +2225,6 @@ void Aura::_DeleteRemovedApplications()
 
 void Aura::LoadScripts()
 {
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura::LoadScripts");
     sScriptMgr->CreateAuraScripts(m_spellInfo->Id, m_loadedScripts);
     for (std::list<AuraScript*>::iterator itr = m_loadedScripts.begin(); itr != m_loadedScripts.end() ;)
     {
@@ -2252,6 +2235,7 @@ void Aura::LoadScripts()
             m_loadedScripts.erase(bitr);
             continue;
         }
+        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura::LoadScripts: Script `%s` for aura `%u` is loaded now", (*itr)->_GetScriptName()->c_str(), m_spellInfo->Id);
         (*itr)->Register();
         ++itr;
     }
