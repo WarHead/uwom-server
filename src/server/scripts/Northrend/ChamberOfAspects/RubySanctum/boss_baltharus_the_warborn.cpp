@@ -362,9 +362,9 @@ class boss_baltharus_the_warborn : public CreatureScript
                         break;
                     case ACTION_CLONE:
                     {
-                        DoCast(me, SPELL_CLEAR_DEBUFFS);
-                        DoCast(me, SPELL_CLONE);
-                        DoCast(me, SPELL_REPELLING_WAVE);
+                        DoCast(me, SPELL_CLEAR_DEBUFFS, true);
+                        DoCast(me, SPELL_CLONE, true);
+                        DoCast(me, SPELL_REPELLING_WAVE, true);
                         Talk(SAY_CLONE);
                         --cloneCount;
                         break;
