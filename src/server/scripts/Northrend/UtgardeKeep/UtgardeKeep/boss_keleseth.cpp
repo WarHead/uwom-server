@@ -18,7 +18,7 @@
 /* ScriptData
 SDName: Boss_Prince_Keleseth
 SD%Complete: 100
-SDComment:  
+SDComment:
 SDCategory: Utgarde Keep
 EndScriptData */
 
@@ -158,7 +158,7 @@ public:
         {
             if (data == DATA_ON_THE_ROCKS)
                 return onTheRocks;
-           
+
             return 0;
         }
 
@@ -252,7 +252,7 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -302,7 +302,7 @@ class spell_frost_tomb : public SpellScriptLoader
                 if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
                     if (Unit* caster = GetCaster())
                         if (caster->ToCreature() && caster->isAlive())
-                            caster->ToCreature()->DespawnOrUnsummon();
+                            caster->ToCreature()->DespawnOrUnsummon(1000);
             }
 
             void Register()
