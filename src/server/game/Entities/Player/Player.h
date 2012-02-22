@@ -275,13 +275,14 @@ struct PvPInfo
 
 struct DuelInfo
 {
-    DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0) {}
+    DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0), isMounted(false) {}
 
     Player* initiator;
     Player* opponent;
     time_t startTimer;
     time_t startTime;
     time_t outOfBound;
+    bool isMounted;
 };
 
 struct Areas
@@ -464,23 +465,6 @@ enum PlayerFieldByte2Flags
     PLAYER_FIELD_BYTE2_NONE                 = 0x00,
     PLAYER_FIELD_BYTE2_STEALTH              = 0x20,
     PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW    = 0x40
-};
-
-enum ActivateTaxiReplies
-{
-    ERR_TAXIOK                      = 0,
-    ERR_TAXIUNSPECIFIEDSERVERERROR  = 1,
-    ERR_TAXINOSUCHPATH              = 2,
-    ERR_TAXINOTENOUGHMONEY          = 3,
-    ERR_TAXITOOFARAWAY              = 4,
-    ERR_TAXINOVENDORNEARBY          = 5,
-    ERR_TAXINOTVISITED              = 6,
-    ERR_TAXIPLAYERBUSY              = 7,
-    ERR_TAXIPLAYERALREADYMOUNTED    = 8,
-    ERR_TAXIPLAYERSHAPESHIFTED      = 9,
-    ERR_TAXIPLAYERMOVING            = 10,
-    ERR_TAXISAMENODE                = 11,
-    ERR_TAXINOTSTANDING             = 12
 };
 
 enum MirrorTimerType
@@ -1062,19 +1046,16 @@ private:
 
     Player* _killer;
     Unit* _victim;
-    bool _isBattleGround;
-
-    bool _isPvP;
-
     Group* _group;
     float _groupRate;
-    uint8 _maxLevel;
     Player* _maxNotGrayMember;
     uint32 _count;
     uint32 _sumLevel;
-    bool _isFullXP;
-
     uint32 _xp;
+    bool _isFullXP;
+    uint8 _maxLevel;
+    bool _isBattleGround;
+    bool _isPvP;
 };
 
 class Player : public Unit, public GridObject<Player>
@@ -1403,7 +1384,7 @@ class Player : public Unit, public GridObject<Player>
         void SendPreparedGossip(WorldObject* source);
         void OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 menuId);
 
-        uint32 GetGossipTextId(uint32 menuId);
+        uint32 GetGossipTextId(uint32 menuId, WorldObject* source);
         uint32 GetGossipTextId(WorldObject* source);
         static uint32 GetDefaultGossipMenuForSource(WorldObject* source);
 
@@ -1823,7 +1804,7 @@ class Player : public Unit, public GridObject<Player>
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
         void ResetContestedPvP()
         {
-            ClearUnitState(UNIT_STAT_ATTACK_PLAYER);
+            ClearUnitState(UNIT_STATE_ATTACK_PLAYER);
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
             m_contestedPvPTimer = 0;
         }
@@ -2341,8 +2322,6 @@ class Player : public Unit, public GridObject<Player>
         void   SaveRecallPosition();
 
         void SetHomebind(WorldLocation const& loc, uint32 area_id);
-
-        uint32 m_ConditionErrorMsgId;
 
         // Homebind coordinates
         uint32 m_homebindMapId;
