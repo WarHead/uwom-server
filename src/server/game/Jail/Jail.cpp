@@ -591,6 +591,7 @@ void Jail::Amnestie()
         {
             CharacterDatabase.PExecute("DELETE FROM `jail` WHERE `guid`=%u LIMIT 1", itr->first);
             m_JailMap.erase(itr);
+            break;
         }
 }
 
