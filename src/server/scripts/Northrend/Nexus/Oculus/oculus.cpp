@@ -269,7 +269,7 @@ public:
                Talk(SAY_UROM);
                me->DespawnOrUnsummon(60000);
             }
-        }            
+        }
     };
 
     CreatureAI * GetAI(Creature * creature) const

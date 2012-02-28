@@ -1360,7 +1360,7 @@ void Tausendwinter::BearbeiteWiederbelebungen(const uint32 diff)
 
         (*NPCiter).second->m_LetzteWiederbelebung += diff;
 
-        if ((*NPCiter).second->m_Creature && !(*NPCiter).second->m_Creature->HasUnitState(UNIT_STAT_CASTING))
+        if ((*NPCiter).second->m_Creature && !(*NPCiter).second->m_Creature->HasUnitState(UNIT_STATE_CASTING))
         {
             (*NPCiter).second->m_LetzteWiederbelebung = 0;
             (*NPCiter).second->m_Creature->CastSpell((*NPCiter).second->m_Creature, SPELL_SPIRIT_HEAL_CHANNEL, false);
@@ -2055,8 +2055,8 @@ bool Tausendwinter::ErstelleGOStatusMap()
 // Friedhöfe zuordnen / erstellen
 void Tausendwinter::OrdneFriedhoefeZu()
 {
-    GraveYardMap::const_iterator graveLow = sObjectMgr->mGraveYardMap.lower_bound(NORDEND_TAUSENDWINTER);
-    GraveYardMap::const_iterator graveUp  = sObjectMgr->mGraveYardMap.upper_bound(NORDEND_TAUSENDWINTER);
+    GraveYardContainer::const_iterator graveLow = sObjectMgr->GraveYardStore.lower_bound(NORDEND_TAUSENDWINTER);
+    GraveYardContainer::const_iterator graveUp  = sObjectMgr->GraveYardStore.upper_bound(NORDEND_TAUSENDWINTER);
 
     for (POIListe::iterator iter = m_PoIListe.begin(); iter != m_PoIListe.end();)
     {
@@ -2068,7 +2068,7 @@ void Tausendwinter::OrdneFriedhoefeZu()
                 ++iter;
                 continue;
             }
-            GraveYardMap::const_iterator FriedhofIter;
+            GraveYardContainer::const_iterator FriedhofIter;
             for (FriedhofIter = graveLow; FriedhofIter != graveUp; ++FriedhofIter)
                 if (FriedhofIter->second.safeLocId == loc->ID)
                     break;
@@ -2078,7 +2078,7 @@ void Tausendwinter::OrdneFriedhoefeZu()
                 GraveYardData graveData;
                 graveData.safeLocId = loc->ID;
                 graveData.team = 0;
-                FriedhofIter = sObjectMgr->mGraveYardMap.insert(std::make_pair(NORDEND_TAUSENDWINTER, graveData));
+                FriedhofIter = sObjectMgr->GraveYardStore.insert(std::make_pair(NORDEND_TAUSENDWINTER, graveData));
             }
 
             for (GOStatusMap::iterator StatusIter = m_GOStatus.begin(); StatusIter != m_GOStatus.end(); ++StatusIter)

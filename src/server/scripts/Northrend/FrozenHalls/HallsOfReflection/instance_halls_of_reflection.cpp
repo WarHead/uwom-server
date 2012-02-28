@@ -672,7 +672,7 @@ public:
 
         void RemoveFlags(Unit * unit)
         {
-            unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_UNK_6);
+            unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_6);
             unit->CastSpell(unit, 53708, true); // Shadow Summon Visual - Kann den orig. Spell nicht finden. Ist eigentlich eine lila Zone unter den NPCs, mit aufsteigenden "Dämpfen".
         }
 

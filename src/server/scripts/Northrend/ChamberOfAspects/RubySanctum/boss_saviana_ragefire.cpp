@@ -137,7 +137,7 @@ class boss_saviana_ragefire : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STAT_CASTING) || me->HasAura(SPELL_ENRAGE) || me->HasAura(SPELL_FLAME_BREATH))
+                if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_ENRAGE) || me->HasAura(SPELL_FLAME_BREATH))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())

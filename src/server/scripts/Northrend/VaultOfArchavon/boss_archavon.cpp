@@ -125,13 +125,10 @@ public:
             if (eventsTW.ExecuteEvent() == EVENT_TW_CHECK)
                 CheckTW();
 
-            if (!UpdateVictim())
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STAT_CASTING))
-                return;
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -224,6 +221,9 @@ public:
                 return;
 
             events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
 
             while (uint32 eventId = events.ExecuteEvent())
             {

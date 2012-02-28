@@ -134,12 +134,15 @@ public:
             if (eventsTW.ExecuteEvent() == EVENT_TW_CHECK)
                 CheckTW();
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             if (!UpdateVictim())
                 return;
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -262,10 +265,10 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            if (Aura *overchargedAura = me->GetAura(SPELL_OVERCHARGED))
+            if (Aura * overchargedAura = me->GetAura(SPELL_OVERCHARGED))
             {
                 if (overchargedAura->GetStackAmount() < 10)
                 {

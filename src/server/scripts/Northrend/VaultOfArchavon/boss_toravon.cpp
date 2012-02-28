@@ -183,7 +183,7 @@ public:
                 if (spawntimer)
                     spawntimer -= diff;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -324,7 +324,7 @@ public:
                 Unit* pToravon = me->GetMap()->GetCreature(pInstance->GetData64(DATA_TORAVON));
                 if (pToravon)
                 {
-                    Unit* pTarget = pToravon->SelectNearbyTarget(50);
+                    Unit * pTarget = pToravon->SelectNearbyTarget(NULL, 50.0f);
                     if (pTarget)
                         me->AI()->AttackStart(pTarget);
                 }

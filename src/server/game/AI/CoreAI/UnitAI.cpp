@@ -53,7 +53,7 @@ void UnitAI::AttackStart(Unit * victim, float dist)
 
 void UnitAI::DoMeleeAttackIfReady()
 {
-    if (me->HasUnitState(UNIT_STAT_CASTING))
+    if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
 
     Unit* victim = me->getVictim();
@@ -73,7 +73,7 @@ void UnitAI::DoMeleeAttackIfReady()
 
 bool UnitAI::DoSpellAttackIfReady(uint32 spell)
 {
-    if (me->HasUnitState(UNIT_STAT_CASTING))
+    if (me->HasUnitState(UNIT_STATE_CASTING))
         return true;
 
     if (me->isAttackReady())

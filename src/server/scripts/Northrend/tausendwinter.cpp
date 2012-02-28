@@ -190,7 +190,7 @@ public:
 
             events.Update(uiDiff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             uint32 eventId = events.ExecuteEvent();

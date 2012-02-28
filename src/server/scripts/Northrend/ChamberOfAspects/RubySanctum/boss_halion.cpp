@@ -330,7 +330,7 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while(uint32 eventId = events.ExecuteEvent())
@@ -509,7 +509,7 @@ public:
 
         void UpdateAI(uint32 const diff)
         {
-            if (!instance || !UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
+            if (!instance || !UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
@@ -701,7 +701,7 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while(uint32 eventId = events.ExecuteEvent())

@@ -254,9 +254,13 @@ public:
                 {
                     if (state == DONE && GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE)
                     {
-                        HandleGameObject(FlameWallsGUID, true);
-                        if (Creature * zarithrian = instance->GetCreature(GeneralZarithrianGUID))
-                            zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        if (state == DONE && GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE)
+                        {
+                            HandleGameObject(FlameWallsGUID, true);
+                            if (Creature* zarithrian = instance->GetCreature(GeneralZarithrianGUID))
+                                zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                        break;
                     }
                     if (state == DONE)
                         if (Creature * Xerestrasza = instance->GetCreature(XerestraszaGUID))
@@ -267,9 +271,13 @@ public:
                 {
                     if (state == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
                     {
-                        HandleGameObject(FlameWallsGUID, true);
-                        if (Creature * zarithrian = instance->GetCreature(GeneralZarithrianGUID))
-                            zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        if (state == DONE && GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
+                        {
+                            HandleGameObject(FlameWallsGUID, true);
+                            if (Creature* zarithrian = instance->GetCreature(GeneralZarithrianGUID))
+                                zarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                        break;
                     }
                     break;
                 }

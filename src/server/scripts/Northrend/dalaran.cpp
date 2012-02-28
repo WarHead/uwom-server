@@ -84,7 +84,7 @@ public:
             if (!who)
                 return;
 
-            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            Player * player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
             
             if (!player || !player->IsInWorld() || player->isGameMaster() || player->IsBeingTeleported() || me->GetDistance(player) > 12.0f ||
                 // If player has Disguise aura for quest A Meeting With The Magister or An Audience With The Arcanist, do not teleport it away but let it pass

@@ -421,7 +421,7 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
-           if (!instance || me->HasUnitState(UNIT_STAT_CASTING))
+           if (!instance || me->HasUnitState(UNIT_STATE_CASTING))
                return;
 
            if (instance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
@@ -513,7 +513,7 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
-           if (!instance || me->HasUnitState(UNIT_STAT_CASTING))
+           if (!instance || me->HasUnitState(UNIT_STATE_CASTING))
                return;
 
            if (instance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
@@ -611,7 +611,7 @@ public:
 
        void UpdateAI(const uint32 diff)
        {
-           if (!instance || me->HasUnitState(UNIT_STAT_CASTING))
+           if (!instance || me->HasUnitState(UNIT_STATE_CASTING))
                return;
 
            if (instance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
