@@ -798,6 +798,9 @@ void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTar
                     GetSpellInfo()->Effects[effIndex].CalcRadius(m_caster) == GetSpellInfo()->Effects[j].CalcRadius(m_caster))
                     effectMask |= 1 << j;
             processedEffectMask |= effectMask;
+            break;
+        default:
+            break;
     }
 
     switch(targetType.GetSelectionCategory())
@@ -835,7 +838,7 @@ void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTar
                              SelectImplicitCasterDestTargets(effIndex, targetType);
                              break;
                          case TARGET_REFERENCE_TYPE_TARGET:
-                             SelectImplicitCasterDestTargets(effIndex, targetType);
+                             SelectImplicitTargetDestTargets(effIndex, targetType);
                              break;
                          case TARGET_REFERENCE_TYPE_DEST:
                              SelectImplicitDestDestTargets(effIndex, targetType);
@@ -884,7 +887,7 @@ void Spell::SelectImplicitChannelTargets(SpellEffIndex effIndex, SpellImplicitTa
         sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::SelectImplicitChannelTargets: cannot find channel spell for spell ID %u, effect %u", m_spellInfo->Id, effIndex);
         return;
     }
-    switch (targetType.GetType())
+    switch (targetType.GetTarget())
     {
         case TARGET_UNIT_CHANNEL_TARGET:
             // unit target may be no longer avalible - teleported out of map for example
@@ -918,7 +921,7 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
         return;
     }
 
-    float range;
+    float range = 0.0f;
     switch (targetType.GetCheckType())
     {
         case TARGET_CHECK_ENEMY:
@@ -942,7 +945,7 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
     ConditionList* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
 
     // handle emergency case - try to use other provided targets if no conditions provided
-    if (targetType.GetCheckType() == TARGET_CHECK_ENTRY && !condList || condList->empty())
+    if (targetType.GetCheckType() == TARGET_CHECK_ENTRY && (!condList || condList->empty()))
     {
         sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::SelectImplicitNearbyTargets: no conditions entry for target with TARGET_CHECK_ENTRY of spell ID %u, effect %u - selecting default targets", m_spellInfo->Id, effIndex);
         switch (targetType.GetObjectType())
@@ -1124,7 +1127,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                         case TYPEID_PLAYER:
                         {
                             Unit* unitTarget = (*itr)->ToUnit();
-                            if (unitTarget->isAlive() || !playerCaster->isHonorOrXPTarget(unitTarget) 
+                            if (unitTarget->isAlive() || !playerCaster->isHonorOrXPTarget(unitTarget)
                                 || ((unitTarget->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_HUMANOID-1))) == 0)
                                 || (unitTarget->GetDisplayId() != unitTarget->GetNativeDisplayId()))
                                 break;
@@ -1149,7 +1152,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
         case 51328:
             // check if our target is not valid (spell can target ghoul or dead unit)
             if (!(m_targets.GetUnitTarget() && m_targets.GetUnitTarget()->GetDisplayId() == m_targets.GetUnitTarget()->GetNativeDisplayId() &&
-                ((m_targets.GetUnitTarget()->GetEntry() == 26125 && m_targets.GetUnitTarget()->GetOwnerGUID() == m_caster->GetGUID()) 
+                ((m_targets.GetUnitTarget()->GetEntry() == 26125 && m_targets.GetUnitTarget()->GetOwnerGUID() == m_caster->GetGUID())
                 || m_targets.GetUnitTarget()->isDead())))
             {
                 // remove existing targets
@@ -1348,7 +1351,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
 
 void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
-    switch(targetType.GetType())
+    switch(targetType.GetTarget())
     {
         case TARGET_DEST_CASTER:
             m_targets.SetDst(*m_caster);
@@ -1384,23 +1387,25 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
              m_targets.SetDst(x, y, z, m_caster->GetOrientation());
              return;
         }
+        default:
+            break;
     }
 
     float dist;
     float angle = targetType.CalcDirectionAngle();
     float objSize = m_caster->GetObjectSize();
-    if (targetType.GetType() == TARGET_DEST_CASTER_SUMMON)
+    if (targetType.GetTarget() == TARGET_DEST_CASTER_SUMMON)
         dist = PET_FOLLOW_DIST;
     else
         dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
 
     if (dist < objSize)
         dist = objSize;
-    else if (targetType.GetType() == TARGET_DEST_CASTER_RANDOM)
+    else if (targetType.GetTarget() == TARGET_DEST_CASTER_RANDOM)
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
     Position pos;
-    if (targetType.GetType() == TARGET_DEST_CASTER_FRONT_LEAP)
+    if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP)
         m_caster->GetFirstCollisionPosition(pos, dist, angle);
     else
         m_caster->GetNearPosition(pos, dist, angle);
@@ -1417,6 +1422,8 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_TARGET_ANY:
             m_targets.SetDst(*target);
             return;
+        default:
+            break;
     }
 
     float angle = targetType.CalcDirectionAngle();
@@ -1424,7 +1431,7 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
     float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
     if (dist < objSize)
         dist = objSize;
-    else if (targetType.GetType() == TARGET_DEST_TARGET_RANDOM)
+    else if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
     Position pos;
@@ -1435,6 +1442,13 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
 
 void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    // set destination to caster if no dest provided
+    // can only happen if previous destination target could not be set for some reason
+    // (not found nearby target, or channel target for example
+    // maybe we should abort the spell in such case?
+    if (!m_targets.HasDst())
+        m_targets.SetDst(*m_caster);
+
     switch(targetType.GetTarget())
     {
         case TARGET_DEST_DYNOBJ_ENEMY:
@@ -1445,6 +1459,8 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         case TARGET_DEST_TRAJ:
             SelectImplicitTrajTargets();
             return;
+        default:
+            break;
     }
 
     float angle = targetType.CalcDirectionAngle();
@@ -1493,12 +1509,14 @@ void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImpli
                 if (Unit *unit = m_caster->GetVehicleKit()->GetPassenger(targetType.GetTarget() - TARGET_UNIT_PASSENGER_0))
                     AddUnitTarget(unit, 1 << effIndex);
             break;
+        default:
+            break;
     }
 }
 
 void Spell::SelectImplicitTargetObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
-    ASSERT(m_targets.GetObjectTarget() && "Spell::SelectImplicitTargetObjectTargets - no explicit object target available!");
+    ASSERT((m_targets.GetObjectTarget() || m_targets.GetItemTarget()) && "Spell::SelectImplicitTargetObjectTargets - no explicit object or item target available!");
     if (Unit* unit = m_targets.GetUnitTarget())
         AddUnitTarget(unit, 1 << effIndex);
     else if (GameObject* gobj = m_targets.GetGOTarget())
@@ -1526,7 +1544,7 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
 
         std::list<WorldObject*> targets;
         SearchChainTargets(targets, maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType()
-            , m_spellInfo->Effects[effIndex].ImplicitTargetConditions, targetType.GetType() == TARGET_UNIT_TARGET_CHAINHEAL_ALLY);
+            , m_spellInfo->Effects[effIndex].ImplicitTargetConditions, targetType.GetTarget() == TARGET_UNIT_TARGET_CHAINHEAL_ALLY);
 
         // for backward compability
         std::list<Unit*> unitTargets;
@@ -1779,6 +1797,8 @@ uint32 Spell::GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList*
         case TARGET_OBJECT_TYPE_GOBJ_ITEM:
             retMask &= GRID_MAP_TYPE_MASK_GAMEOBJECT;
             break;
+        default:
+            break;
     }
     if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_DEAD))
         retMask &= ~GRID_MAP_TYPE_MASK_CORPSE;
@@ -1874,7 +1894,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     }
 
     // chain lightning/heal spells and similar - allow to jump at larger distance and go out of los
-    bool isBouncingFar = (m_spellInfo->AttributesEx4 & SPELL_ATTR4_AREA_TARGET_CHAIN 
+    bool isBouncingFar = (m_spellInfo->AttributesEx4 & SPELL_ATTR4_AREA_TARGET_CHAIN
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC);
 
@@ -4490,9 +4510,7 @@ void Spell::TakeReagents()
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ItemTemplate const* castItemTemplate = m_CastItem
-            ? m_CastItem->GetTemplate()
-            : NULL;
+    ItemTemplate const* castItemTemplate = m_CastItem ? m_CastItem->GetTemplate() : NULL;
 
     // do not take reagents for these item casts
     if (castItemTemplate && castItemTemplate->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST)
@@ -4779,11 +4797,16 @@ SpellCastResult Spell::CheckCast(bool strict)
             // TODO: using WorldSession::SendNotification is not blizzlike
             if (Player* playerCaster = m_caster->ToPlayer())
             {
-                if (playerCaster->GetSession() && condInfo.mLastFailedCondition
+                if (playerCaster->GetSession()
                     && condInfo.mLastFailedCondition->ErrorTextId)
+                {
                     playerCaster->GetSession()->SendNotification(condInfo.mLastFailedCondition->ErrorTextId);
+                    return SPELL_FAILED_DONT_REPORT;
+                }
             }
-            return SPELL_FAILED_DONT_REPORT;
+            if (!condInfo.mLastFailedCondition->ConditionTarget)
+                return SPELL_FAILED_CASTER_AURASTATE;
+            return SPELL_FAILED_BAD_TARGETS;
         }
     }
 
@@ -5103,7 +5126,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (creature->GetCreatureType() != CREATURE_TYPE_CRITTER && !creature->loot.isLooted())
                     return SPELL_FAILED_TARGET_NOT_LOOTED;
 
-                uint32 skill = creature->GetCreatureInfo()->GetRequiredLootSkill();
+                uint32 skill = creature->GetCreatureTemplate()->GetRequiredLootSkill();
 
                 int32 skillValue = m_caster->ToPlayer()->GetSkillValue(skill);
                 int32 TargetLevel = m_targets.GetUnitTarget()->getLevel();
@@ -5379,7 +5402,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_HIGHLEVEL;
 
                         // use SMSG_PET_TAME_FAILURE?
-                        if (!target->GetCreatureInfo()->isTameable (m_caster->ToPlayer()->CanTameExoticPets()))
+                        if (!target->GetCreatureTemplate()->isTameable (m_caster->ToPlayer()->CanTameExoticPets()))
                             return SPELL_FAILED_BAD_TARGETS;
 
                         if (m_caster->GetPetGUID())
@@ -5569,16 +5592,11 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (!target && m_targets.GetUnitTarget())
         target = m_targets.GetUnitTarget();
 
-    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    if (m_spellInfo->NeedsExplicitUnitTarget())
     {
-        if (m_spellInfo->Effects[i].TargetA.GetType() == TARGET_TYPE_UNIT_TARGET
-            || m_spellInfo->Effects[i].TargetA.GetType() == TARGET_TYPE_DEST_TARGET)
-        {
-            if (!target)
-                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-            m_targets.SetUnitTarget(target);
-            break;
-        }
+        if (!target)
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        m_targets.SetUnitTarget(target);
     }
 
     // cooldown
@@ -7260,8 +7278,8 @@ namespace Trinity
 {
 
 WorldObjectSpellTargetCheck::WorldObjectSpellTargetCheck(Unit* caster, Unit* referer, SpellInfo const* spellInfo,
-            SpellTargetCheckTypes selectionType, ConditionList* condList) : _caster(caster), _referer(referer), _spellInfo(spellInfo), 
-    _condList(condList), _targetSelectionType(selectionType)
+            SpellTargetCheckTypes selectionType, ConditionList* condList) : _caster(caster), _referer(referer), _spellInfo(spellInfo),
+    _targetSelectionType(selectionType), _condList(condList)
 {
     if (condList)
         _condSrcInfo = new ConditionSourceInfo(NULL, caster);
@@ -7334,7 +7352,7 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
     return sConditionMgr->IsObjectMeetToConditions(*_condSrcInfo, *_condList);
 }
 
-WorldObjectSpellNearbyTargetCheck::WorldObjectSpellNearbyTargetCheck(float range, Unit* caster, SpellInfo const* spellInfo, 
+WorldObjectSpellNearbyTargetCheck::WorldObjectSpellNearbyTargetCheck(float range, Unit* caster, SpellInfo const* spellInfo,
     SpellTargetCheckTypes selectionType, ConditionList* condList)
     : WorldObjectSpellTargetCheck(caster, caster, spellInfo, selectionType, condList), _range(range), _position(caster)
 {

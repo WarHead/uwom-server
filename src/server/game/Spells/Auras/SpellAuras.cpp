@@ -1223,56 +1223,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 break;
-            case SPELLFAMILY_HUNTER:
-                // Rapid Killing
-                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000)
-                {
-                    // Rapid Recuperation
-                    // FIXME: this is completely wrong way to fixing this talent
-                    // but for unknown reason it won't proc if your target are dead
-                    if (AuraEffect * auraEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3560, 1))
-                    {
-                        uint32 spellId;
-                        switch (auraEff->GetId())
-                        {
-                            case 53228: spellId = 56654; break;
-                            case 53232: spellId = 58882; break;
-                        }
-                        target->CastSpell(target, spellId, true);
-                    }
-                }
-                // Animal Handler
-                if (GetId() == 68361)
-                {
-                    if (Unit* owner = target->GetOwner())
-                        if (AuraEffect* auraEff = owner->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2234, 1))
-                            GetEffect(0)->SetAmount(auraEff->GetAmount());
-                }
-                break;
-            case SPELLFAMILY_WARLOCK:
-                switch (GetId())
-                {
-                    case 48020: // Demonic Circle
-                        if (target->GetTypeId() == TYPEID_PLAYER)
-                            if (GameObject* obj = target->GetGameObject(48018))
-                            {
-                                target->NearTeleportTo(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
-                                target->RemoveMovementImpairingAuras();
-                            }
-                        break;
-                    case 6358: // Seduction
-                        if (!caster)
-                            break;
-                        if (Unit *owner = caster->GetOwner())
-                            if (owner->HasAura(56250)) // Glyph of Succubus
-                            {
-                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
-                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
-                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
-                            }
-                        break;
-                }
-                break;
             case SPELLFAMILY_PRIEST:
                 if (!caster)
                     break;
@@ -1492,22 +1442,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (spellId)
                             caster->CastSpell(target, spellId, true);
                     }
-                }
-                switch (GetId())
-                {
-                   case 48018: // Demonic Circle
-                        // Do not remove GO when aura is removed by stack
-                        // to prevent remove GO added by new spell
-                        // old one is already removed
-                        if (!onReapply)
-                            target->RemoveGameObject(GetId(), true);
-                        target->RemoveAura(62388);
-                    break;
-                   case 6358: // Seduction
-                       // Interrupt cast if aura removed from target
-                       // maybe should be used SpellChannelInterruptFlags instead
-                       caster->InterruptNonMeleeSpells(false, 6358, false);
-                       break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:

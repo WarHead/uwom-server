@@ -242,6 +242,7 @@ public:
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
 
                 me->GetMotionMaster()->MoveJump(Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 5.0f, 10.0f);
+                me->SetWalk(false);
                 MountTimer = 1000;
                 Summons.DespawnEntry(MOB_GRAUF);
             }
@@ -508,24 +509,8 @@ public:
     }
 };
 
-class go_skadi_harpune : public GameObjectScript
-{
-public:
-    go_skadi_harpune() : GameObjectScript("go_skadi_harpune") { }
-
-    bool OnGossipHello(Player * player, GameObject * /*pGO*/)
-    {
-        if (!player || !player->IsInWorld())
-            return false;
-
-        player->CastSpell(player, SPELL_HARPUNE_ERSCHAFFEN, true);
-        return false;
-    }
-};
-
 void AddSC_boss_skadi()
 {
     new boss_skadi();
     new go_harpoon_launcher();
-    new go_skadi_harpune();
 }
