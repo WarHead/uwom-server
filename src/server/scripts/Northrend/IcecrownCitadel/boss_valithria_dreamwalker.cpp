@@ -237,14 +237,8 @@ class ValithriaDespawner : public BasicEvent
             switch (creature->GetEntry())
             {
                 case NPC_VALITHRIA_DREAMWALKER:
-                    if (InstanceScript * instance = creature->GetInstanceScript())
-                    {
+                    if (InstanceScript* instance = creature->GetInstanceScript())
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, creature);
-                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == IN_PROGRESS)
-                            instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, NOT_STARTED);
-                        if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
-                            creature->AI()->EnterEvadeMode();
-                    }
                     break;
                 case NPC_BLAZING_SKELETON:
                 case NPC_SUPPRESSER:
@@ -253,30 +247,33 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_MANA_VOID:
                 case NPC_COLUMN_OF_FROST:
                 case NPC_ROT_WORM:
-                case NPC_DREAM_PORTAL_PRE_EFFECT:
-                case NPC_NIGHTMARE_PORTAL_PRE_EFFECT:
-                case NPC_DREAM_PORTAL:
-                case NPC_NIGHTMARE_PORTAL:
                     creature->DespawnOrUnsummon();
-                    break;
+                    return;
                 case NPC_RISEN_ARCHMAGE:
                     if (!creature->GetDBTableGUIDLow())
+                    {
                         creature->DespawnOrUnsummon();
-                    else
-                        creature->Respawn(true);
-                    break;
-                case NPC_WORLD_TRIGGER:
-                    creature->setDeathState(JUST_DIED);
+                        return;
+                    }
                     creature->Respawn(true);
-                default:
                     break;
+                default:
+                    return;
             }
+
+            uint32 corpseDelay = creature->GetCorpseDelay();
+            uint32 respawnDelay = creature->GetRespawnDelay();
+            creature->SetCorpseDelay(1);
+            creature->SetRespawnDelay(10);
 
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
+            creature->ForcedDespawn();
 
-            creature->UpdateObjectVisibility();
+            creature->SetCorpseDelay(corpseDelay);
+            creature->SetRespawnDelay(respawnDelay);
         }
+
     private:
         Creature* _creature;
 };
@@ -288,7 +285,8 @@ class boss_valithria_dreamwalker : public CreatureScript
 
         struct boss_valithria_dreamwalkerAI : public ScriptedAI
         {
-            boss_valithria_dreamwalkerAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()), _portalCount(RAID_MODE<uint32>(3, 8, 3, 8))
+            boss_valithria_dreamwalkerAI(Creature* creature) : ScriptedAI(creature),
+                _instance(creature->GetInstanceScript()), _portalCount(RAID_MODE<uint32>(3, 8, 3, 8))
             {
                 if (_portalCount == 8)
                 {
@@ -331,19 +329,15 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void DoAction(int32 const action)
             {
-                switch(action)
-                {
-                    case ACTION_COMBAT:
-                        DoCast(me, SPELL_COPY_DAMAGE);
-                        _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
-                        _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
-                        _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
-                        if (IsHeroic())
-                            _events.ScheduleEvent(EVENT_BERSERK, 420000);
-                        break;
-                    default:
-                        break;
-                }
+                if (action != ACTION_COMBAT)
+                    return;
+
+                DoCast(me, SPELL_COPY_DAMAGE);
+                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+                _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
+                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                if (IsHeroic())
+                    _events.ScheduleEvent(EVENT_BERSERK, 420000);
             }
 
             void HealReceived(Unit* /*healer*/, uint32& heal)
@@ -360,6 +354,8 @@ class boss_valithria_dreamwalker : public CreatureScript
                     _events.ScheduleEvent(EVENT_DREAM_SLIP, 3500);
                     if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
                         lichKing->AI()->EnterEvadeMode();
+                    if (InstanceScript * Instance = me->GetInstanceScript())
+                        Instance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
                 }
                 else if (!_over75PercentTalkDone && me->HealthAbovePctHealed(75, heal))
                 {
@@ -406,8 +402,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                     me->SetDisplayId(11686);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->DespawnOrUnsummon(4000);
-
-                    if (Creature * lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
                         lichKing->CastSpell(lichKing, SPELL_SPAWN_CHEST, false);
 
                     if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
@@ -532,7 +527,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                     valithria->AI()->DoAction(ACTION_COMBAT);
             }
 
-            void AttackStart(Unit * target, float /*dist*/ = 0)
+            void AttackStart(Unit * target, float /*dist*/)
             {
                 if (target->GetTypeId() == TYPEID_PLAYER)
                     BossAI::AttackStart(target);
@@ -540,10 +535,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
 
             bool CanAIAttack(Unit const* target) const
             {
-                if (target && (target->GetTypeId() == TYPEID_PLAYER || (target->GetOwner() && target->GetOwner()->GetTypeId() == TYPEID_PLAYER)))
-                    return true;
-
-                return false;
+                return target->GetTypeId() == TYPEID_PLAYER;
             }
 
             void JustReachedHome()
@@ -581,8 +573,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 // check if there is any player on threatlist, if not - evade
                 for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                     if (Unit* target = (*itr)->getTarget())
-                        // Hier muss unbedingt auf GM geprüft werden!
-                        if (target->GetTypeId() == TYPEID_PLAYER && !target->ToPlayer()->isGameMaster() && target->ToPlayer()->isGMVisible())
+                        if (target->GetTypeId() == TYPEID_PLAYER)
                             return; // found any player, return
 
                 EnterEvadeMode();
@@ -744,7 +735,6 @@ class npc_risen_archmage : public CreatureScript
                     if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
                         trigger->AI()->DoZoneInCombat();
                 }
-                DoZoneInCombat();
             }
 
             void DoAction(int32 const action)
@@ -846,7 +836,7 @@ class npc_blazing_skeleton : public CreatureScript
             {
                 if (!done)
                 {   // Muss sofort beim ersten Schaden auf den NPC gecastet werden!
-                    DoCast(me, SPELL_LAY_WASTE);
+                    DoCast(me, SPELL_LAY_WASTE, true);
                     done = true;
                 }
             }
@@ -943,6 +933,11 @@ class npc_suppresser : public CreatureScript
                             break;
                     }
                 }
+
+                // this creature has REACT_PASSIVE so it does not always have victim here
+                if (Unit* victim = me->getVictim())
+                    if (victim->GetEntry() != NPC_VALITHRIA_DREAMWALKER)
+                        DoMeleeAttackIfReady();
             }
 
         private:
@@ -1333,11 +1328,6 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                /*if (InstanceScript * instance = caster->GetInstanceScript())
-                    if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != IN_PROGRESS)
-                        return;*/
-
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
                 summoners.remove_if (Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
@@ -1347,12 +1337,8 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
-                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                    //summoners.front()->CastSpell(summoners.front(), 70935, true);
                 for (uint32 i = 0; i < 3; ++i)
                     caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
-                    // Temp Workaround bis das Spawnen wieder "normal" funktioniert!
-                    //summoners.back()->CastSpell(summoners.back(), 70935, true);
             }
 
             void Register()

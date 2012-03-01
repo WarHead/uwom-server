@@ -185,7 +185,6 @@ class boss_blood_council_controller : public CreatureScript
 
             void Reset()
             {
-                _Reset();
                 events.Reset();
                 me->SetReactState(REACT_PASSIVE);
                 _invocationStage = 0;
@@ -196,13 +195,8 @@ class boss_blood_council_controller : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!who)
+                if (instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
                     return;
-
-                if (me->isInCombat())
-                    return;
-
-                _EnterCombat();
 
                 if (!instance->CheckRequiredBosses(DATA_BLOOD_PRINCE_COUNCIL, who->ToPlayer()))
                 {
@@ -211,7 +205,7 @@ class boss_blood_council_controller : public CreatureScript
                     return;
                 }
 
-                //instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
+                instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
 
                 DoCast(me, SPELL_INVOCATION_OF_BLOOD_VALANAR);
 
@@ -270,12 +264,6 @@ class boss_blood_council_controller : public CreatureScript
 
             void JustDied(Unit* killer)
             {
-                if (!killer)
-                    return;
-
-                if (InstanceScript* pInstance = me->GetInstanceScript())
-                    pInstance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
-
                 _JustDied();
                 // kill all prices
                 for (uint8 i = 0; i < 3; ++i)
@@ -289,22 +277,14 @@ class boss_blood_council_controller : public CreatureScript
                         if (me->IsDamageEnoughForLootingAndReward())
                             prince->LowerPlayerDamageReq(prince->GetMaxHealth());
                         killer->Kill(prince);
+                        if (InstanceScript * Instance = me->GetInstanceScript())
+                            Instance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
                     }
                 }
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (Creature * valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
-                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
-                        EnterCombat(valanar->getVictim());
-
-                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
                 if (!UpdateVictim())
                     return;
 
@@ -397,11 +377,12 @@ class boss_prince_keleseth_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
+
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
-                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -409,12 +390,11 @@ class boss_prince_keleseth_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                _EnterCombat();
-
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -553,16 +533,6 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
-                        EnterCombat(Controller->getVictim());
-
-                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 
@@ -631,11 +601,12 @@ class boss_prince_taldaram_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
+
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
-                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -643,12 +614,22 @@ class boss_prince_taldaram_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+                me->SetReactState(REACT_DEFENSIVE);
+            }
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                if (!who)
+                    return;
+
+                if (me->GetDistance(who) >= 15.0f)
+                    return;
+
+                ScriptedAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                _EnterCombat();
-
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -777,16 +758,6 @@ class boss_prince_taldaram_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
-                        EnterCombat(Controller->getVictim());
-
-                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 
@@ -860,11 +831,12 @@ class boss_prince_valanar_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
+
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
             {
-                _Reset();
                 events.Reset();
                 summons.DespawnAll();
 
@@ -872,12 +844,22 @@ class boss_prince_valanar_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(me->GetMaxHealth());
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
+                me->SetReactState(REACT_DEFENSIVE);
+            }
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                if (!who)
+                    return;
+
+                if (me->GetDistance(who) >= 15.0f)
+                    return;
+
+                ScriptedAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                _EnterCombat();
-
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
                     DoZoneInCombat(controller);
 
@@ -1020,16 +1002,6 @@ class boss_prince_valanar_icc : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (Creature * Controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BLOOD_PRINCES_CONTROL)))
-                    if (!me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
-                        EnterCombat(Controller->getVictim());
-
-                if (me->isInCombat() && instance && instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != IN_PROGRESS)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
                 if (!UpdateVictim() || !CheckRoom())
                     return;
 
@@ -1047,11 +1019,11 @@ class boss_prince_valanar_icc : public CreatureScript
                             Talk(SAY_VALANAR_BERSERK);
                             break;
                         case EVENT_KINETIC_BOMB:
-                            /*if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                             {
                                 DoCast(target, SPELL_KINETIC_BOMB_TARGET);
                                 Talk(SAY_VALANAR_SPECIAL);
-                            }*/
+                            }
                             events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
                             break;
                         case EVENT_SHOCK_VORTEX:
@@ -1115,9 +1087,6 @@ class npc_blood_queen_lana_thel : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (!who)
-                    return;
-
                 if (_introDone)
                     return;
 
@@ -1356,9 +1325,6 @@ class npc_dark_nucleus : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!who)
-                    return;
-
                 _targetAuraCheck = 1000;
                 if (me->GetDistance(who) >= 15.0f)
                 {
@@ -1383,9 +1349,6 @@ class npc_dark_nucleus : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& /*damage*/)
             {
-                if (!attacker)
-                    return;
-
                 if (attacker == me)
                     return;
 

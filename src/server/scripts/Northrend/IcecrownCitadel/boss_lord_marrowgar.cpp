@@ -121,12 +121,10 @@ class boss_lord_marrowgar : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                if (InstanceScript* pInstance = me->GetInstanceScript())
-                    pInstance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
-
                 Talk(SAY_DEATH);
-
                 _JustDied();
+                if (InstanceScript * Instance = me->GetInstanceScript())
+                    Instance->SetData(DATA_KILL_CREDIT, Quest_A_Feast_of_Souls);
             }
 
             void JustReachedHome()
@@ -575,12 +573,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
 
             void RecalculateDamage()
             {
-                if (Unit* caster = GetCaster())
-                {
-                    const float distance = GetHitUnit()->GetExactDist2d(caster);
-                    const int32 damage   = GetHitDamage();
-                    SetHitDamage(int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))));
-                }
+                SetHitDamage(int32(GetHitDamage() / std::max(sqrtf(GetHitUnit()->GetExactDist2d(GetCaster())), 1.0f)));
             }
 
             void Register()
