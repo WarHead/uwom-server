@@ -44,6 +44,12 @@ public:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Schalte Todesbringer Saurfang frei!",      GOSSIP_SENDER_ADMIN, GOSSIP_ACTION_INFO_DEF+104);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Setze alle Encounter auf NOT_STARTED!!",   GOSSIP_SENDER_ADMIN, GOSSIP_ACTION_INFO_DEF+105);
             }
+            else
+                if (instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Schalte Blutkönigin Lana'thel frei!",  GOSSIP_SENDER_ADMIN, GOSSIP_ACTION_INFO_DEF+102);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Schalte Sindragosa frei!",             GOSSIP_SENDER_ADMIN, GOSSIP_ACTION_INFO_DEF+101);
+                }
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Der Hammer des Lichts.", GOSSIP_SENDER_ICC_PORT, LIGHT_S_HAMMER_TELEPORT);
 
@@ -85,12 +91,12 @@ public:
                                 instance->SetBossState(i, DONE);
                             break;
                         case GOSSIP_ACTION_INFO_DEF+101:
-                            for (uint8 i=0; i<4; ++i) // Bis einschließlich Saurfang setzen
+                            for (uint8 i=0; i<4; ++i) // Bis einschließlich Traumwandler setzen
                                 instance->SetBossState(i, DONE);
                             instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, DONE);
                             break;
                         case GOSSIP_ACTION_INFO_DEF+102:
-                            for (uint8 i=0; i<4; ++i) // Bis einschließlich Saurfang setzen
+                            for (uint8 i=0; i<4; ++i) // Bis einschließlich Prinzen setzen
                                 instance->SetBossState(i, DONE);
                             instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, DONE);
                             break;
