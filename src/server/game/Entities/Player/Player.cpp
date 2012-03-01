@@ -145,8 +145,9 @@ static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 // == PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
-    : m_taximask()
-{ }
+{
+    memset(m_taximask, 0, sizeof(m_taximask));
+}
 
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
 {
@@ -4699,9 +4700,9 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     Unit::BuildCreateUpdateBlockForPlayer(data, target);
 }
 
-void Player::DestroyForPlayer(Player* target, bool anim) const
+void Player::DestroyForPlayer(Player* target, bool onDeath) const
 {
-    Unit::DestroyForPlayer(target, anim);
+    Unit::DestroyForPlayer(target, onDeath);
 
     for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
     {
